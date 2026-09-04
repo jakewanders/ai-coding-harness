@@ -312,7 +312,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 - A custom shell gate `exit 1` fails with its stderr in `remedy`.
 - `resolveMode('express')` demotes `reach_audit_recorded` and `counterweight_consulted`; `sketch.skip_stages` contains `review`, `challenge`, `verify`; a custom mode extending `express` inherits its demotions.
 
-- [ ] Task 10
+- [x] Task 10
 
 ## Milestone 1 — Thin pipeline end to end
 
