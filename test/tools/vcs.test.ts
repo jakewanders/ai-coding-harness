@@ -111,7 +111,7 @@ describe('vcs status and commit', () => {
   it('refuses to commit while a blocking gate fails, then commits and moves to review', async () => {
     const { ctx } = await unitInRepo();
     await dispatch(vcsTool, { action: 'worktree', id: 'VCS-1' }, ctx);
-    for (const to of ['plan', 'build', 'commit']) await dispatch(unitTool, { action: 'advance', id: 'VCS-1', to }, ctx);
+    await dispatch(unitTool, { action: 'advance', id: 'VCS-1', to: 'build' }, ctx);
     const wt = readState(unitDirFor(ctx, 'VCS-1')).worktree!;
     fs.writeFileSync(path.join(wt, 'feature.txt'), 'new\n');
 

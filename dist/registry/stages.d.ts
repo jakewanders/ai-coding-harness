@@ -31,11 +31,9 @@ export declare function isCoreStage(name: string): name is StageName;
 export interface RoutingOptions {
     skip: StageName[];
     browserUi: boolean;
-    verifyAfterPublish: boolean;
 }
 /**
- * Default next core stage. Revise returns to commit; verify runs only with
- * browser_ui and, when the mode says so, after publish; skipped stages are
- * jumped over. Null after close.
+ * Default next core stage: the next entry of CORE_ORDER, jumping over skipped
+ * stages and over verify when the repo has no browser_ui. Null after close.
  */
 export declare function nextStageFor(current: StageName, opts: RoutingOptions): StageName | null;

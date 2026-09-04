@@ -12,7 +12,7 @@ const schema0 = {
   tracked: true,
   source: { kind: 'ticket', ref: 'OLD-9', pinned: true },
   mode: 'express',
-  phaseName: 'build', // harness-lint: allow
+  phaseName: 'commit', // harness-lint: allow
   cycle: 2,
   base_branch: 'develop',
   created_at: '2025-01-01T00:00:00.000Z',
@@ -25,6 +25,13 @@ describe('migrate', () => {
     expect(s.schema).toBe(STATE_SCHEMA);
     expect(s.stage).toBe('build');
     expect(s.cycle).toBe(2);
+    for (const [old, now] of [['plan', 'build'], ['revise', 'build'], ['challenge', 'review'], ['review', 'review']]) {
+      expect(migrate({ ...schema0, phaseName: old }).stage, old).toBe(now); // harness-lint: allow
+    }
+    const current = migrate(schema0);
+    const renamed = migrate({ ...current, stage: 'commit', timers: [{ stage: 'plan', started_at: '2025-01-01T00:00:00.000Z', ended_at: null, idle_gaps_ms: 0 }] });
+    expect(renamed.stage).toBe('build');
+    expect(renamed.timers[0]!.stage).toBe('build');
     expect(s.mode).toBe('express');
     expect(s.base_branch).toBe('develop');
     expect(s.evidence).toEqual([]);

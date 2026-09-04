@@ -1,6 +1,6 @@
 import { z } from 'zod';
 export declare const STATE_SCHEMA = 1;
-export declare const STAGE_NAMES: readonly ['scope', 'plan', 'build', 'commit', 'review', 'revise', 'challenge', 'verify', 'publish', 'close'];
+export declare const STAGE_NAMES: readonly ['scope', 'build', 'review', 'verify', 'publish', 'close'];
 export declare const UNIT_KINDS: readonly ['feature', 'bug', 'chore', 'unknown'];
 export declare const SOURCE_KINDS: readonly ['ticket', 'pr', 'url', 'file', 'conversation', 'text'];
 export declare const REVIEW_VERDICTS: readonly ['ship', 'needs_attention', 'not_ready'];
@@ -47,13 +47,9 @@ export declare const PrRecordSchema: z.ZodObject<{
 export declare const TimerRecordSchema: z.ZodObject<{
     stage: z.ZodEnum<{
         build: "build";
-        challenge: "challenge";
         close: "close";
-        commit: "commit";
-        plan: "plan";
         publish: "publish";
         review: "review";
-        revise: "revise";
         scope: "scope";
         verify: "verify";
     }>;
@@ -118,13 +114,9 @@ export declare const UnitStateSchema: z.ZodObject<{
     mode: z.ZodString;
     stage: z.ZodEnum<{
         build: "build";
-        challenge: "challenge";
         close: "close";
-        commit: "commit";
-        plan: "plan";
         publish: "publish";
         review: "review";
-        revise: "revise";
         scope: "scope";
         verify: "verify";
     }>;
@@ -191,13 +183,9 @@ export declare const UnitStateSchema: z.ZodObject<{
     timers: z.ZodArray<z.ZodObject<{
         stage: z.ZodEnum<{
             build: "build";
-            challenge: "challenge";
             close: "close";
-            commit: "commit";
-            plan: "plan";
             publish: "publish";
             review: "review";
-            revise: "revise";
             scope: "scope";
             verify: "verify";
         }>;

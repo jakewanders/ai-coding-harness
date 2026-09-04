@@ -27,7 +27,7 @@ describe('run modes end to end', () => {
     expect(start.envelope.ok).toBe(true);
     const bad = await dispatch(unitTool, { action: 'start', source: 'ticket', ref: 'MD-3', mode: 'nope' }, ctx);
     expect(bad.envelope.summary).toContain('fast');
-    const brief = await dispatch(unitTool, { action: 'brief', id: 'MD-2', stage: 'commit', quiet: true }, ctx);
+    const brief = await dispatch(unitTool, { action: 'brief', id: 'MD-2', stage: 'build', quiet: true }, ctx);
     expect(headerOf(brief.text).mode).toBe('fast');
     expect(brief.text).toContain('## Mode');
     expect(brief.text).toContain('fast');

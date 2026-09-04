@@ -28,16 +28,14 @@ export interface StageEntry {
   specBanner: boolean;
 }
 
-export const CORE_ORDER: StageName[] = [
-  'scope', 'plan', 'build', 'commit', 'review', 'revise', 'challenge', 'verify', 'publish', 'close',
-];
+export const CORE_ORDER: StageName[] = ['scope', 'build', 'review', 'verify', 'publish', 'close'];
 
 export const FLOW_NAMES: readonly FlowName[] = [
   'pilot', 'convoy', 'screen', 'shape', 'inspect', 'respond', 'aftercare', 'botprs', 'draft', 'setup',
 ];
 
 /** Core stages whose brief opens with the pinned source/spec block. */
-const SPEC_BANNER_STAGES = new Set<StageName>(['scope', 'plan', 'build', 'review', 'revise', 'challenge', 'verify']);
+const SPEC_BANNER_STAGES = new Set<StageName>(['scope', 'build', 'review', 'verify']);
 
 /** Flows that start from a source or nothing rather than an existing unit id. */
 const NO_ID_FLOWS = new Set<FlowName>(['inspect', 'convoy', 'botprs', 'draft', 'setup']);
@@ -81,23 +79,17 @@ export function isCoreStage(name: string): name is StageName {
 export interface RoutingOptions {
   skip: StageName[];
   browserUi: boolean;
-  verifyAfterPublish: boolean;
 }
 
 /**
- * Default next core stage. Revise returns to commit; verify runs only with
- * browser_ui and, when the mode says so, after publish; skipped stages are
- * jumped over. Null after close.
+ * Default next core stage: the next entry of CORE_ORDER, jumping over skipped
+ * stages and over verify when the repo has no browser_ui. Null after close.
  */
 export function nextStageFor(current: StageName, opts: RoutingOptions): StageName | null {
-  const order: StageName[] = opts.verifyAfterPublish
-    ? ['scope', 'plan', 'build', 'commit', 'review', 'challenge', 'publish', 'verify', 'close']
-    : ['scope', 'plan', 'build', 'commit', 'review', 'challenge', 'verify', 'publish', 'close'];
-  if (current === 'revise') return 'commit';
   if (current === 'close') return null;
-  let i = order.indexOf(current);
-  while (i + 1 < order.length) {
-    const candidate = order[i + 1]!;
+  let i = CORE_ORDER.indexOf(current);
+  while (i + 1 < CORE_ORDER.length) {
+    const candidate = CORE_ORDER[i + 1]!;
     i += 1;
     if (opts.skip.includes(candidate)) continue;
     if (candidate === 'verify' && !opts.browserUi) continue;

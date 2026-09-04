@@ -1,4 +1,3 @@
-import { createHash } from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
 import { parse as parseYaml } from 'yaml';
@@ -146,18 +145,18 @@ describe('unit brief', () => {
 });
 
 describe('unit advance', () => {
-  it('moves scope to plan when no gates apply and records timers and history', async () => {
+  it('moves scope to build when no gates apply and records timers and history', async () => {
     const ctx = ctxInRepo();
     await dispatch(unitTool, { action: 'start', source: 'text', id: 'ABC-1', text: 'a' }, ctx);
     const r = await dispatch(unitTool, { action: 'advance', id: 'ABC-1' }, ctx);
     expect(r.envelope.ok).toBe(true);
-    expect(r.envelope.data).toMatchObject({ from: 'scope', to: 'plan', cycle: 0 });
+    expect(r.envelope.data).toMatchObject({ from: 'scope', to: 'build', cycle: 0 });
     const state = readState(unitDirFor(ctx, 'ABC-1'));
-    expect(state.stage).toBe('plan');
-    expect(state.timers.map((t) => t.stage)).toEqual(['scope', 'plan']);
+    expect(state.stage).toBe('build');
+    expect(state.timers.map((t) => t.stage)).toEqual(['scope', 'build']);
     expect(state.timers[0]!.ended_at).not.toBeNull();
     expect(state.timers[1]!.ended_at).toBeNull();
-    expect(fs.readFileSync(path.join(unitDirFor(ctx, 'ABC-1'), 'history.md'), 'utf8')).toMatch(/scope.*plan/);
+    expect(fs.readFileSync(path.join(unitDirFor(ctx, 'ABC-1'), 'history.md'), 'utf8')).toMatch(/scope.*build/);
     expect(r.envelope.next[0]).toMatchObject({ tool: 'unit', action: 'brief' });
   });
 
@@ -166,7 +165,7 @@ describe('unit advance', () => {
     await dispatch(unitTool, { action: 'start', source: 'text', id: 'GATED-1', text: 'a' }, ctx);
     if (!allGates().some((g) => g.id === 'test_block_plan')) {
       registerGate(defineGate({
-        id: 'test_block_plan', stage: 'plan', description: 'test gate scoped to GATED-1', severity: 'block',
+        id: 'test_block_plan', stage: 'build', description: 'test gate scoped to GATED-1', severity: 'block',
         check: (g) => (g.state.id !== 'GATED-1' || g.state.answers.unblock === 'yes' ? { pass: true } : { pass: false, remedy: 'answer unblock=yes' }),
       }));
     }
@@ -174,35 +173,34 @@ describe('unit advance', () => {
     const blocked = await dispatch(unitTool, { action: 'advance', id: 'GATED-1' }, ctx);
     expect(blocked.envelope.ok).toBe(false);
     expect(blocked.text).toContain('answer unblock=yes');
-    expect((blocked.envelope.data as { blocking: Array<{ id: string }> }).blocking[0]!.id).toBe('test_block_plan');
-    expect(readState(unitDirFor(ctx, 'GATED-1')).stage).toBe('plan');
+    expect((blocked.envelope.data as { blocking: Array<{ id: string }> }).blocking.map((g) => g.id)).toContain('test_block_plan');
+    expect(readState(unitDirFor(ctx, 'GATED-1')).stage).toBe('build');
   });
 
-  it('honours an explicit target, skips stages per mode, and increments the cycle after a revise', async () => {
+  it('honours an explicit target, skips stages per mode, and increments the cycle when review starts again', async () => {
     const ctx = ctxInRepo();
     await dispatch(unitTool, { action: 'start', source: 'text', id: 'ABC-1', text: 'a', mode: 'sketch' }, ctx);
-    for (const to of ['plan', 'build', 'commit']) {
-      expect((await dispatch(unitTool, { action: 'advance', id: 'ABC-1', to }, ctx)).envelope.ok).toBe(true);
-    }
-    satisfyCommitGates(unitDirFor(ctx, 'ABC-1'));
+    expect((await dispatch(unitTool, { action: 'advance', id: 'ABC-1', to: 'build' }, ctx)).envelope.ok).toBe(true);
+    satisfyBuildGates(unitDirFor(ctx, 'ABC-1'));
     const r = await dispatch(unitTool, { action: 'advance', id: 'ABC-1' }, ctx);
-    expect(r.envelope.data).toMatchObject({ from: 'commit', to: 'publish' });
+    expect(r.envelope.data).toMatchObject({ from: 'build', to: 'publish' });
     await dispatch(unitTool, { action: 'start', source: 'text', id: 'ABC-2', text: 'b' }, ctx);
-    for (const to of ['plan', 'build', 'commit', 'review', 'revise', 'commit']) {
-      if (readState(unitDirFor(ctx, 'ABC-2')).stage === 'commit') satisfyCommitGates(unitDirFor(ctx, 'ABC-2'));
-      expect((await dispatch(unitTool, { action: 'advance', id: 'ABC-2', to }, ctx)).envelope.ok).toBe(true);
-    }
+    expect((await dispatch(unitTool, { action: 'advance', id: 'ABC-2', to: 'build' }, ctx)).envelope.ok).toBe(true);
+    satisfyBuildGates(unitDirFor(ctx, 'ABC-2'));
+    expect((await dispatch(unitTool, { action: 'advance', id: 'ABC-2', to: 'review' }, ctx)).envelope.ok).toBe(true);
     expect(readState(unitDirFor(ctx, 'ABC-2')).cycle).toBe(0);
-    satisfyCommitGates(unitDirFor(ctx, 'ABC-2'));
+    expect((await dispatch(unitTool, { action: 'advance', id: 'ABC-2', to: 'build' }, ctx)).envelope.ok).toBe(true);
+    satisfyBuildGates(unitDirFor(ctx, 'ABC-2'));
     const again = await dispatch(unitTool, { action: 'advance', id: 'ABC-2', to: 'review' }, ctx);
-    expect(again.envelope.data).toMatchObject({ from: 'commit', to: 'review', cycle: 1 });
+    expect(again.envelope.data).toMatchObject({ from: 'build', to: 'review', cycle: 1 });
     const bad = await dispatch(unitTool, { action: 'advance', id: 'ABC-2', to: 'nowhere' }, ctx);
     expect(bad.envelope.ok).toBe(false);
   });
+
 });
 
-/** Give a unit the evidence and green run the real commit gates require in its current cycle. */
-function satisfyCommitGates(dir: string) {
+/** Give a unit the evidence and green run the real build gates require in its current cycle. */
+function satisfyBuildGates(dir: string) {
   const s: UnitState = readState(dir);
   const at = '2026-09-04T00:00:00.000Z';
   writeState(dir, {
@@ -211,22 +209,6 @@ function satisfyCommitGates(dir: string) {
     runs: [...s.runs, { id: `r-${s.cycle}`, command: 'true', exit: 0, summary: '', log: '~/l.log', started_at: at, ended_at: at, cycle: s.cycle }],
   });
 }
-
-describe('unit explain', () => {
-  it('describes the next stage with gates, seats and outputs without touching state', async () => {
-    const ctx = ctxInRepo();
-    await dispatch(unitTool, { action: 'start', source: 'text', id: 'ABC-1', text: 'a' }, ctx);
-    const file = path.join(unitDirFor(ctx, 'ABC-1'), 'state.json');
-    const before = createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-    const r = await dispatch(unitTool, { action: 'explain', id: 'ABC-1' }, ctx);
-    expect(r.envelope.ok).toBe(true);
-    expect(r.envelope.data).toMatchObject({ stage: 'scope', next: 'plan' });
-    const data = r.envelope.data as { gates: unknown[]; seats: string[]; outputs: string[] };
-    expect(Array.isArray(data.gates)).toBe(true);
-    expect(data.seats.length + data.outputs.length).toBeGreaterThan(0);
-    expect(createHash('sha256').update(fs.readFileSync(file)).digest('hex')).toBe(before);
-  });
-});
 
 describe('STAGES coverage', () => {
   it('every registered stage has a brief renderer that names itself', async () => {

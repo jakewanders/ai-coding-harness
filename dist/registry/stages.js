@@ -1,13 +1,11 @@
 import { CORE_STAGE_MODULES } from '../stages/index.js';
 import { flowStub } from '../stages/_shared.js';
-export const CORE_ORDER = [
-    'scope', 'plan', 'build', 'commit', 'review', 'revise', 'challenge', 'verify', 'publish', 'close',
-];
+export const CORE_ORDER = ['scope', 'build', 'review', 'verify', 'publish', 'close'];
 export const FLOW_NAMES = [
     'pilot', 'convoy', 'screen', 'shape', 'inspect', 'respond', 'aftercare', 'botprs', 'draft', 'setup',
 ];
 /** Core stages whose brief opens with the pinned source/spec block. */
-const SPEC_BANNER_STAGES = new Set(['scope', 'plan', 'build', 'review', 'revise', 'challenge', 'verify']);
+const SPEC_BANNER_STAGES = new Set(['scope', 'build', 'review', 'verify']);
 /** Flows that start from a source or nothing rather than an existing unit id. */
 const NO_ID_FLOWS = new Set(['inspect', 'convoy', 'botprs', 'draft', 'setup']);
 const flowRenderers = new Map();
@@ -41,21 +39,15 @@ export function isCoreStage(name) {
     return CORE_ORDER.includes(name);
 }
 /**
- * Default next core stage. Revise returns to commit; verify runs only with
- * browser_ui and, when the mode says so, after publish; skipped stages are
- * jumped over. Null after close.
+ * Default next core stage: the next entry of CORE_ORDER, jumping over skipped
+ * stages and over verify when the repo has no browser_ui. Null after close.
  */
 export function nextStageFor(current, opts) {
-    const order = opts.verifyAfterPublish
-        ? ['scope', 'plan', 'build', 'commit', 'review', 'challenge', 'publish', 'verify', 'close']
-        : ['scope', 'plan', 'build', 'commit', 'review', 'challenge', 'verify', 'publish', 'close'];
-    if (current === 'revise')
-        return 'commit';
     if (current === 'close')
         return null;
-    let i = order.indexOf(current);
-    while (i + 1 < order.length) {
-        const candidate = order[i + 1];
+    let i = CORE_ORDER.indexOf(current);
+    while (i + 1 < CORE_ORDER.length) {
+        const candidate = CORE_ORDER[i + 1];
         i += 1;
         if (opts.skip.includes(candidate))
             continue;

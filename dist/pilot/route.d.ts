@@ -10,13 +10,14 @@ export interface Route {
     questions: string[];
 }
 export declare const MAX_REVIEW_CYCLES = 4;
-export declare const MAX_COMMIT_FAILURES = 2;
+export declare const MAX_BUILD_FAILURES = 2;
 export declare const MAX_OTHER_FAILURES = 1;
 export declare const MAX_BOT_ROUNDS = 2;
 /**
  * Decide what the conductor does next from the unit's reports for the
- * current stage and cycle. Pure: never mutates the state. With a wired
- * reviewbot seat, a publish report routes to the respond flow while the bot
- * requests changes and the round cap is not exceeded.
+ * current stage and cycle. Pure: never mutates the state. A review verdict
+ * other than ship sends the unit back to build (retry) while cycle < 4. With
+ * a wired reviewbot seat, a publish report routes to the respond flow while
+ * the bot requests changes and the round cap is not exceeded.
  */
 export declare function routeNext(state: UnitState, mode: ModeDef, browserUi?: boolean, reviewbotWired?: boolean): Route;

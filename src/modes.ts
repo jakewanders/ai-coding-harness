@@ -33,8 +33,7 @@ export const BUILT_IN_MODES: Record<'thorough' | 'sketch', ModeDef> = {
     demote: { review_verdict_ship: 'off', ledger_reverified: 'off', walkthrough_done: 'off' },
     merge_dispatches: false,
     verify_after_publish: false,
-    // 'challenge' is listed until the stage collapse removes that stage.
-    skip_stages: ['review', 'challenge', 'verify'],
+    skip_stages: ['review', 'verify'],
     banner: SKETCH_BANNER,
   },
 };

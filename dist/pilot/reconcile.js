@@ -1,4 +1,4 @@
-const COMMITTED_STAGES = ['review', 'challenge', 'verify', 'publish', 'close'];
+const COMMITTED_STAGES = ['review', 'verify', 'publish', 'close'];
 /** Compare stored state with live facts the assistant gathered; never mutates. */
 export function reconcile(state, live, opts = {}) {
     const out = [];

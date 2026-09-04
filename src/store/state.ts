@@ -8,7 +8,7 @@ import { STATE_SCHEMA, UnitStateSchema } from './schema.js';
 export { STATE_SCHEMA };
 export { appendHistory } from './history.js';
 
-export type StageName = 'scope'|'plan'|'build'|'commit'|'review'|'revise'|'challenge'|'verify'|'publish'|'close';
+export type StageName = 'scope' | 'build' | 'review' | 'verify' | 'publish' | 'close';
 export type UnitKind = 'feature' | 'bug' | 'chore' | 'unknown';
 export type SourceKind = 'ticket' | 'pr' | 'url' | 'file' | 'conversation' | 'text';
 export type ReviewVerdict = 'ship' | 'needs_attention' | 'not_ready';

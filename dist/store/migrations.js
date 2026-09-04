@@ -42,6 +42,16 @@ const from0 = (raw) => {
         updated_at: rest.updated_at ?? now,
     };
 };
+/** Stage names from the ten-stage 0.1.0 pipeline mapped onto the six-stage one. */
+const STAGE_RENAMES = { plan: 'build', commit: 'build', revise: 'build', challenge: 'review' };
+function renameStage(v) {
+    return typeof v === 'string' ? (STAGE_RENAMES[v] ?? v) : v;
+}
+/** Map old stage names in `stage` and every timer onto the current pipeline. */
+export function normalizeStages(raw) {
+    const timers = Array.isArray(raw.timers) ? raw.timers.map((t) => (isRecord(t) ? { ...t, stage: renameStage(t.stage) } : t)) : raw.timers;
+    return { ...raw, stage: renameStage(raw.stage), timers };
+}
 /** `n → n+1` steps keyed by the schema they upgrade from. */
 export const MIGRATIONS = { 0: from0 };
 /** Lift any known state shape to the current schema and validate it. */
@@ -61,5 +71,5 @@ export function migrate(raw) {
         current = step(current);
         schema = current.schema;
     }
-    return UnitStateSchema.parse(current);
+    return UnitStateSchema.parse(normalizeStages(current));
 }

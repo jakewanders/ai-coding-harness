@@ -16,7 +16,7 @@ function profileCommand(ctx: GateContext, name: 'check' | 'test'): string | null
 
 export const checkCommandGreen = registerGate(defineGate({
   id: 'check_command_green',
-  stage: 'commit',
+  stage: 'build',
   description: 'The latest check run (or test run when no check command exists) in this cycle exited 0.',
   severity: 'block',
   check: (ctx) => {
@@ -35,7 +35,7 @@ export const checkCommandGreen = registerGate(defineGate({
 
 export const selfCritiqueRecorded = registerGate(defineGate({
   id: 'self_critique_recorded',
-  stage: 'commit',
+  stage: 'build',
   description: 'A self_critique evidence record exists for this cycle (an empty findings list is valid).',
   severity: 'block',
   check: (ctx) => (recordsThisCycle(ctx, 'self_critique').length ? { pass: true } : { pass: false, remedy: EVIDENCE_KINDS.self_critique.remedy }),
@@ -43,7 +43,7 @@ export const selfCritiqueRecorded = registerGate(defineGate({
 
 export const defectReproBeforeFix = registerGate(defineGate({
   id: 'defect_repro_before_fix',
-  stage: 'commit',
+  stage: 'build',
   description: 'Bug-shaped units carry a defect_repro record with verbatim red output, or a written waiver.',
   severity: 'block',
   check: (ctx) => {
@@ -60,7 +60,7 @@ export const defectReproBeforeFix = registerGate(defineGate({
 
 export const piiAuditClean = registerGate(defineGate({
   id: 'pii_audit_clean',
-  stage: 'commit',
+  stage: 'build',
   description: 'A pii record for this cycle reports zero findings, or a waiver explains why findings are acceptable.',
   severity: 'block',
   check: (ctx) => {

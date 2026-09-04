@@ -28,7 +28,7 @@ Unit of work bookkeeping: start, status, list, brief, explain and advance throug
 - `brief` — Render the brief for a stage: header, seats, config problems, source, then stage material.
 - `explain` — Describe the next stage, the gates guarding the move, the seats consulted and what it produces. Mutates nothing.
 - `advance` — Move a unit to its next stage when the current stage gates allow it; otherwise list the remedies.
-- `report` — Store a stage report (outcome, summary, questions, verdict, artifacts) for the current cycle; a ship verdict at challenge marks it passed.
+- `report` — Store a stage report (outcome, summary, questions, verdict, artifacts) for the current cycle.
 - `route` — Decide the next stage from the reports (proceed, retry, blocked, done); applies the move when gates allow it.
 - `answer` — Store the user's answers to blocked questions.
 - `reconcile` — Compare stored state with live facts you gathered (branch, uncommitted work, PR state, tracker status); reports disagreements, mutates nothing.
@@ -88,7 +88,7 @@ Git bookkeeping for a unit: fetch, diff against the remote base, branch, worktre
 - `branch` — Create or check out the unit branch (<id>-<slug>) from the base branch.
 - `worktree` — Isolate the unit per repo capability isolation: a sibling worktree ../<repo>-<id>, or a branch in place.
 - `status` — Porcelain status of the unit worktree with ahead/behind counts.
-- `commit` — Commit everything in the worktree once the commit-stage gates pass; records the commit and moves the unit to review.
+- `commit` — Commit everything in the worktree once the build-stage gates pass; records the commit and moves the unit to review.
 - `cleanup` — Remove the unit worktree, delete its branch if merged into the base, and clear state.worktree.
 
 ## `pullreq`

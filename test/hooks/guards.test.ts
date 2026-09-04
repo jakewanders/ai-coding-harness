@@ -20,7 +20,7 @@ async function repoWithUnit(branch = 'ABC-1-x') {
   const ctx = makeCtx({ cwd: repo });
   await dispatch(unitTool, { action: 'start', source: 'ticket', ref: 'ABC-1' }, ctx);
   const dir = unitDirFor(ctx, 'ABC-1');
-  writeState(dir, { ...readState(dir), stage: 'commit', branch });
+  writeState(dir, { ...readState(dir), stage: 'build', branch });
   runGit(['checkout', '-q', '-b', branch], repo);
   return { repo, ctx, dir };
 }
@@ -163,7 +163,7 @@ describe('transition_preview and stop_status', () => {
     expect(preview.guards.find((g) => g.id === 'transition_preview')?.outcome).toBe('warn');
     expect(preview.messages.join('\n')).toMatch(/self_critique_recorded/);
     const stop = await runStop({ event: 'stop', cwd: repo }, deps({ vault: ctx.vault }));
-    expect(stop.message).toBe('ABC-1 · commit · cycle 0 · thorough · ABC-1-x');
+    expect(stop.message).toBe('ABC-1 · build · cycle 0 · thorough · ABC-1-x');
     runGit(['checkout', '-q', 'main'], repo);
     expect((await runStop({ event: 'stop', cwd: repo }, deps({ vault: ctx.vault }))).message).toBe('');
   });

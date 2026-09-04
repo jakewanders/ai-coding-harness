@@ -11,7 +11,7 @@ const thorough = resolveMode('thorough', DEFAULTS);
 const at = '2026-09-04T00:00:00.000Z';
 
 function base(over: Partial<UnitState> = {}): UnitState {
-  return { ...createState({ id: 'G-1', repo: 'local/x', tracked: true, source: { kind: 'ticket', ref: 'G-1', pinned: false }, mode: 'thorough', base_branch: 'main' }), stage: 'commit', ...over };
+  return { ...createState({ id: 'G-1', repo: 'local/x', tracked: true, source: { kind: 'ticket', ref: 'G-1', pinned: false }, mode: 'thorough', base_branch: 'main' }), stage: 'build', ...over };
 }
 
 function ev(kind: EvidenceRecord['kind'], payload: unknown, cycle = 0): EvidenceRecord {
@@ -33,10 +33,10 @@ async function gate(id: string, state: UnitState, config: HarnessConfig = DEFAUL
 describe('registered gates', () => {
   it('includes the commit and close gates with their default severities', () => {
     const ids = Object.fromEntries(allGates().map((g) => [g.id, g]));
-    expect(ids.check_command_green).toMatchObject({ stage: 'commit', severity: 'block' });
-    expect(ids.self_critique_recorded).toMatchObject({ stage: 'commit', severity: 'block' });
-    expect(ids.defect_repro_before_fix).toMatchObject({ stage: 'commit', severity: 'block' });
-    expect(ids.pii_audit_clean).toMatchObject({ stage: 'commit', severity: 'block' });
+    expect(ids.check_command_green).toMatchObject({ stage: 'build', severity: 'block' });
+    expect(ids.self_critique_recorded).toMatchObject({ stage: 'build', severity: 'block' });
+    expect(ids.defect_repro_before_fix).toMatchObject({ stage: 'build', severity: 'block' });
+    expect(ids.pii_audit_clean).toMatchObject({ stage: 'build', severity: 'block' });
     expect(ids.pr_recorded).toMatchObject({ stage: 'close', severity: 'block' });
   });
 });

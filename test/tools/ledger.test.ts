@@ -90,8 +90,8 @@ describe('briefs', () => {
       expect(r.text, stage).toContain('Keep the export CSV header stable');
       expect(r.text, stage).not.toContain('Closed thing');
     }
-    const build = await dispatch(unitTool, { action: 'brief', id: 'LG-2', stage: 'build', quiet: true }, ctx);
-    expect(build.text).not.toContain('## Ledger');
+    const publish = await dispatch(unitTool, { action: 'brief', id: 'LG-2', stage: 'publish', quiet: true }, ctx);
+    expect(publish.text).not.toContain('## Ledger');
     expect(fs.existsSync(path.join(unitDirFor(ctx, 'LG-2'), 'state.json'))).toBe(true);
   });
 });

@@ -45,7 +45,7 @@ async function gatesFor(stage: StageName, unit: LoadedUnit, ctx: ToolContext, mo
 }
 
 function routing(state: UnitState, ctx: ToolContext, mode: ModeDef) {
-  return { skip: mode.skip_stages, browserUi: hasCapability(ctx.config.config, state.repo, 'browser_ui'), verifyAfterPublish: mode.verify_after_publish };
+  return { skip: mode.skip_stages, browserUi: hasCapability(ctx.config.config, state.repo, 'browser_ui') };
 }
 
 function notFound(id: string, ctx: ToolContext): ToolResult {
@@ -207,8 +207,8 @@ export const unitTool = defineTool({
 
         const to = (input.to as StageName | undefined) ?? nextStageFor(state.stage, routing(state, ctx, mode));
         if (!to) return fail(`unit ${state.id}: no stage after ${state.stage}`);
-        // The correction loop (back to revise, and revise -> commit) is a retry, not a promotion: no gates.
-        const correction = to === 'revise' || (state.stage === 'revise' && to === 'commit');
+        // Going back to build from review is a retry, not a promotion: no gates.
+        const correction = to === 'build' && state.stage === 'review';
         const gates = correction ? [] : await gatesFor(state.stage, unit, ctx, mode);
         const verdict = transitionAllowed(gates);
         if (!verdict.ok) {
@@ -228,7 +228,7 @@ export const unitTool = defineTool({
     }),
 
     report: action({
-      describe: 'Store a stage report (outcome, summary, questions, verdict, artifacts) for the current cycle; a ship verdict at challenge marks it passed.',
+      describe: 'Store a stage report (outcome, summary, questions, verdict, artifacts) for the current cycle.',
       schema: z.object({
         id: z.string().describe('Unit id.'),
         stage: z.string().describe('Stage the report is for; must be the current stage.'),
@@ -245,11 +245,10 @@ export const unitTool = defineTool({
         const report: Report = { stage: input.stage, cycle: unit.state.cycle, outcome: input.outcome, summary: input.summary, questions: input.questions ?? [], artifacts: input.artifacts ?? {}, at: ctx.now().toISOString(), ...(input.verdict ? { verdict: input.verdict } : {}) };
         const reports = { ...(unit.state.reports ?? {}) };
         reports[input.stage] = [...(reports[input.stage] ?? []), report];
-        const reviews = input.verdict && (input.stage === 'review' || input.stage === 'challenge') ? { ...(unit.state.reviews ?? {}), [unit.state.cycle]: input.verdict } : unit.state.reviews;
-        const challengePassed = unit.state.challenge_passed || (input.stage === 'challenge' && input.verdict === 'ship');
-        writeState(unit.dir, { ...unit.state, reports, ...(reviews ? { reviews } : {}), challenge_passed: challengePassed }, ctx.now);
+        const reviews = input.verdict && input.stage === 'review' ? { ...(unit.state.reviews ?? {}), [unit.state.cycle]: input.verdict } : unit.state.reviews;
+        writeState(unit.dir, { ...unit.state, reports, ...(reviews ? { reviews } : {}) }, ctx.now);
         appendHistory(unit.dir, `report ${input.stage}: ${input.outcome}${input.verdict ? ` (${input.verdict})` : ''} — ${input.summary}`, ctx.now);
-        return result(`Report stored for ${input.stage} (${input.outcome}${input.verdict ? `, ${input.verdict}` : ''}).`, envelope(true, `report ${input.outcome}`, { id: unit.id, report, challenge_passed: challengePassed }, [{ tool: 'unit', action: 'route', why: 'ask the engine what to do next' }]));
+        return result(`Report stored for ${input.stage} (${input.outcome}${input.verdict ? `, ${input.verdict}` : ''}).`, envelope(true, `report ${input.outcome}`, { id: unit.id, report }, [{ tool: 'unit', action: 'route', why: 'ask the engine what to do next' }]));
       },
     }),
 
@@ -319,7 +318,7 @@ export const unitTool = defineTool({
       handler: async (input, ctx) => {
         const unit = loadUnit(ctx, input.id);
         if (!unit) return notFound(input.id, ctx);
-        const boundary: Record<string, StatusBoundary> = { scope: 'scope', plan: 'build', build: 'build', commit: 'build', review: 'build', revise: 'build', challenge: 'build', verify: 'build', publish: 'publish', close: 'close' };
+        const boundary: Record<string, StatusBoundary> = { scope: 'scope', build: 'build', review: 'build', verify: 'build', publish: 'publish', close: 'close' };
         const expected = statusHint(unit.id, boundary[unit.state.stage] ?? 'build', ctx.config.config);
         const disagreements = reconcile(unit.state, input.live, { expectedTrackerStatus: expected });
         const text = disagreements.length ? ['Disagreements between state and live reality:', ...disagreements.map((d) => `- ${d.kind}: ${d.detail}`)].join('\n') : 'State agrees with live reality.';

@@ -13,14 +13,14 @@ function ctx(config: HarnessConfig = DEFAULTS, worktree: string | null = null): 
 
 const thorough: ModeDef = resolveMode('thorough', DEFAULTS);
 
-const passing: GateDef = defineGate({ id: 'fake_pass', stage: 'commit', description: 'always passes', severity: 'block', check: () => ({ pass: true }) });
-const failing: GateDef = defineGate({ id: 'fake_fail', stage: 'commit', description: 'always fails', severity: 'block', check: () => ({ pass: false, remedy: 'do the thing' }) });
+const passing: GateDef = defineGate({ id: 'fake_pass', stage: 'build', description: 'always passes', severity: 'block', check: () => ({ pass: true }) });
+const failing: GateDef = defineGate({ id: 'fake_fail', stage: 'build', description: 'always fails', severity: 'block', check: () => ({ pass: false, remedy: 'do the thing' }) });
 const needsBrowser: GateDef = defineGate({ id: 'fake_browser', stage: 'publish', description: 'needs browser_ui', severity: 'block', requires: 'browser_ui', check: () => ({ pass: false, remedy: 'walk through' }) });
-const warning: GateDef = defineGate({ id: 'fake_warn', stage: 'commit', description: 'warns', severity: 'warn', check: async () => ({ pass: false, remedy: 'consider it' }) });
+const warning: GateDef = defineGate({ id: 'fake_warn', stage: 'build', description: 'warns', severity: 'warn', check: async () => ({ pass: false, remedy: 'consider it' }) });
 
 describe('resolveGates', () => {
   it('only resolves gates for the requested stage and runs their checks', async () => {
-    const out = await resolveGates('commit', ctx(), thorough, [passing, failing, needsBrowser]);
+    const out = await resolveGates('build', ctx(), thorough, [passing, failing, needsBrowser]);
     expect(out.map((g) => g.id)).toEqual(['fake_pass', 'fake_fail']);
     expect(out[0]).toMatchObject({ severity: 'block', status: 'pass' });
     expect(out[1]).toMatchObject({ severity: 'block', status: 'fail', remedy: 'do the thing' });
@@ -36,13 +36,13 @@ describe('resolveGates', () => {
 
   it('applies config severity overrides', async () => {
     const config: HarnessConfig = { ...DEFAULTS, gates: { fake_fail: { severity: 'warn' } } };
-    const out = await resolveGates('commit', ctx(config), thorough, [failing]);
+    const out = await resolveGates('build', ctx(config), thorough, [failing]);
     expect(out[0]).toMatchObject({ severity: 'warn', status: 'fail', demoted_by: 'config' });
   });
 
   it('applies mode demotion downward only', async () => {
     const demoting: ModeDef = { ...thorough, name: 'm', demote: { fake_fail: 'warn', fake_warn: 'block' } };
-    const out = await resolveGates('commit', ctx(), demoting, [failing, warning]);
+    const out = await resolveGates('build', ctx(), demoting, [failing, warning]);
     expect(out.find((g) => g.id === 'fake_fail')).toMatchObject({ severity: 'warn', demoted_by: 'mode' });
     const warn = out.find((g) => g.id === 'fake_warn')!;
     expect(warn.severity).toBe('warn');
@@ -51,9 +51,9 @@ describe('resolveGates', () => {
 
   it('turns off gates without running them', async () => {
     let ran = false;
-    const spy: GateDef = defineGate({ id: 'spy', stage: 'commit', description: 's', severity: 'block', check: () => { ran = true; return { pass: false }; } });
+    const spy: GateDef = defineGate({ id: 'spy', stage: 'build', description: 's', severity: 'block', check: () => { ran = true; return { pass: false }; } });
     const off: ModeDef = { ...thorough, name: 'm', demote: { spy: 'off' } };
-    const out = await resolveGates('commit', ctx(), off, [spy]);
+    const out = await resolveGates('build', ctx(), off, [spy]);
     expect(out[0]).toMatchObject({ severity: 'off', status: 'n/a' });
     expect(ran).toBe(false);
   });
@@ -63,12 +63,12 @@ describe('resolveGates', () => {
     const config: HarnessConfig = {
       ...DEFAULTS,
       custom_gates: [
-        { id: 'custom_fail', stage: 'commit', command: 'echo "custom says no" 1>&2; exit 1', severity: 'block' },
-        { id: 'custom_pass', stage: 'commit', command: 'test "$(pwd -P)" = "$(cd \'' + worktree + '\' && pwd -P)"' },
+        { id: 'custom_fail', stage: 'build', command: 'echo "custom says no" 1>&2; exit 1', severity: 'block' },
+        { id: 'custom_pass', stage: 'build', command: 'test "$(pwd -P)" = "$(cd \'' + worktree + '\' && pwd -P)"' },
         { id: 'elsewhere', stage: 'review', command: 'exit 1' },
       ],
     };
-    const out = await resolveGates('commit', ctx(config, worktree), thorough, []);
+    const out = await resolveGates('build', ctx(config, worktree), thorough, []);
     expect(out.map((g) => g.id)).toEqual(['custom_fail', 'custom_pass']);
     expect(out[0]).toMatchObject({ severity: 'block', status: 'fail' });
     expect(out[0]!.remedy).toContain('custom says no');

@@ -55,7 +55,7 @@ describe('analyze pii', () => {
   it('records findings and the gate stays failing until clean', async () => {
     const ctx = await unitCtx();
     const dir = unitDirFor(ctx, 'AN-1');
-    writeState(dir, { ...readState(dir), stage: 'commit' });
+    writeState(dir, { ...readState(dir), stage: 'build' });
     const dirty = await dispatch(analyzeTool, { action: 'pii', id: 'AN-1', diff: PII_DIFF }, ctx);
     expect(dirty.envelope.ok).toBe(false);
     expect((dirty.envelope.data as { findings: unknown[] }).findings).toHaveLength(2);

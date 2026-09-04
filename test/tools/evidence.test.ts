@@ -99,12 +99,12 @@ describe('evidence gates and check', () => {
   it('reports the same statuses as resolveGates and checks a single gate', async () => {
     const ctx = await unitCtx();
     const dir = unitDirFor(ctx, 'EVI-1');
-    writeState(dir, { ...readState(dir), stage: 'commit', kind: 'bug' });
+    writeState(dir, { ...readState(dir), stage: 'build', kind: 'bug' });
     await dispatch(evidenceTool, { action: 'record', id: 'EVI-1', kind: 'self_critique', payload: { findings: [] } }, ctx);
     const viaTool = await dispatch(evidenceTool, { action: 'gates', id: 'EVI-1' }, ctx);
     expect(viaTool.envelope.ok).toBe(true);
     const state = readState(dir);
-    const direct = await resolveGates('commit', { state, config: ctx.config.config, unitDir: dir, worktree: null }, resolveMode('thorough', ctx.config.config));
+    const direct = await resolveGates('build', { state, config: ctx.config.config, unitDir: dir, worktree: null }, resolveMode('thorough', ctx.config.config));
     const toolGates = (viaTool.envelope.data as { gates: Array<{ id: string; status: string; severity: string }> }).gates;
     expect(toolGates.map((g) => [g.id, g.severity, g.status])).toEqual(direct.map((g) => [g.id, g.severity, g.status]));
     expect(toolGates.find((g) => g.id === 'self_critique_recorded')!.status).toBe('pass');

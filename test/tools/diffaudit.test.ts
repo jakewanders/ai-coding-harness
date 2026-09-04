@@ -103,7 +103,7 @@ describe('evidence synthesize and the challenge gates', () => {
   it('writes reviews/cycle-n.json, stores the verdict, and drives review_verdict_ship', async () => {
     const ctx = await unitCtx();
     const dir = unitDirFor(ctx, 'DA-1');
-    writeState(dir, { ...readState(dir), stage: 'challenge' });
+    writeState(dir, { ...readState(dir), stage: 'review' });
     const missing = await dispatch(evidenceTool, { action: 'synthesize', id: 'DA-1' }, ctx);
     expect(missing.envelope.ok).toBe(false);
     expect(missing.envelope.data).toMatchObject({ verdict: 'not_ready' });
@@ -122,25 +122,6 @@ describe('evidence synthesize and the challenge gates', () => {
     expect(ship.envelope.ok).toBe(true);
     expect(ship.envelope.data).toMatchObject({ verdict: 'ship' });
     gate = await dispatch(evidenceTool, { action: 'check', id: 'DA-1', gate: 'review_verdict_ship' }, ctx);
-    expect(gate.envelope.data).toMatchObject({ status: 'pass' });
-  });
-
-  it('challenge_passed is set by a ship report at challenge and stays true through a later revise cycle', async () => {
-    const ctx = await unitCtx();
-    const dir = unitDirFor(ctx, 'DA-1');
-    writeState(dir, { ...readState(dir), stage: 'publish' });
-    let gate = await dispatch(evidenceTool, { action: 'check', id: 'DA-1', gate: 'challenge_passed' }, ctx);
-    expect(gate.envelope.data).toMatchObject({ status: 'fail' });
-    writeState(dir, { ...readState(dir), stage: 'challenge' });
-    await dispatch(unitTool, { action: 'report', id: 'DA-1', stage: 'challenge', outcome: 'done', summary: 'clean', verdict: 'ship' }, ctx);
-    expect(readState(dir).challenge_passed).toBe(true);
-    for (const to of ['revise', 'commit']) expect((await dispatch(unitTool, { action: 'advance', id: 'DA-1', to }, ctx)).envelope.ok).toBe(true);
-    const s = readState(dir);
-    writeState(dir, { ...s, stage: 'review', cycle: s.cycle + 1 });
-    await dispatch(unitTool, { action: 'report', id: 'DA-1', stage: 'review', outcome: 'done', summary: 'again', verdict: 'needs_attention' }, ctx);
-    expect(readState(dir).challenge_passed).toBe(true);
-    writeState(dir, { ...readState(dir), stage: 'publish' });
-    gate = await dispatch(evidenceTool, { action: 'check', id: 'DA-1', gate: 'challenge_passed' }, ctx);
     expect(gate.envelope.data).toMatchObject({ status: 'pass' });
   });
 });

@@ -104,7 +104,7 @@ export const digestTool = defineTool({
       handler: async (input, ctx) =>
         withUnit(ctx, input.id, (unit) => {
           const mode = modeOf(unit, ctx);
-          const next = nextStageFor(unit.state.stage, { skip: mode.skip_stages, browserUi: hasCapability(ctx.config.config, unit.state.repo, 'browser_ui'), verifyAfterPublish: mode.verify_after_publish });
+          const next = nextStageFor(unit.state.stage, { skip: mode.skip_stages, browserUi: hasCapability(ctx.config.config, unit.state.repo, 'browser_ui') });
           const handoff = renderHandoff(unit.state, requirementOf(unit.dir), readDigest(unit.dir), { next, questions: openQuestions(unit) });
           const draftAbs = path.join(unit.dir, 'drafts', 'handoff.md');
           fs.mkdirSync(path.dirname(draftAbs), { recursive: true });

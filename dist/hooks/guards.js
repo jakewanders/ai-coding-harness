@@ -113,11 +113,11 @@ const piiSinkWarn = (ctx) => {
 const commitGate = async (ctx) => {
     if (!GIT_COMMIT.test(ctx.command) || !ctx.unit)
         return { id: 'commit_gate', outcome: 'silent' };
-    const gates = await gatesFor(ctx, 'commit');
+    const gates = await gatesFor(ctx, 'build');
     const verdict = transitionAllowed(gates);
     if (verdict.ok)
         return { id: 'commit_gate', outcome: 'pass' };
-    return { id: 'commit_gate', outcome: 'block', message: [`commit gates failing for ${ctx.unit.id}:`, ...gateLines(verdict.blocking)].join('\n') };
+    return { id: 'commit_gate', outcome: 'block', message: [`build gates failing for ${ctx.unit.id}:`, ...gateLines(verdict.blocking)].join('\n') };
 };
 const publishGate = async (ctx) => {
     if (!(GIT_PUSH.test(ctx.command) || PR_CREATE.test(ctx.command)) || !ctx.unit)
@@ -134,7 +134,7 @@ const transitionPreview = async (ctx) => {
     const mode = modeFor(ctx);
     const stage = ctx.unit.state.stage;
     const gates = await gatesFor(ctx, stage);
-    const next = nextStageFor(stage, { skip: mode.skip_stages, browserUi: Boolean(ctx.config.config.repos?.[ctx.unit.state.repo]?.capabilities?.browser_ui), verifyAfterPublish: mode.verify_after_publish });
+    const next = nextStageFor(stage, { skip: mode.skip_stages, browserUi: Boolean(ctx.config.config.repos?.[ctx.unit.state.repo]?.capabilities?.browser_ui) });
     return { id: 'transition_preview', outcome: 'warn', message: [`${ctx.unit.id}: leaving ${stage}${next ? ` for ${next}` : ''} depends on:`, ...(gates.length ? gateLines(gates) : ['- no gates'])].join('\n') };
 };
 const GUARDS = [noBypassFlags, protectedBranch, credentialScan, oversizeFile, piiSinkWarn, commitGate, publishGate, transitionPreview];

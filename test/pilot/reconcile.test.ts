@@ -23,7 +23,7 @@ describe('reconcile', () => {
 
   it('reports uncommitted work only from review onward', () => {
     expect(reconcile(st('build'), { uncommitted: true })).toEqual([]);
-    for (const stage of ['review', 'challenge', 'verify', 'publish', 'close'] as StageName[]) {
+    for (const stage of ['review', 'verify', 'publish', 'close'] as StageName[]) {
       const d = reconcile(st(stage, { pr: stage === 'close' ? pr : null }), { uncommitted: true, pr_state: stage === 'close' ? 'merged' : undefined });
       expect(d.map((x) => x.kind), stage).toContain('uncommitted_work');
       expect(d.find((x) => x.kind === 'uncommitted_work')!.detail).toContain(stage);

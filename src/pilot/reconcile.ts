@@ -21,7 +21,7 @@ export interface Disagreement {
   detail: string;
 }
 
-const COMMITTED_STAGES: StageName[] = ['review', 'challenge', 'verify', 'publish', 'close'];
+const COMMITTED_STAGES: StageName[] = ['review', 'verify', 'publish', 'close'];
 
 /** Compare stored state with live facts the assistant gathered; never mutates. */
 export function reconcile(state: UnitState, live: LiveFacts, opts: { expectedTrackerStatus?: string | null } = {}): Disagreement[] {

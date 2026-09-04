@@ -3,7 +3,7 @@ import path from 'node:path';
 import { defineGate, registerGate } from '../registry/gates.js';
 export const reviewVerdictShip = registerGate(defineGate({
     id: 'review_verdict_ship',
-    stage: 'challenge',
+    stage: 'review',
     description: "The current cycle's synthesized review verdict is ship.",
     severity: 'block',
     check: (ctx) => {

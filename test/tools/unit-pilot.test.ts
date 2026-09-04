@@ -37,8 +37,8 @@ describe('unit report and route', () => {
     expect(state.reports!.scope![0]).toMatchObject({ stage: 'scope', cycle: 0, outcome: 'done', summary: 'criteria recorded', at: '2026-09-04T12:00:00.000Z' });
     const route = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
     expect(route.envelope.ok).toBe(true);
-    expect(route.envelope.data).toMatchObject({ next: 'plan', decision: 'proceed', from: 'scope' });
-    expect(readState(unitDirFor(ctx, 'PL-1')).stage).toBe('plan');
+    expect(route.envelope.data).toMatchObject({ next: 'build', decision: 'proceed', from: 'scope' });
+    expect(readState(unitDirFor(ctx, 'PL-1')).stage).toBe('build');
     expect(route.envelope.next[0]).toMatchObject({ tool: 'unit', action: 'brief' });
   });
 
@@ -58,10 +58,10 @@ describe('unit report and route', () => {
   it('turns failing gates into a blocked route with remedies as questions', async () => {
     const ctx = await unitCtx();
     const dir = unitDirFor(ctx, 'PL-1');
-    for (const to of ['plan', 'build', 'commit']) await dispatch(unitTool, { action: 'advance', id: 'PL-1', to }, ctx);
-    await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'commit', outcome: 'done', summary: 'committed' }, ctx);
+    await dispatch(unitTool, { action: 'advance', id: 'PL-1', to: 'build' }, ctx);
+    await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'build', outcome: 'done', summary: 'built' }, ctx);
     const blocked = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
-    expect(blocked.envelope.data).toMatchObject({ decision: 'blocked', next: 'commit' });
+    expect(blocked.envelope.data).toMatchObject({ decision: 'blocked', next: 'build' });
     expect((blocked.envelope.data as { questions: string[] }).questions.join(' ')).toContain('self_critique');
     satisfyCommitGates(dir);
     const ok = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
@@ -69,19 +69,20 @@ describe('unit report and route', () => {
     expect(readState(dir).stage).toBe('review');
   });
 
-  it('retries to revise on a needs_attention verdict and marks challenge passed on ship', async () => {
+  it('retries to build on a needs_attention verdict and proceeds to publish on ship', async () => {
     const ctx = await unitCtx();
     const dir = unitDirFor(ctx, 'PL-1');
     writeState(dir, { ...readState(dir), stage: 'review' });
     await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'review', outcome: 'done', summary: 'two majors', verdict: 'needs_attention' }, ctx);
     const retry = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
-    expect(retry.envelope.data).toMatchObject({ decision: 'retry', next: 'revise', verdict: 'needs_attention' });
-    expect(readState(dir).stage).toBe('revise');
-    writeState(dir, { ...readState(dir), stage: 'challenge' });
-    await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'challenge', outcome: 'done', summary: 'clean', verdict: 'ship' }, ctx);
-    expect(readState(dir).challenge_passed).toBe(true);
+    expect(retry.envelope.data).toMatchObject({ decision: 'retry', next: 'build', verdict: 'needs_attention' });
+    expect(readState(dir).stage).toBe('build');
+    // reach_audit_recorded still guards review until the gate prune removes it.
+    writeState(dir, { ...readState(dir), stage: 'review', evidence: [{ kind: 'reach_audit', cycle: 0, recorded_at: '2026-09-04T00:00:00.000Z', payload: { surfaces: [] } }] });
+    await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'review', outcome: 'done', summary: 'clean', verdict: 'ship' }, ctx);
     const onward = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
     expect(onward.envelope.data).toMatchObject({ decision: 'proceed', next: 'publish' });
+    expect(readState(dir).stage).toBe('publish');
   });
 
   it('rejects a report for a stage other than the current one', async () => {

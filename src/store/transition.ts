@@ -9,12 +9,11 @@ export interface Transition {
 
 /**
  * Move a unit to `to`: end the open timer, start one for the new stage, and
- * increment the cycle when re-entering review from commit after a revise.
+ * increment the cycle each time review starts again after the first time.
  */
 export function applyTransition(state: UnitState, to: StageName, at: string): Transition {
   const from = state.stage;
-  const previousStages = state.timers.map((t) => t.stage);
-  const cycleIncremented = from === 'commit' && to === 'review' && previousStages.at(-2) === 'revise';
+  const cycleIncremented = to === 'review' && state.timers.some((t) => t.stage === 'review');
   const next: UnitState = {
     ...state,
     stage: to,

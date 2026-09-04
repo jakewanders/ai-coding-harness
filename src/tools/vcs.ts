@@ -149,7 +149,7 @@ export const vcsTool = defineTool({
     }),
 
     commit: action({
-      describe: 'Commit everything in the worktree once the commit-stage gates pass; records the commit and moves the unit to review.',
+      describe: 'Commit everything in the worktree once the build-stage gates pass; records the commit and moves the unit to review.',
       schema: z.object({ id: z.string().describe('Unit id.'), message: z.string().min(1).describe('Commit message.') }),
       handler: async (input, ctx) =>
         withUnit(ctx, input.id, async (unit, root) => {
@@ -168,10 +168,10 @@ export const vcsTool = defineTool({
             if (!(e instanceof UnknownModeError)) throw e;
             mode = resolveMode('thorough', ctx.config.config);
           }
-          const gates = await resolveGates('commit', { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree, cwd: ctx.cwd, vault: ctx.vault }, mode);
+          const gates = await resolveGates('build', { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree, cwd: ctx.cwd, vault: ctx.vault }, mode);
           const verdict = transitionAllowed(gates);
           if (!verdict.ok) {
-            const lines = ['Commit refused: commit-stage gates are failing.', ...verdict.blocking.map((g) => `- ${g.id}: ${g.remedy ?? 'no remedy given'}`)];
+            const lines = ['Commit refused: build-stage gates are failing.', ...verdict.blocking.map((g) => `- ${g.id}: ${g.remedy ?? 'no remedy given'}`)];
             return result(lines.join('\n'), envelope(false, 'commit blocked by gates', { id: unit.id, blocking: verdict.blocking, warnings: verdict.warnings }));
           }
 
@@ -184,7 +184,7 @@ export const vcsTool = defineTool({
           const record: CommitRecord = { sha, message: input.message, at, cycle: unit.state.cycle };
           let next = { ...unit.state, commits: [...unit.state.commits, record], branch: branch ?? unit.state.branch };
           let moved = false;
-          if (next.stage === 'commit') {
+          if (next.stage === 'build') {
             next = applyTransition(next, 'review', at).state;
             moved = true;
           }
