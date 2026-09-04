@@ -23,8 +23,10 @@ export declare const BUILT_IN_MODES: Record<'thorough' | 'express' | 'sketch', M
  */
 export declare function resolveMode(name: string, config: HarnessConfig, seen?: string[]): ModeDef;
 /**
- * The demotions a mode really applies, sorted by gate id. An entry that would
- * raise a gate above its registered default is not a demotion and is dropped.
+ * The demotions a mode declares, sorted by gate id. An entry that would raise
+ * a gate above its registered default is a promotion, not a demotion, and is
+ * dropped; an entry at the gate's default rank is kept because the mode still
+ * declares it and the PR body lists every declared demotion.
  */
 export declare function demotionsOf(mode: ModeDef): Array<{
     gate: string;

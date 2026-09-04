@@ -1,3 +1,6 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { demotionsOf, resolveMode, UnknownModeError } from '../modes.js';
 import { BRIEF_CONTRACT, renderHeader } from '../contracts/header.js';
 import { stageEntry } from '../registry/stages.js';
 import { homeRelative } from '../store/paths.js';
@@ -50,13 +53,43 @@ function sourceBlock(ctx) {
     lines.push('');
     return lines;
 }
-/** Full brief: header, seats, config problems, source, stage material, stop banner. */
+function modeOf(ctx) {
+    try {
+        return resolveMode(ctx.header.mode, ctx.config.config);
+    }
+    catch (e) {
+        if (e instanceof UnknownModeError)
+            return resolveMode('thorough', ctx.config.config);
+        throw e;
+    }
+}
+/** `## Mode`: name, demotions, skipped stages, ordering notes, banner, and the stage's mode notes when shipped. */
+export function modeBlock(ctx, mode = modeOf(ctx)) {
+    const lines = ['## Mode', '', `Run mode: **${mode.name}**${mode.extends ? ` (extends ${mode.extends})` : ''}.`];
+    if (mode.banner)
+        lines.push('', `> **${mode.banner}**`);
+    const demotions = demotionsOf(mode);
+    if (demotions.length)
+        lines.push('', 'Gate demotions in this mode (every one is listed in the PR body):', ...demotions.map((d) => `- ${d.gate} → ${d.to}`));
+    if (mode.skip_stages.length)
+        lines.push('', `Skipped stages: ${mode.skip_stages.join(', ')}.`);
+    if (mode.merge_dispatches)
+        lines.push('', 'Specialist review columns are merged into one dispatch.');
+    if (mode.verify_after_publish)
+        lines.push('', 'Verify runs after publish in this mode.');
+    const notes = path.join(ctx.root, 'skills', ctx.header.stage, 'modes', `${mode.name}.md`);
+    if (fs.existsSync(notes))
+        lines.push('', `Mode notes for this stage: @root/skills/${ctx.header.stage}/modes/${mode.name}.md — read them before starting.`);
+    return lines;
+}
+/** Full brief: header, seats, config problems, mode, source, stage material, stop banner. */
 export function renderBrief(ctx) {
     const entry = stageEntry(ctx.header.stage);
     if (!entry)
         throw new Error(`unknown stage "${ctx.header.stage}"`);
     const parts = [renderHeader(ctx.header), '', buildSeatBlock(ctx.config.config), ''];
     parts.push(...configErrorBlock(ctx.config.errors));
+    parts.push(...modeBlock(ctx), '');
     parts.push(...sourceBlock(ctx));
     parts.push(entry.render(ctx).trimEnd(), '');
     if (!ctx.quiet)

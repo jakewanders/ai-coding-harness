@@ -100,4 +100,28 @@ describe('skills', () => {
     const text = fs.readFileSync(path.join(sharedDir, 'severity.md'), 'utf8');
     for (const level of ['blocker', 'major', 'minor', 'note']) expect(text).toMatch(new RegExp(`\\*\\*${level}\\*\\*`, 'i'));
   });
+
+  it('ships mode files for exactly the stages whose skills reference them', () => {
+    const skillsDir = path.join(repoRoot, 'skills');
+    const withModes = fs.readdirSync(skillsDir, { withFileTypes: true })
+      .filter((e) => e.isDirectory() && fs.existsSync(path.join(skillsDir, e.name, 'modes')))
+      .map((e) => e.name)
+      .sort();
+    expect(withModes).toEqual(['build', 'publish', 'review']);
+    for (const stage of withModes) {
+      const files = fs.readdirSync(path.join(skillsDir, stage, 'modes')).sort();
+      expect(files, stage).toEqual(['express.md', 'sketch.md']);
+      const skill = skills.find((s) => s.name === stage)!;
+      for (const f of files) {
+        expect(skill.text, `${stage} must reference modes/${f}`).toContain(`@root/skills/${stage}/modes/${f}`);
+        const text = fs.readFileSync(path.join(skillsDir, stage, 'modes', f), 'utf8');
+        expect(text.trim().length, `${stage}/modes/${f}`).toBeGreaterThan(40);
+        for (const ref of extractRootRefs(text)) expect(fs.existsSync(path.join(repoRoot, ref)), `${stage}/modes/${f} -> @root/${ref}`).toBe(true);
+      }
+      expect(skill.text).toMatch(/if the header mode is/i);
+    }
+    for (const s of skills) {
+      if (!withModes.includes(s.name)) expect(s.text, `${s.file} references a mode file without shipping one`).not.toMatch(/\/modes\//);
+    }
+  });
 });

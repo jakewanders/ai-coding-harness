@@ -21,6 +21,9 @@ unit brief { "id": "<id>", "stage": "build" }
 
 If the header's `contract` is not `harness-brief/1`, stop and report.
 
+If the header mode is `express`, also read @root/skills/build/modes/express.md; if it is `sketch`,
+also read @root/skills/build/modes/sketch.md. Other modes need no extra reading.
+
 ## Procedure
 
 1. Ensure the unit has an isolated worktree or branch; never work on a protected branch.

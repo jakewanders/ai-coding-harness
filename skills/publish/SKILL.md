@@ -21,6 +21,9 @@ unit brief { "id": "<id>", "stage": "publish" }
 
 If the header's `contract` is not `harness-brief/1`, stop and report.
 
+If the header mode is `express`, also read @root/skills/publish/modes/express.md; if it is `sketch`,
+also read @root/skills/publish/modes/sketch.md. Other modes need no extra reading.
+
 ## Procedure
 
 1. Record `criteria_validation` for every criterion and a `claims` audit over the factual statements the PR body will make.

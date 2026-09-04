@@ -82,8 +82,10 @@ export function resolveMode(name: string, config: HarnessConfig, seen: string[] 
 }
 
 /**
- * The demotions a mode really applies, sorted by gate id. An entry that would
- * raise a gate above its registered default is not a demotion and is dropped.
+ * The demotions a mode declares, sorted by gate id. An entry that would raise
+ * a gate above its registered default is a promotion, not a demotion, and is
+ * dropped; an entry at the gate's default rank is kept because the mode still
+ * declares it and the PR body lists every declared demotion.
  */
 export function demotionsOf(mode: ModeDef): Array<{ gate: string; to: Severity }> {
   const defaults = new Map(allGates().map((g) => [g.id, g.severity]));
@@ -91,7 +93,7 @@ export function demotionsOf(mode: ModeDef): Array<{ gate: string; to: Severity }
     .filter(([gate, to]) => {
       if (to === 'block') return false;
       const def = defaults.get(gate);
-      return def === undefined || SEVERITY_RANK[to] < SEVERITY_RANK[def];
+      return def === undefined || SEVERITY_RANK[to] <= SEVERITY_RANK[def];
     })
     .map(([gate, to]) => ({ gate, to }))
     .sort((a, b) => a.gate.localeCompare(b.gate));

@@ -1,4 +1,5 @@
 import type { LoadedConfig } from '../config/load.js';
+import { type ModeDef } from '../modes.js';
 import { type BriefHeader } from '../contracts/header.js';
 import type { ResolvedGate } from '../registry/gates.js';
 import { type BriefContext } from '../registry/stages.js';
@@ -16,5 +17,7 @@ export interface HeaderInputs {
     baseBranch?: string;
 }
 export declare function buildHeader(h: HeaderInputs): BriefHeader;
-/** Full brief: header, seats, config problems, source, stage material, stop banner. */
+/** `## Mode`: name, demotions, skipped stages, ordering notes, banner, and the stage's mode notes when shipped. */
+export declare function modeBlock(ctx: BriefContext, mode?: ModeDef): string[];
+/** Full brief: header, seats, config problems, mode, source, stage material, stop banner. */
 export declare function renderBrief(ctx: BriefContext): string;

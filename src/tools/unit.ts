@@ -6,7 +6,7 @@ import '../flows/index.js';
 import '../gates/index.js';
 import { envelope, type NextAction } from '../contracts/envelope.js';
 import { defaultBranch } from '../git/exec.js';
-import { resolveMode, UnknownModeError, type ModeDef } from '../modes.js';
+import { BUILT_IN_MODES, resolveMode, UnknownModeError, type ModeDef } from '../modes.js';
 import { reconcile } from '../pilot/reconcile.js';
 import { routeNext } from '../pilot/route.js';
 import { statusHint, type StatusBoundary } from '../config/tickets.js';
@@ -80,7 +80,8 @@ export const unitTool = defineTool({
         try {
           resolveMode(modeName, ctx.config.config);
         } catch (e) {
-          return fail(`unit start: ${e instanceof Error ? e.message : String(e)}`);
+          const known = [...Object.keys(BUILT_IN_MODES), ...Object.keys(ctx.config.config.modes ?? {}).filter((m) => !(m in BUILT_IN_MODES))];
+          return fail(`unit start: ${e instanceof Error ? e.message : String(e)}; known modes: ${known.join(', ')}`);
         }
         if (loadUnit(ctx, id)) return fail(`unit "${id}" already exists; use unit status or unit brief`);
 

@@ -1,8 +1,15 @@
+import { resolveMode, UnknownModeError } from '../modes.js';
 import { CORE_ORDER, registerRenderer, type BriefRenderer } from '../registry/stages.js';
 
 export const render: BriefRenderer = (ctx) => {
   const id = ctx.state?.id ?? '<id>';
   const stage = ctx.state?.stage ?? 'scope';
+  let merged = false;
+  try {
+    merged = resolveMode(ctx.header.mode, ctx.config.config).merge_dispatches;
+  } catch (e) {
+    if (!(e instanceof UnknownModeError)) throw e;
+  }
   const lines = [
     '# pilot',
     '',
@@ -55,6 +62,9 @@ export const render: BriefRenderer = (ctx) => {
     '- Never post to a tracker, code host or chat yourself; subagents draft, the user approves.',
     '- After publish, if the reviewbot seat is wired, run at most two rounds of the review-bot loop.',
   ];
+  if (merged) {
+    lines.push('', '## Merged dispatch', '', `Mode ${ctx.header.mode} merges the specialist review columns into one dispatch: send a single review subagent that records every required column itself instead of one subagent per column.`);
+  }
   return lines.join('\n');
 };
 
