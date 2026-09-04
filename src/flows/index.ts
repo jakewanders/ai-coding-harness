@@ -2,3 +2,6 @@
 import './pilot.js';
 import './screen.js';
 import './shape.js';
+import './inspect.js';
+import './respond.js';
+import './aftercare.js';

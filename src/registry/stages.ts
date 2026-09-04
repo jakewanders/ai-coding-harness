@@ -40,7 +40,7 @@ export const FLOW_NAMES: readonly FlowName[] = [
 const SPEC_BANNER_STAGES = new Set<StageName>(['scope', 'plan', 'build', 'review', 'revise', 'challenge', 'verify']);
 
 /** Flows that start from a source or nothing rather than an existing unit id. */
-const NO_ID_FLOWS = new Set<FlowName>(['convoy', 'botprs', 'draft', 'setup']);
+const NO_ID_FLOWS = new Set<FlowName>(['inspect', 'convoy', 'botprs', 'draft', 'setup']);
 
 const flowRenderers = new Map<FlowName, BriefRenderer>();
 

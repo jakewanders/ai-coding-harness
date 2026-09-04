@@ -72,7 +72,8 @@ export const unitTool = defineTool({
                     return fail('unit start: ticket sources need a ref (the ticket key)');
                 if (input.source === 'file' && !input.ref && input.text === undefined)
                     return fail('unit start: file sources need a ref (the path) or text');
-                const id = input.id ?? (input.source === 'ticket' ? input.ref : syntheticId(input.text ?? input.ref ?? ''));
+                const prNumber = input.source === 'pr' && input.ref ? /(\d+)\s*$/.exec(input.ref.trim())?.[1] : undefined;
+                const id = input.id ?? (input.source === 'ticket' ? input.ref : prNumber ? `pr-${prNumber}` : syntheticId(input.text ?? input.ref ?? ''));
                 const modeName = input.mode ?? 'thorough';
                 try {
                     resolveMode(modeName, ctx.config.config);

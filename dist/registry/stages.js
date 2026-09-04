@@ -9,7 +9,7 @@ export const FLOW_NAMES = [
 /** Core stages whose brief opens with the pinned source/spec block. */
 const SPEC_BANNER_STAGES = new Set(['scope', 'plan', 'build', 'review', 'revise', 'challenge', 'verify']);
 /** Flows that start from a source or nothing rather than an existing unit id. */
-const NO_ID_FLOWS = new Set(['convoy', 'botprs', 'draft', 'setup']);
+const NO_ID_FLOWS = new Set(['inspect', 'convoy', 'botprs', 'draft', 'setup']);
 const flowRenderers = new Map();
 /** Install a flow's renderer; flow modules call this as they land. */
 export function registerRenderer(name, render) {
