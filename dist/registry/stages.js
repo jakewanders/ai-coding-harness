@@ -1,13 +1,11 @@
 import { CORE_STAGE_MODULES } from '../stages/index.js';
 import { flowStub } from '../stages/_shared.js';
 export const CORE_ORDER = ['scope', 'build', 'review', 'verify', 'publish', 'close'];
-export const FLOW_NAMES = [
-    'pilot', 'convoy', 'screen', 'shape', 'inspect', 'respond', 'aftercare', 'botprs', 'draft', 'setup',
-];
+export const FLOW_NAMES = ['pilot', 'convoy', 'screen', 'inspect', 'respond', 'aftercare', 'setup'];
 /** Core stages whose brief opens with the pinned source/spec block. */
 const SPEC_BANNER_STAGES = new Set(['scope', 'build', 'review', 'verify']);
 /** Flows that start from a source or nothing rather than an existing unit id. */
-const NO_ID_FLOWS = new Set(['inspect', 'convoy', 'botprs', 'draft', 'setup']);
+const NO_ID_FLOWS = new Set(['inspect', 'convoy', 'setup']);
 const flowRenderers = new Map();
 /** Install a flow's renderer; flow modules call this as they land. */
 export function registerRenderer(name, render) {

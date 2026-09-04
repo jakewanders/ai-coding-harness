@@ -23,7 +23,7 @@ unit brief { "id": "<id>", "stage": "aftercare" }
 
 1. Re-check the heuristic buckets: a defect the change introduced is fix now; anything beyond the shipped criteria is a new ticket; questions are reply only.
 2. Fix now: start a follow-up unit from the PR and pilot it; do not patch the shipped branch ad hoc.
-3. New ticket: draft it with the `draft` flow and link it in the reply.
+3. New ticket: draft it by hand under `drafts/`, file it only after approval, and link it in the reply.
 4. Post replies only with the user's approval.
 
 ```harness

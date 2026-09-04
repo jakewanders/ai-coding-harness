@@ -18,7 +18,8 @@ function emptyContext(): BriefContext {
 describe('STAGES', () => {
   it('holds the six core stages in order plus the standalone flows', () => {
     expect(CORE_ORDER).toEqual(['scope', 'build', 'review', 'verify', 'publish', 'close']);
-    expect(STAGES).toHaveLength(6 + FLOW_NAMES.length);
+    expect([...FLOW_NAMES]).toEqual(['pilot', 'convoy', 'screen', 'inspect', 'respond', 'aftercare', 'setup']);
+    expect(STAGES).toHaveLength(13);
     expect(STAGES.slice(0, 6).map((s) => s.name)).toEqual(CORE_ORDER);
     expect(STAGES.slice(0, 6).every((s) => s.standalone === false)).toBe(true);
     const flows = STAGES.slice(6);

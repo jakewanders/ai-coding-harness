@@ -30,7 +30,7 @@ export function renderAftercare(id, tri) {
     const lines = [`# Aftercare for ${id}`, '', 'Drafts only; post through the codehost or tracker seat after the user approves.', ''];
     const sections = [
         ['fix_now', 'Fix now', 'Defects introduced by the shipped change: reproduce with a failing test, fix on a follow-up unit.'],
-        ['new_ticket', 'New ticket', 'Requests beyond the shipped criteria: draft a ticket with `draft` and link it back.'],
+        ['new_ticket', 'New ticket', 'Requests beyond the shipped criteria: draft a ticket by hand under drafts/ and file it only after approval, then link it back.'],
         ['reply_only', 'Reply only', 'Questions and remarks that need an answer, not a change.'],
     ];
     for (const [key, title, note] of sections) {
