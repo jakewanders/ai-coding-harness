@@ -1,4 +1,6 @@
 import { spawnSync } from 'node:child_process';
+import { seatWiring } from '../brief/seats.js';
+import { SEAT_NAMES } from '../contracts/header.js';
 export const SEVERITY_RANK = { block: 2, warn: 1, off: 0 };
 export function defineGate(def) {
     return def;
@@ -18,6 +20,16 @@ export const CUSTOM_GATE_TIMEOUT_MS = 60_000;
 export function hasCapability(config, repo, capability) {
     const caps = config.repos?.[repo]?.capabilities;
     return Boolean(caps?.[capability]);
+}
+/** Is the seat wired (tool names, or cli/http for counterweight)? */
+export function hasSeat(config, seat) {
+    if (!SEAT_NAMES.includes(seat))
+        return false;
+    return seatWiring(config)[seat] !== 'unwired';
+}
+/** A gate requirement: a repo capability, or `seat:<name>` for a wired seat. */
+export function requirementMet(config, repo, requires) {
+    return requires.startsWith('seat:') ? hasSeat(config, requires.slice('seat:'.length)) : hasCapability(config, repo, requires);
 }
 function runShellGate(command, cwd) {
     const r = spawnSync('sh', ['-c', command], {
@@ -66,7 +78,7 @@ export async function resolveGates(stage, ctx, mode, gates = allGates()) {
             else if (SEVERITY_RANK[demote] > SEVERITY_RANK[gate.severity])
                 gate = { ...gate, ignored_promotion: demote };
         }
-        if (requires && !hasCapability(ctx.config, ctx.state.repo, requires)) {
+        if (requires && !requirementMet(ctx.config, ctx.state.repo, requires)) {
             out.push({ ...gate, status: 'n/a' });
             continue;
         }

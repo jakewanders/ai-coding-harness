@@ -1,5 +1,7 @@
 import { spawnSync } from 'node:child_process';
+import { seatWiring } from '../brief/seats.js';
 import type { HarnessConfig } from '../config/schema.js';
+import { SEAT_NAMES, type SeatName } from '../contracts/header.js';
 import type { Severity } from '../contracts/header.js';
 import type { ModeDef } from '../modes.js';
 import type { StageName, UnitState } from '../store/state.js';
@@ -69,6 +71,17 @@ export function hasCapability(config: HarnessConfig, repo: string, capability: s
   return Boolean(caps?.[capability]);
 }
 
+/** Is the seat wired (tool names, or cli/http for counterweight)? */
+export function hasSeat(config: HarnessConfig, seat: string): boolean {
+  if (!(SEAT_NAMES as readonly string[]).includes(seat)) return false;
+  return seatWiring(config)[seat as SeatName] !== 'unwired';
+}
+
+/** A gate requirement: a repo capability, or `seat:<name>` for a wired seat. */
+export function requirementMet(config: HarnessConfig, repo: string, requires: string): boolean {
+  return requires.startsWith('seat:') ? hasSeat(config, requires.slice('seat:'.length)) : hasCapability(config, repo, requires);
+}
+
 function runShellGate(command: string, cwd: string): GateOutcome {
   const r = spawnSync('sh', ['-c', command], {
     cwd,
@@ -113,7 +126,7 @@ export async function resolveGates(stage: StageName, ctx: GateContext, mode: Mod
       if (SEVERITY_RANK[demote] < SEVERITY_RANK[gate.severity]) gate = { ...gate, severity: demote, demoted_by: 'mode' };
       else if (SEVERITY_RANK[demote] > SEVERITY_RANK[gate.severity]) gate = { ...gate, ignored_promotion: demote };
     }
-    if (requires && !hasCapability(ctx.config, ctx.state.repo, requires)) {
+    if (requires && !requirementMet(ctx.config, ctx.state.repo, requires)) {
       out.push({ ...gate, status: 'n/a' });
       continue;
     }
