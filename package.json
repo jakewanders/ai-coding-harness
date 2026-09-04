@@ -21,7 +21,7 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
-    "check:dist": "node -e \"process.exit(0)\"",
+    "check:dist": "node dist/scripts/check-dist.js",
     "gen:tools": "npm run build && node dist/scripts/gen-tools.js"
   },
   "license": "MIT",

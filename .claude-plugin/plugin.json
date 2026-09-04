@@ -1,0 +1,34 @@
+{
+  "name": "harness",
+  "version": "0.1.0",
+  "description": "Tracker-driven development lifecycle engine: an MCP server, stage skills, and safety hooks for coding agents.",
+  "skills": [
+    "./skills/aftercare/SKILL.md",
+    "./skills/botprs/SKILL.md",
+    "./skills/build/SKILL.md",
+    "./skills/challenge/SKILL.md",
+    "./skills/close/SKILL.md",
+    "./skills/commit/SKILL.md",
+    "./skills/convoy/SKILL.md",
+    "./skills/draft/SKILL.md",
+    "./skills/inspect/SKILL.md",
+    "./skills/pilot/SKILL.md",
+    "./skills/plan/SKILL.md",
+    "./skills/publish/SKILL.md",
+    "./skills/respond/SKILL.md",
+    "./skills/review/SKILL.md",
+    "./skills/revise/SKILL.md",
+    "./skills/scope/SKILL.md",
+    "./skills/screen/SKILL.md",
+    "./skills/setup/SKILL.md",
+    "./skills/shape/SKILL.md",
+    "./skills/verify/SKILL.md"
+  ],
+  "hooks": "./hooks/hooks.json",
+  "mcpServers": {
+    "harness": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/dist/server.js"]
+    }
+  }
+}
