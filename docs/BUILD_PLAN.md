@@ -296,7 +296,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 - `docs/tools.md` equals the generator output (stale doc fails).
 - The server lists exactly `allTools().length` tools via the SDK's in-memory transport pair.
 
-- [ ] Task 9
+- [x] Task 9
 
 ### Task 10: Stage registry, gate registry, mode resolution
 

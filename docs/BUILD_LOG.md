@@ -10,3 +10,4 @@ One line per completed task: `NN · title · tests <n> · note`.
 06 · Configuration layers · tests 60 · valid_keys comes from walking the zod def tree (object/record/array/optional); fixed a millisecond-flaky round-trip expectation in the state test.
 07 · Zero-config repo inference · tests 75 · Test repos get their bare origin through git clone --bare plus fetch and remote set-head, so no test ever runs git push.
 08 · Unit ids and ticket patterns · tests 86 · unitFromBranch also recognizes a known synthetic id used as a branch segment prefix (local-xxxxxxxx-title); invalid ticket regexes are skipped rather than thrown.
+09 · Tool registry, dispatch, server, generated inventory · tests 100 · Server uses the low-level SDK Server so each tool gets one merged JSON schema; test/helpers/ctx.ts makeCtx builds a hermetic ToolContext for later tool tests.
