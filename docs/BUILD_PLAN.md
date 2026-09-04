@@ -534,7 +534,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** `selectEnvironment` picks by role regardless of name order; credentials resolve by prefix and never appear in the brief text; the gate is `n/a` without `browser_ui`, fails with a `fail` criterion, passes when all pass; `out_of_scope` content does not change the gate.
 
-- [ ] Task 25
+- [x] Task 25
 
 ### Task 26: Safety hooks with loud failure
 
