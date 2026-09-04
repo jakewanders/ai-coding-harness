@@ -571,7 +571,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** inspect creates a `pr-…` unit and its brief contains "read-only"; respond groups threads by path and writes the drafts file; aftercare classification renders all three buckets.
 
-- [ ] Task 28
+- [x] Task 28
 
 ### Task 29: `botprs` and `draft` flows
 
