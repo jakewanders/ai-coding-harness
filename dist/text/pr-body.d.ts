@@ -7,5 +7,11 @@ export interface PrBodyOptions {
 }
 /** Bullets under a `## Deferred` heading in plan.md. */
 export declare function parseDeferred(plan: string | null | undefined): string[];
+export declare function scopeLedger(state: UnitState, requirement: Requirement | null): string[];
+export declare function notBuiltSection(plan: string | null | undefined): string[];
+export declare function modeSection(mode: ModeDef): {
+    mode: string[];
+    notProven: string[];
+};
 /** The ghostwritten PR body assembled from the unit record. */
 export declare function renderPrBody(state: UnitState, requirement: Requirement | null, mode: ModeDef, opts?: PrBodyOptions): string;

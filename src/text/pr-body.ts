@@ -36,7 +36,7 @@ function plural(n: number, word: string): string {
   return `${n} ${word}${n === 1 ? '' : 's'}`;
 }
 
-function scopeLedger(state: UnitState, requirement: Requirement | null): string[] {
+export function scopeLedger(state: UnitState, requirement: Requirement | null): string[] {
   const results = ((latestThisCycle(state, 'criteria_validation')?.payload as { results?: Validation[] } | undefined)?.results ?? []);
   const byId = new Map(results.map((r) => [r.criterion, r]));
   const lines = ['## Scope ledger', '', '| Criterion | Proof | Status |', '|---|---|---|'];
@@ -80,12 +80,12 @@ function waiversSection(state: UnitState): string[] {
   return ['## Waivers', '', ...(waivers.length ? waivers.map((w) => `- ${w.gate}: ${w.rationale}`) : ['none'])];
 }
 
-function notBuiltSection(plan: string | null | undefined): string[] {
+export function notBuiltSection(plan: string | null | undefined): string[] {
   const deferred = parseDeferred(plan);
   return ['## Not built', '', ...(deferred.length ? deferred.map((d) => `- ${d}`) : ['nothing deferred'])];
 }
 
-function modeSection(mode: ModeDef): { mode: string[]; notProven: string[] } {
+export function modeSection(mode: ModeDef): { mode: string[]; notProven: string[] } {
   const demotions = demotionsOf(mode);
   const modeLines = ['## Mode', '', `Run mode: ${mode.name}${mode.extends ? ` (extends ${mode.extends})` : ''}.`];
   if (demotions.length) modeLines.push('', 'Gate demotions applied by this mode:', ...demotions.map((d) => `- ${d.gate} → ${d.to}`));

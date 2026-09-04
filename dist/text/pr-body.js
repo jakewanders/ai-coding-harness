@@ -26,7 +26,7 @@ function latestThisCycle(state, kind) {
 function plural(n, word) {
     return `${n} ${word}${n === 1 ? '' : 's'}`;
 }
-function scopeLedger(state, requirement) {
+export function scopeLedger(state, requirement) {
     const results = (latestThisCycle(state, 'criteria_validation')?.payload?.results ?? []);
     const byId = new Map(results.map((r) => [r.criterion, r]));
     const lines = ['## Scope ledger', '', '| Criterion | Proof | Status |', '|---|---|---|'];
@@ -72,11 +72,11 @@ function waiversSection(state) {
     const waivers = state.evidence.filter((e) => e.kind === 'waiver').map((e) => e.payload);
     return ['## Waivers', '', ...(waivers.length ? waivers.map((w) => `- ${w.gate}: ${w.rationale}`) : ['none'])];
 }
-function notBuiltSection(plan) {
+export function notBuiltSection(plan) {
     const deferred = parseDeferred(plan);
     return ['## Not built', '', ...(deferred.length ? deferred.map((d) => `- ${d}`) : ['nothing deferred'])];
 }
-function modeSection(mode) {
+export function modeSection(mode) {
     const demotions = demotionsOf(mode);
     const modeLines = ['## Mode', '', `Run mode: ${mode.name}${mode.extends ? ` (extends ${mode.extends})` : ''}.`];
     if (demotions.length)

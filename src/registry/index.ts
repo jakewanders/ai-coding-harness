@@ -1,6 +1,8 @@
 import type { ToolDef } from './tools.js';
 import '../gates/index.js';
+import { digestTool } from '../tools/digest.js';
 import { evidenceTool } from '../tools/evidence.js';
+import { recallTool } from '../tools/recall.js';
 import { systemTool } from '../tools/system.js';
 import { execTool } from '../tools/exec.js';
 import { pullreqTool } from '../tools/pullreq.js';
@@ -10,7 +12,7 @@ import { vcsTool } from '../tools/vcs.js';
 
 /** Every tool the server exposes, in the order they appear in docs/tools.md. */
 export function allTools(): ToolDef[] {
-  return [unitTool, specTool, evidenceTool, execTool, vcsTool, pullreqTool, systemTool];
+  return [unitTool, specTool, evidenceTool, execTool, vcsTool, pullreqTool, digestTool, recallTool, systemTool];
 }
 
 export function findTool(name: string): ToolDef | undefined {
