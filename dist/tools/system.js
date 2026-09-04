@@ -7,6 +7,8 @@ import { validateLayer } from '../config/validate.js';
 import { parseYamlDocument, documentError } from '../config/yaml.js';
 import { provenance, renderDoctor, runDoctor } from '../system/doctor.js';
 import { syncVault } from '../system/sync.js';
+import { mapToolsToSeats, unmappedTools } from '../setup/seat-heuristics.js';
+import { stringify as stringifyYaml } from 'yaml';
 import { measureTokens, renderTokens } from '../system/tokens.js';
 import { envelope } from '../contracts/envelope.js';
 import { VERSION } from '../index.js';
@@ -111,6 +113,30 @@ export const systemTool = defineTool({
             handler: async (input, ctx) => {
                 const report = measureTokens(ctx, input.mode ?? 'thorough');
                 return result(renderTokens(report), envelope(true, `${report.total.tokens} tokens for a ${report.mode} run`, report));
+            },
+        }),
+        seats: action({
+            describe: "Map the session's visible tool names onto seats by name heuristics; returns the mapping, the unmapped tools and a seats YAML fragment.",
+            schema: z.object({ tools: z.array(z.string()).describe('Every tool name visible in the session.') }),
+            handler: async (input) => {
+                const seats = mapToolsToSeats(input.tools);
+                const unmapped = unmappedTools(input.tools, seats);
+                const fragment = {};
+                if (seats.tracker.length)
+                    fragment.tracker = { fetch: seats.tracker, comment: seats.tracker, transition_hint: seats.tracker };
+                if (seats.codehost.length)
+                    fragment.codehost = { open_pr: seats.codehost, read_threads: seats.codehost, comment: seats.codehost, resolve_thread: seats.codehost, attach: seats.codehost };
+                if (seats.docs.length)
+                    fragment.docs = { search: seats.docs };
+                if (seats.design.length)
+                    fragment.design = { fetch: seats.design };
+                if (seats.chat.length)
+                    fragment.chat = { post: seats.chat };
+                if (seats.reviewbot.length)
+                    fragment.reviewbot = { status: seats.reviewbot, threads: seats.reviewbot };
+                const yaml = stringifyYaml({ seats: fragment }, { lineWidth: 0 });
+                const lines = [...Object.entries(seats).map(([seat, names]) => `- ${seat}: ${names.length ? names.join(', ') : 'unwired'}`), `unmapped: ${unmapped.length ? unmapped.join(', ') : 'none'}`, '', 'Proposed seats fragment (refine which tool does which action):', '', yaml.trimEnd()];
+                return result(lines.join('\n'), envelope(true, `${input.tools.length - unmapped.length} tool(s) mapped, ${unmapped.length} unmapped`, { seats, unmapped, yaml }));
             },
         }),
     },
