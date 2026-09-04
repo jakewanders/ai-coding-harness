@@ -4,15 +4,11 @@ import { z } from 'zod';
 import { envelope } from '../contracts/envelope.js';
 import '../gates/index.js';
 import { resolveMode, UnknownModeError } from '../modes.js';
-import { hasCapability } from '../registry/gates.js';
-import { nextStageFor } from '../registry/stages.js';
 import { action, defineTool, fail, result } from '../registry/tools.js';
 import { parseRequirement } from '../spec/requirement.js';
 import { entryFor, parseDigest, renderDigest, upsertEntry } from '../store/index.js';
-import { homeRelative } from '../store/paths.js';
 import { appendHistory } from '../store/state.js';
 import { loadUnit } from '../store/units.js';
-import { renderHandoff } from '../text/handoff.js';
 import { renderWrapup, stageTable } from '../text/wrapup.js';
 function withUnit(ctx, id, fn) {
     const unit = loadUnit(ctx, id);
@@ -41,14 +37,9 @@ function modeOf(unit, ctx) {
         return resolveMode('thorough', ctx.config.config);
     }
 }
-function openQuestions(unit) {
-    const reports = Object.values(unit.state.reports ?? {}).flat();
-    const asked = reports.flatMap((r) => r.questions);
-    return asked.filter((q) => !(q in unit.state.answers));
-}
 export const digestTool = defineTool({
     name: 'digest',
-    description: 'Story summaries for a unit: the digest and its keyword index, the running history, a handoff note, and the wrap-up.',
+    description: 'Story summaries for a unit: the digest and its keyword index, the running history, and the wrap-up.',
     actions: {
         write: action({
             describe: 'Write digest.md (summary, decisions, tags) and update the cross-unit keyword index.',
@@ -86,20 +77,6 @@ export const digestTool = defineTool({
                 }
                 const lines = (readIf(path.join(unit.dir, 'history.md')) ?? '').trimEnd().split('\n').filter(Boolean);
                 return result(lines.join('\n') || 'No history yet.', envelope(true, `${lines.length} history line(s)`, { id: unit.id, lines }));
-            }),
-        }),
-        handoff: action({
-            describe: 'Render a handoff note (where things stand, open questions, next action) and save it to drafts/handoff.md.',
-            schema: z.object({ id: z.string().describe('Unit id.') }),
-            handler: async (input, ctx) => withUnit(ctx, input.id, (unit) => {
-                const mode = modeOf(unit, ctx);
-                const next = nextStageFor(unit.state.stage, { skip: mode.skip_stages, browserUi: hasCapability(ctx.config.config, unit.state.repo, 'browser_ui') });
-                const handoff = renderHandoff(unit.state, requirementOf(unit.dir), readDigest(unit.dir), { next, questions: openQuestions(unit) });
-                const draftAbs = path.join(unit.dir, 'drafts', 'handoff.md');
-                fs.mkdirSync(path.dirname(draftAbs), { recursive: true });
-                fs.writeFileSync(draftAbs, handoff);
-                appendHistory(unit.dir, 'handoff drafted', ctx.now);
-                return result(handoff, envelope(true, 'handoff drafted', { id: unit.id, handoff, draft: homeRelative(draftAbs), next }));
             }),
         }),
         wrapup: action({

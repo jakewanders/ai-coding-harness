@@ -59,26 +59,6 @@ describe('digest history', () => {
   });
 });
 
-describe('digest handoff', () => {
-  it('renders where things stand, questions and the next action, saved under drafts/', async () => {
-    const ctx = await unitCtx();
-    await dispatch(unitTool, { action: 'advance', id: 'DG-1' }, ctx);
-    await dispatch(digestTool, { action: 'write', id: 'DG-1', summary: 'Halfway.', decisions: ['Streaming'] }, ctx);
-    const r = await dispatch(digestTool, { action: 'handoff', id: 'DG-1' }, ctx);
-    expect(r.envelope.ok).toBe(true);
-    expect(r.text).toContain('# Handoff');
-    expect(r.text).toMatch(/where things stand/i);
-    expect(r.text).toContain('build');
-    expect(r.text).toMatch(/open questions/i);
-    expect(r.text).toMatch(/next action/i);
-    expect(r.text).toContain('review');
-    expect(r.text).toContain('Halfway.');
-    const draft = path.join(unitDirFor(ctx, 'DG-1'), 'drafts', 'handoff.md');
-    expect(fs.existsSync(draft)).toBe(true);
-    expect(fs.readFileSync(draft, 'utf8')).toBe((r.envelope.data as { handoff: string }).handoff);
-  });
-});
-
 describe('digest wrapup', () => {
   it('lists every timed stage, the PR link, the ledger, drafts and not-proven for reduced modes', async () => {
     const ctx = await unitCtx('sketch');

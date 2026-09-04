@@ -25,6 +25,10 @@ function satisfyCommitGates(dir: string) {
 }
 
 describe('unit report and route', () => {
+  it('exposes exactly the lean actions', () => {
+    expect(Object.keys(unitTool.actions)).toEqual(['start', 'status', 'list', 'brief', 'advance', 'report', 'route', 'answer', 'link']);
+  });
+
   it('persists reports per stage and cycle, and route reads them', async () => {
     const ctx = await unitCtx();
     const first = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
@@ -88,23 +92,6 @@ describe('unit report and route', () => {
     const ctx = await unitCtx();
     const r = await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'publish', outcome: 'done', summary: 'x' }, ctx);
     expect(r.envelope.ok).toBe(false);
-  });
-});
-
-describe('unit reconcile', () => {
-  it('reports disagreements from the supplied live facts without mutating state', async () => {
-    const ctx = await unitCtx();
-    const dir = unitDirFor(ctx, 'PL-1');
-    writeState(dir, { ...readState(dir), stage: 'review', branch: 'PL-1-thing' });
-    const before = fs.readFileSync(path.join(dir, 'state.json'), 'utf8');
-    const r = await dispatch(unitTool, { action: 'reconcile', id: 'PL-1', live: { branch: 'main', uncommitted: true, pr_state: 'open' } }, ctx);
-    expect(r.envelope.ok).toBe(false);
-    const kinds = (r.envelope.data as { disagreements: Array<{ kind: string }> }).disagreements.map((d) => d.kind).sort();
-    expect(kinds).toEqual(['branch_differs', 'pr_unrecorded', 'uncommitted_work']);
-    expect(fs.readFileSync(path.join(dir, 'state.json'), 'utf8')).toBe(before);
-    const clean = await dispatch(unitTool, { action: 'reconcile', id: 'PL-1', live: { branch: 'PL-1-thing', uncommitted: false, pr_state: 'none' } }, ctx);
-    expect(clean.envelope.ok).toBe(true);
-    expect(clean.envelope.data).toMatchObject({ disagreements: [] });
   });
 });
 

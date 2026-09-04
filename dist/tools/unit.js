@@ -7,13 +7,10 @@ import '../gates/index.js';
 import { envelope } from '../contracts/envelope.js';
 import { defaultBranch } from '../git/exec.js';
 import { BUILT_IN_MODES, resolveMode, UnknownModeError } from '../modes.js';
-import { reconcile } from '../pilot/reconcile.js';
 import { routeNext } from '../pilot/route.js';
-import { statusHint } from '../config/tickets.js';
-import { hasCapability, hasSeat, resolveGates, transitionAllowed } from '../registry/gates.js';
+import { hasCapability, resolveGates, transitionAllowed } from '../registry/gates.js';
 import { CORE_ORDER, isCoreStage, nextStageFor, stageEntry } from '../registry/stages.js';
 import { action, defineTool, fail, result } from '../registry/tools.js';
-import { CORE_STAGE_MODULES } from '../stages/index.js';
 import { selectDocs } from '../kits/select.js';
 import { syntheticId } from '../store/ids.js';
 import { appendHistory, createState, writeState } from '../store/state.js';
@@ -56,7 +53,7 @@ function pinnedText(source, text, ref) {
 }
 export const unitTool = defineTool({
     name: 'unit',
-    description: 'Unit of work bookkeeping: start, status, list, brief, explain and advance through the core stages.',
+    description: 'Unit of work bookkeeping: start, status, list, brief, advance, report and route through the core stages.',
     actions: {
         start: action({
             describe: 'Create a unit from a source (ticket, pr, url, file, conversation, text) and pin its text.',
@@ -160,33 +157,6 @@ export const unitTool = defineTool({
                 return result(text, envelope(true, `brief for ${stageName}${unit ? ` (${unit.id})` : ''}`, { unit: unit?.id ?? null, stage: stageName, gates: header.gates, config_errors: header.config_errors.length }));
             },
         }),
-        explain: action({
-            describe: 'Describe the next stage, the gates guarding the move, the seats consulted and what it produces. Mutates nothing.',
-            schema: z.object({ id: z.string().optional().describe('Unit id; defaults to the unit implied by the current branch.') }),
-            handler: async (input, ctx) => {
-                const unit = resolveUnit(ctx, input.id);
-                if (!unit)
-                    return input.id ? notFound(input.id, ctx) : fail('unit explain: no id given and none implied by the current branch');
-                const mode = modeOf(unit.state, ctx);
-                const gates = await gatesFor(unit.state.stage, unit, ctx, mode);
-                const next = nextStageFor(unit.state.stage, routing(unit.state, ctx, mode));
-                const nextInfo = next ? CORE_STAGE_MODULES[next].info : null;
-                const verdict = transitionAllowed(gates);
-                const lines = [
-                    `${unit.id} is at ${unit.state.stage} (cycle ${unit.state.cycle}, mode ${mode.name}).`,
-                    next ? `Next stage: ${next} — ${nextInfo.purpose}` : 'Next stage: none; the unit is closed.',
-                    '',
-                    `Gates to leave ${unit.state.stage}:`,
-                    ...(gates.length ? gates.map((g) => `- ${g.id} [${g.severity}] ${g.status}${g.remedy ? ` — ${g.remedy}` : ''}`) : ['- none']),
-                    '',
-                    `Seats consulted next: ${nextInfo?.seats.length ? nextInfo.seats.join(', ') : 'none'}`,
-                    `Produces: ${nextInfo?.outputs.join('; ') ?? 'nothing'}`,
-                    verdict.ok ? 'Advance is allowed.' : `Advance is blocked by: ${verdict.blocking.map((g) => g.id).join(', ')}.`,
-                ];
-                const data = { id: unit.id, stage: unit.state.stage, next, gates, seats: nextInfo?.seats ?? [], outputs: nextInfo?.outputs ?? [], allowed: verdict.ok };
-                return result(lines.join('\n'), envelope(true, `next: ${next ?? 'none'}`, data));
-            },
-        }),
         advance: action({
             describe: 'Move a unit to its next stage when the current stage gates allow it; otherwise list the remedies.',
             schema: z.object({
@@ -257,7 +227,7 @@ export const unitTool = defineTool({
                     return notFound(input.id, ctx);
                 const mode = modeOf(unit.state, ctx);
                 const browserUi = hasCapability(ctx.config.config, unit.state.repo, 'browser_ui');
-                const route = routeNext(unit.state, mode, browserUi, hasSeat(ctx.config.config, 'reviewbot'));
+                const route = routeNext(unit.state, mode, browserUi);
                 const from = unit.state.stage;
                 const base = { id: unit.id, from, ...route };
                 if (route.decision === 'blocked') {
@@ -266,10 +236,6 @@ export const unitTool = defineTool({
                 if (route.decision === 'done')
                     return result(`${unit.id} is done.`, envelope(true, 'done', base, [{ tool: 'digest', action: 'wrapup', why: 'render the wrap-up for the user' }]));
                 const next = route.next;
-                if (!isCoreStage(next)) {
-                    const why = `dispatch the ${next} flow for review-bot round ${(unit.state.bot?.round ?? 0) + 1}; count it with reviewbot round, then route again`;
-                    return result(`${route.decision}: ${next} (stage stays ${from}).`, envelope(true, `${route.decision} -> ${next}`, base, briefNext(unit.id, why)));
-                }
                 if (next !== from) {
                     if (route.decision === 'proceed') {
                         const gates = await gatesFor(from, unit, ctx, mode);
@@ -300,28 +266,6 @@ export const unitTool = defineTool({
                 for (const [q, a] of Object.entries(input.answers))
                     appendHistory(unit.dir, `answer: ${q} -> ${a}`, ctx.now);
                 return result(`Stored ${Object.keys(input.answers).length} answer(s).`, envelope(true, 'answers stored', { id: unit.id, answers }, [{ tool: 'unit', action: 'route', why: 'route again with the answers in state' }]));
-            },
-        }),
-        reconcile: action({
-            describe: 'Compare stored state with live facts you gathered (branch, uncommitted work, PR state, tracker status); reports disagreements, mutates nothing.',
-            schema: z.object({
-                id: z.string().describe('Unit id.'),
-                live: z.object({
-                    branch: z.string().optional(),
-                    uncommitted: z.boolean().optional(),
-                    pr_state: z.enum(['open', 'merged', 'closed', 'none']).optional(),
-                    tracker_status: z.string().optional(),
-                }),
-            }),
-            handler: async (input, ctx) => {
-                const unit = loadUnit(ctx, input.id);
-                if (!unit)
-                    return notFound(input.id, ctx);
-                const boundary = { scope: 'scope', build: 'build', review: 'build', verify: 'build', publish: 'publish', close: 'close' };
-                const expected = statusHint(unit.id, boundary[unit.state.stage] ?? 'build', ctx.config.config);
-                const disagreements = reconcile(unit.state, input.live, { expectedTrackerStatus: expected });
-                const text = disagreements.length ? ['Disagreements between state and live reality:', ...disagreements.map((d) => `- ${d.kind}: ${d.detail}`)].join('\n') : 'State agrees with live reality.';
-                return result(text, envelope(disagreements.length === 0, disagreements.length ? `${disagreements.length} disagreement(s)` : 'consistent', { id: unit.id, stage: unit.state.stage, disagreements }));
             },
         }),
         link: action({

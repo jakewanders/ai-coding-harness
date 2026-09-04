@@ -10,7 +10,6 @@ import { homeRelative } from '../store/paths.js';
 import { appendHistory, writeState, type PrRecord, type Thread } from '../store/state.js';
 import { loadUnit, type LoadedUnit } from '../store/units.js';
 import { renderPrBody } from '../text/pr-body.js';
-import { suggestWorklog } from '../time/worklog.js';
 
 function withUnit(ctx: ToolContext, id: string, fn: (unit: LoadedUnit) => Promise<ToolResult> | ToolResult): Promise<ToolResult> | ToolResult {
   const unit = loadUnit(ctx, id);
@@ -33,7 +32,7 @@ const ThreadSchema = z.object({
 
 export const pullreqTool = defineTool({
   name: 'pullreq',
-  description: 'Pull request bookkeeping: ghostwritten body from the record, PR and thread records, worklog suggestion.',
+  description: 'Pull request bookkeeping: ghostwritten body from the record, PR and thread records.',
   actions: {
     body: action({
       describe: 'Render the PR body from the unit record and save it as drafts/pr-body.md.',
@@ -100,17 +99,6 @@ export const pullreqTool = defineTool({
           const pr = unit.state.pr;
           const text = pr ? `${pr.url}${pr.number !== null ? ` (#${pr.number})` : ''}: ${pr.head} → ${pr.base}, ${pr.threads.length} thread(s), ${pr.threads.filter((t) => !t.resolved).length} open` : 'No PR recorded.';
           return result(text, envelope(true, pr ? 'pr found' : 'no pr', { id: unit.id, pr }));
-        }),
-    }),
-
-    worklog: action({
-      describe: 'Suggest a worklog from the stage timers: minutes per stage with idle gaps subtracted.',
-      schema: z.object({ id: z.string().describe('Unit id.') }),
-      handler: async (input, ctx) =>
-        withUnit(ctx, input.id, (unit) => {
-          const w = suggestWorklog(unit.state.timers, undefined, ctx.now());
-          const lines = [...w.stages.map((s) => `- ${s.stage}: ${s.minutes} min`), `total: ${w.total_minutes} min (idle excluded: ${w.idle_minutes} min)`];
-          return result(lines.join('\n'), envelope(true, `${w.total_minutes} min`, { id: unit.id, ...w }));
         }),
     }),
   },

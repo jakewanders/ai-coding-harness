@@ -4,7 +4,6 @@ import { parse as parseYaml } from 'yaml';
 import { describe, expect, it } from 'vitest';
 import { HarnessConfigSchema } from '../../src/config/schema.js';
 import { dispatch } from '../../src/registry/tools.js';
-import { CORE_ORDER } from '../../src/registry/stages.js';
 import { ensureVault } from '../../src/store/vault.js';
 import { systemTool } from '../../src/tools/system.js';
 import { makeCtx } from '../helpers/ctx.js';
@@ -108,44 +107,10 @@ describe('system config', () => {
   });
 });
 
-describe('system infer and sync', () => {
+describe('system infer', () => {
   it('infer exposes the profile guesses', async () => {
     const r = await dispatch(systemTool, { action: 'infer' }, makeCtx({ cwd: nodeRepo() }));
     expect(r.envelope.ok).toBe(true);
     expect((r.envelope.data as { guesses: Array<{ field: string }> }).guesses.map((g) => g.field)).toContain('package_manager');
-  });
-
-  it('sync without a configured remote says skipped', async () => {
-    const ctx = makeCtx({ cwd: nodeRepo() });
-    ensureVault(ctx.vault);
-    const r = await dispatch(systemTool, { action: 'sync' }, ctx);
-    expect(r.envelope.ok).toBe(true);
-    expect(r.envelope.summary).toBe('sync skipped: no remote');
-  });
-});
-
-describe('system tokens', () => {
-  it('returns a per-stage table whose total equals the sum, including shared prose and mode files', async () => {
-    const ctx = makeCtx({ cwd: nodeRepo() });
-    const r = await dispatch(systemTool, { action: 'tokens', mode: 'sketch' }, ctx);
-    expect(r.envelope.ok).toBe(true);
-    const data = r.envelope.data as { mode: string; rows: Array<{ stage: string; skill_bytes: number; mode_bytes: number; brief_bytes: number; bytes: number; tokens: number }>; shared: { bytes: number; tokens: number }; total: { bytes: number; tokens: number } };
-    expect(data.mode).toBe('sketch');
-    expect(data.rows.map((x) => x.stage)).toEqual(CORE_ORDER);
-    for (const row of data.rows) {
-      expect(row.skill_bytes).toBeGreaterThan(0);
-      expect(row.brief_bytes).toBeGreaterThan(0);
-      expect(row.bytes).toBe(row.skill_bytes + row.mode_bytes + row.brief_bytes);
-      expect(row.tokens).toBe(Math.ceil(row.bytes / 4));
-    }
-    expect(data.rows.find((x) => x.stage === 'build')!.mode_bytes).toBeGreaterThan(0);
-    expect(data.rows.find((x) => x.stage === 'scope')!.mode_bytes).toBe(0);
-    expect(data.shared.bytes).toBeGreaterThan(0);
-    expect(data.total.bytes).toBe(data.rows.reduce((n, x) => n + x.bytes, 0) + data.shared.bytes);
-    expect(data.total.tokens).toBe(Math.ceil(data.total.bytes / 4));
-    expect(r.text).toMatch(/\| build \|/);
-    const thorough = (await dispatch(systemTool, { action: 'tokens' }, ctx)).envelope.data as { mode: string; rows: Array<{ mode_bytes: number }> };
-    expect(thorough.mode).toBe('thorough');
-    expect(thorough.rows.every((x) => x.mode_bytes === 0)).toBe(true);
   });
 });

@@ -1,16 +1,7 @@
-import { resolveMode, UnknownModeError } from '../modes.js';
 import { CORE_ORDER, registerRenderer } from '../registry/stages.js';
 export const render = (ctx) => {
     const id = ctx.state?.id ?? '<id>';
     const stage = ctx.state?.stage ?? 'scope';
-    let merged = false;
-    try {
-        merged = resolveMode(ctx.header.mode, ctx.config.config).merge_dispatches;
-    }
-    catch (e) {
-        if (!(e instanceof UnknownModeError))
-            throw e;
-    }
     const lines = [
         '# pilot',
         '',
@@ -32,11 +23,7 @@ export const render = (ctx) => {
         `digest wrapup { "id": "${id}" }`,
         '```',
         '',
-        '3. If this is a resumed session, reconcile first and surface every disagreement before dispatching anything.',
-        '',
-        '```harness',
-        `unit reconcile { "id": "${id}", "live": { "branch": "<current branch>", "uncommitted": false, "pr_state": "none" } }`,
-        '```',
+        '3. If this is a resumed session, compare the stored status (`unit status`) with the live branch, uncommitted work and PR state yourself, and surface every disagreement before dispatching anything.',
         '',
         '## Dispatch template',
         '',
@@ -61,27 +48,8 @@ export const render = (ctx) => {
         '- A commit failure is retried by the engine at most twice, then it becomes a checkpoint for the user.',
         '- Check every report against the standing rules (scope, cross-check, remote refs, no posting without approval); re-dispatch the stage on a breach.',
         '- Never post to a tracker, code host or chat yourself; subagents draft, the user approves.',
-        '- After publish, if the reviewbot seat is wired, run at most two rounds of the review-bot loop.',
-        '',
-        '## Review-bot loop',
-        '',
-        `Only when the reviewbot seat is wired (${ctx.header.seats.reviewbot === 'unwired' ? 'it is unwired here: skip this section and say so' : 'it is wired here'}). After the publish report:`,
-        '',
-        '1. `reviewbot ready` records round 0 and names the codehost call that marks the PR ready.',
-        '2. Poll the bot at most 10 times, 30 s apart, recording each result with `reviewbot poll`.',
-        '3. On changes_requested: `reviewbot threads` stores the bot threads, `unit route` returns the respond flow, you dispatch it (one batched commit, threads resolved on the host), then `reviewbot round` counts the round.',
-        '4. After two rounds, or on passed/failed, `unit route` goes to close; remaining bot findings are deferred to the human.',
-        '',
-        '```harness',
-        `reviewbot ready { "id": "${id}" }`,
-        `reviewbot poll { "id": "${id}", "status": "pending", "polls": 1 }`,
-        `reviewbot threads { "id": "${id}", "threads": [] }`,
-        `reviewbot round { "id": "${id}" }`,
-        '```',
+        '- After publish, if the reviewbot seat is wired, pull the bot threads into state with `pullreq threads`, dispatch the respond flow once, then close; further bot rounds are the human\'s call.',
     ];
-    if (merged) {
-        lines.push('', '## Merged dispatch', '', `Mode ${ctx.header.mode} merges the specialist review columns into one dispatch: send a single review subagent that records every required column itself instead of one subagent per column.`);
-    }
     return lines.join('\n');
 };
 registerRenderer('pilot', render);

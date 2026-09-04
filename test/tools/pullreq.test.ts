@@ -109,14 +109,4 @@ describe('worklog', () => {
     expect(w.idle_minutes).toBe(30);
     expect(w.gaps).toEqual([{ after: 'scope', before: 'build', minutes: 30 }]);
   });
-
-  it('is exposed through pullreq worklog', async () => {
-    const ctx = await unitCtx();
-    const dir = unitDirFor(ctx, 'PR-1');
-    writeState(dir, { ...readState(dir), timers: [t('scope', '2026-09-04T09:00:00.000Z', '2026-09-04T10:00:00.000Z', 20 * 60_000)] });
-    const r = await dispatch(pullreqTool, { action: 'worklog', id: 'PR-1' }, ctx);
-    expect(r.envelope.ok).toBe(true);
-    expect(r.envelope.data).toMatchObject({ total_minutes: 40, stages: [{ stage: 'scope', minutes: 40 }] });
-    expect(r.text).toContain('40');
-  });
 });

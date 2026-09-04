@@ -37,7 +37,6 @@ no extra reading.
 evidence record { "id": "<id>", "kind": "claims", "payload": { "claims": [] } }
 pullreq body { "id": "<id>" }
 pullreq record { "id": "<id>", "url": "<pr url>", "number": 0, "base": "<base>", "head": "<branch>" }
-pullreq worklog { "id": "<id>" }
 ```
 
 ## Done when

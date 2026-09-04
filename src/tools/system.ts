@@ -6,17 +6,15 @@ import { findGitRoot } from '../config/load.js';
 import { validateLayer } from '../config/validate.js';
 import { parseYamlDocument, documentError } from '../config/yaml.js';
 import { provenance, renderDoctor, runDoctor } from '../system/doctor.js';
-import { syncVault } from '../system/sync.js';
 import { mapToolsToSeats, unmappedTools } from '../setup/seat-heuristics.js';
 import { stringify as stringifyYaml } from 'yaml';
-import { measureTokens, renderTokens } from '../system/tokens.js';
 import { envelope } from '../contracts/envelope.js';
 import { VERSION } from '../index.js';
 import { action, defineTool, fail, result } from '../registry/tools.js';
 
 export const systemTool = defineTool({
   name: 'system',
-  description: 'Engine housekeeping: version, health, doctor, configuration, inference and sync.',
+  description: 'Engine housekeeping: version, health, kits, doctor, configuration, inference and seat mapping.',
   actions: {
     version: action({
       describe: 'Report the engine version.',
@@ -92,22 +90,6 @@ export const systemTool = defineTool({
         const profile = inferProfile(ctx.cwd);
         const lines = [`namespace: ${profile.namespace}`, ...profile.guesses.map((g) => `- ${g.field}: \`${g.value}\` — ${g.evidence}`)];
         return result(lines.join('\n'), envelope(true, `${profile.guesses.length} guess(es)`, profile));
-      },
-    }),
-    sync: action({
-      describe: "Push and pull the vault's git remote when store.remote is configured; otherwise skipped.",
-      schema: z.object({}),
-      handler: async (_input, ctx) => {
-        const r = syncVault(ctx.vault, ctx.config.config.store?.remote);
-        return result(r.detail.join('\n'), envelope(r.ok, r.summary, { vault: ctx.vault, remote: ctx.config.config.store?.remote ?? null, detail: r.detail }));
-      },
-    }),
-    tokens: action({
-      describe: 'Measure the instruction load of a full run: skill, mode file and rendered brief per core stage, plus shared prose.',
-      schema: z.object({ mode: z.string().optional().describe('Run mode to measure (default thorough).') }),
-      handler: async (input, ctx) => {
-        const report = measureTokens(ctx, input.mode ?? 'thorough');
-        return result(renderTokens(report), envelope(true, `${report.total.tokens} tokens for a ${report.mode} run`, report));
       },
     }),
     seats: action({

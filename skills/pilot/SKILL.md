@@ -30,7 +30,6 @@ unit brief { "id": "<id>", "stage": "pilot" }
 ```harness
 unit route { "id": "<id>" }
 unit answer { "id": "<id>", "answers": { "<question>": "<answer>" } }
-unit reconcile { "id": "<id>", "live": { "branch": "<branch>", "uncommitted": false, "pr_state": "none" } }
 digest wrapup { "id": "<id>" }
 ```
 
