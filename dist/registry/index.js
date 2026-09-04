@@ -1,8 +1,9 @@
 import { systemTool } from '../tools/system.js';
+import { specTool } from '../tools/spec.js';
 import { unitTool } from '../tools/unit.js';
 /** Every tool the server exposes, in the order they appear in docs/tools.md. */
 export function allTools() {
-    return [unitTool, systemTool];
+    return [unitTool, specTool, systemTool];
 }
 export function findTool(name) {
     return allTools().find((t) => t.name === name);
