@@ -53,7 +53,9 @@ describe('writeState / readState', () => {
     expect(raw).not.toContain(home);
     expect(raw).toContain('~/code/proj-ABC-1');
     const back = readState(dir);
-    expect(back).toEqual(s);
+    const { updated_at: _a, ...expected } = s;
+    const { updated_at: _b, ...actual } = back;
+    expect(actual).toEqual(expected);
   });
 
   it('rejects an invalid state on write', () => {

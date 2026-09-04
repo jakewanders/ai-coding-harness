@@ -1,0 +1,8 @@
+schema: 1
+repos:
+  local/proj:
+    tags: [repo-tag]
+    commands:
+      test: npm run test:ci
+    capabilities:
+      browser_ui: true

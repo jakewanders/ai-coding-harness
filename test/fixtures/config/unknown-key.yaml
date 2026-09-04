@@ -1,0 +1,5 @@
+schema: 1
+repos:
+  x:
+    base_branch: main
+    bogus_key: 1

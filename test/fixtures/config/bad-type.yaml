@@ -1,0 +1,4 @@
+schema: 1
+repos:
+  x:
+    base_branch: 12

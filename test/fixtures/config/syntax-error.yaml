@@ -1,0 +1,5 @@
+schema: 1
+store:
+  path: ~/vault
+  remote: [unclosed
+repos: {}

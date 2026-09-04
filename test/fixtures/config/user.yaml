@@ -1,0 +1,11 @@
+schema: 1
+store:
+  path: ~/vault-user
+repos:
+  local/proj:
+    base_branch: develop
+    tags: [user-tag]
+    commands:
+      test: npm test
+      lint: npm run lint
+protected_branches: [main, develop]
