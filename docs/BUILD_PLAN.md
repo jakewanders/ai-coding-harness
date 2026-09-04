@@ -623,7 +623,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** doctor on a temp node repo lists the inferred commands with evidence and proposes YAML that parses and validates; `config write` refuses overwrite without the flag; `sync` without a remote says skipped; `tokens` returns a per-stage table whose total equals the sum.
 
-- [ ] Task 33
+- [x] Task 33
 
 ### Task 34: `setup` flow
 

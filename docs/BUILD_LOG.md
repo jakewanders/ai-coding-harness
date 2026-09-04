@@ -34,3 +34,4 @@ One line per completed task: `NN · title · tests <n> · note`.
 30 · reviewbot tool and post-publish loop · tests 362 · Route.next widened to StageName | FlowName | null so respond can be dispatched from publish without a stage transition; the bot loop only exists when the reviewbot seat is wired.
 31 · convoy flow · tests 367 · Milestone 3 complete; predictFiles only accepts tokens with an extension so command names and bare words in backticks are not mistaken for paths.
 32 · Kits: discovery, merge, doc selection, rules, example kit · tests 375 · loadConfig runs two merges (first to learn the kit names, then with the discovered fragments); a named kit that is not found is a config error, not a silent skip.
+33 · system tool: doctor, config, infer, sync, tokens · tests 382 · system sync would push the vault remote when store.remote is set; tests only cover the skipped path and the loop itself never runs git push.
