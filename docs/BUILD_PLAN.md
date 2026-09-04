@@ -549,7 +549,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** each guard blocks/passes on a representative command (temp repo with a staged secret, a staged 6 MB file, a branch named `ABC-1-x` with failing commit gates, `--no-verify`); no unit on branch → commit gate silent; bootstrap with `HARNESS_HOOK_IMPL` pointing at a missing file blocks `git commit` with exit 2 and passes `ls` with a warning (spawn `node hooks/guard.mjs` in the test).
 
-- [ ] Task 26
+- [x] Task 26
 
 ## Milestone 3 — Standalone flows
 
