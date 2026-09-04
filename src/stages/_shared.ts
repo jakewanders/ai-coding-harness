@@ -1,19 +1,118 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { inferProfile } from '../config/infer.js';
 import type { SeatName } from '../contracts/header.js';
 import type { BriefContext, BriefRenderer } from '../registry/stages.js';
+import { parseRequirement, type Requirement } from '../spec/requirement.js';
+import { readIndex, searchIndex } from '../store/index.js';
+
+export type StageSection = 'requirement' | 'plan' | 'review' | 'commands' | 'decisions';
 
 export interface StageInfo {
   name: string;
   purpose: string;
   seats: SeatName[];
   outputs: string[];
+  sections: StageSection[];
+  /** Call templates with the unit id filled in. */
+  calls: (id: string) => string[];
 }
 
-/** Heading, purpose sentence, and the unit-brief follow-up template. */
+const PLAN_CAP = 6000;
+
+function readIf(file: string | null): string | null {
+  return file && fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null;
+}
+
+function requirementSection(ctx: BriefContext): string[] {
+  const md = readIf(ctx.unitDir ? path.join(ctx.unitDir, 'requirement.md') : null);
+  const req: Requirement | null = md === null ? null : parseRequirement(md);
+  const lines = ['## Requirement', ''];
+  if (!req) return [...lines, 'Not recorded yet; scope records it with `spec record` and `spec criteria`.'];
+  lines.push(`**${req.title}**${req.url ? ` (${req.url})` : ''}`, '');
+  if (req.body) lines.push(req.body, '');
+  lines.push('Acceptance criteria:', '');
+  lines.push(...(req.criteria.length ? req.criteria.map((c) => `- ${c.id}: ${c.text}`) : ['- none recorded']));
+  return lines;
+}
+
+function planSection(ctx: BriefContext): string[] {
+  const md = readIf(ctx.unitDir ? path.join(ctx.unitDir, 'plan.md') : null);
+  if (md === null) return ['## Plan', '', 'No plan.md yet.'];
+  const body = md.trim();
+  return ['## Plan', '', body.length > PLAN_CAP ? `${body.slice(0, PLAN_CAP)}\n\n[plan truncated; read plan.md in the unit directory]` : body];
+}
+
+function reviewSection(ctx: BriefContext): string[] {
+  const state = ctx.state;
+  if (!state || !ctx.unitDir) return ['## Latest review', '', 'No unit.'];
+  const cycles = fs.existsSync(path.join(ctx.unitDir, 'reviews'))
+    ? fs.readdirSync(path.join(ctx.unitDir, 'reviews')).map((f) => /^cycle-(\d+)\.json$/.exec(f)?.[1]).filter((n): n is string => Boolean(n)).map(Number).sort((a, b) => b - a)
+    : [];
+  const lines = ['## Latest review', ''];
+  if (!cycles.length) {
+    const columns = state.evidence.filter((e) => e.kind === 'review_column' && e.cycle === state.cycle);
+    lines.push(columns.length ? `${columns.length} review column(s) recorded this cycle; no synthesized verdict yet.` : 'No review recorded yet.');
+    return lines;
+  }
+  const latest = cycles[0]!;
+  try {
+    const review = JSON.parse(fs.readFileSync(path.join(ctx.unitDir, 'reviews', `cycle-${latest}.json`), 'utf8')) as { verdict?: string; counts?: Record<string, number> };
+    lines.push(`Cycle ${latest}: verdict ${review.verdict ?? 'unknown'}${review.counts ? ` (${Object.entries(review.counts).map(([k, v]) => `${k} ${v}`).join(', ')})` : ''}.`);
+  } catch {
+    lines.push(`Cycle ${latest}: review file unreadable.`);
+  }
+  return lines;
+}
+
+function commandsSection(ctx: BriefContext): string[] {
+  const repo = ctx.state?.repo ?? ctx.header.repo;
+  const configured = ctx.config.config.repos?.[repo]?.commands ?? {};
+  const entries = Object.entries(configured).filter(([, v]) => typeof v === 'string' && v.trim());
+  const lines = ['## Repo commands', ''];
+  if (entries.length) {
+    lines.push(...entries.map(([k, v]) => `- ${k}: \`${v}\``));
+    return lines;
+  }
+  const dir = ctx.state?.worktree ?? ctx.cwd ?? null;
+  const guesses = dir ? inferProfile(dir).guesses.filter((g) => g.field.startsWith('commands.')) : [];
+  if (!guesses.length) return [...lines, 'None configured or inferable; propose them in plan.md under `## Commands`.'];
+  lines.push('Inferred (not configured):', '', ...guesses.map((g) => `- ${g.field.slice('commands.'.length)}: \`${g.value}\` — ${g.evidence}`));
+  return lines;
+}
+
+function decisionsSection(ctx: BriefContext): string[] {
+  const lines = ['## Prior decisions', ''];
+  const md = readIf(ctx.unitDir ? path.join(ctx.unitDir, 'requirement.md') : null);
+  const req = md === null ? null : parseRequirement(md);
+  const query = [req?.title ?? '', ...(req?.criteria.map((c) => c.text) ?? [])].join(' ').trim();
+  if (!query) return [...lines, 'Nothing to search yet (no requirement).'];
+  const hits = searchIndex(readIndex(ctx.vault), query, { repo: ctx.state?.repo ?? ctx.header.repo, limit: 3 }).filter((h) => h.id !== ctx.state?.id);
+  if (!hits.length) return [...lines, 'No related digests found; `recall search` with other terms if you suspect prior work.'];
+  for (const h of hits) {
+    lines.push(`- ${h.id}: ${h.summary}`);
+    for (const d of h.decisions.slice(0, 3)) lines.push(`  - ${d}`);
+  }
+  return lines;
+}
+
+const SECTION_RENDERERS: Record<StageSection, (ctx: BriefContext) => string[]> = {
+  requirement: requirementSection,
+  plan: planSection,
+  review: reviewSection,
+  commands: commandsSection,
+  decisions: decisionsSection,
+};
+
+/** Heading, purpose, stage sections, produces, call templates, follow-up. */
 export function stageBrief(info: StageInfo, ctx: BriefContext, body: string[] = []): string {
   const id = ctx.state?.id ?? ctx.header.unit;
   const lines = [`# ${info.name}`, '', info.purpose, ''];
   if (body.length) lines.push(...body, '');
+  for (const section of info.sections) lines.push(...SECTION_RENDERERS[section](ctx), '');
   lines.push('## Produces', '', ...info.outputs.map((o) => `- ${o}`), '');
+  const calls = info.calls(id);
+  if (calls.length) lines.push('## Calls', '', '```harness', ...calls, '```', '');
   lines.push(
     '## Next',
     '',

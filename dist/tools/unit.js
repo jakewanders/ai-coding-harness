@@ -146,7 +146,7 @@ export const unitTool = defineTool({
                 if (unit && isCoreStage(stageName))
                     gates = await gatesFor(stageName, unit, ctx, modeOf(unit.state, ctx));
                 const header = buildHeader({ state: unit?.state ?? null, stage: stageName, config: ctx.config, namespace: ns, root: ctx.root, gates, baseBranch: defaultBranch(ctx.cwd) });
-                const briefCtx = { state: unit?.state ?? null, config: ctx.config, header, vault: ctx.vault, root: ctx.root, quiet: input.quiet ?? false, unitDir: unit?.dir ?? null };
+                const briefCtx = { state: unit?.state ?? null, config: ctx.config, header, vault: ctx.vault, root: ctx.root, quiet: input.quiet ?? false, unitDir: unit?.dir ?? null, cwd: ctx.cwd };
                 const text = renderBrief(briefCtx);
                 return result(text, envelope(true, `brief for ${stageName}${unit ? ` (${unit.id})` : ''}`, { unit: unit?.id ?? null, stage: stageName, gates: header.gates, config_errors: header.config_errors.length }));
             },

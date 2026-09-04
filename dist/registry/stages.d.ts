@@ -10,6 +10,8 @@ export interface BriefContext {
     root: string;
     quiet: boolean;
     unitDir: string | null;
+    /** Checkout the brief was requested from; used to infer commands when the unit has no worktree. */
+    cwd?: string;
 }
 export type BriefRenderer = (ctx: BriefContext) => string;
 export interface StageEntry {
