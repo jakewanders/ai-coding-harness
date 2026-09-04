@@ -22,7 +22,7 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "check:dist": "node -e \"process.exit(0)\"",
-    "gen:tools": "node -e \"process.exit(0)\""
+    "gen:tools": "npm run build && node dist/scripts/gen-tools.js"
   },
   "license": "MIT",
   "private": true,
