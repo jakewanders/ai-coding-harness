@@ -82,10 +82,10 @@ describe('unit status and list', () => {
     const empty = await dispatch(unitTool, { action: 'list' }, ctx);
     expect(empty.envelope.ok).toBe(true);
     expect(empty.envelope.data).toEqual({ namespace: namespaceFor(ctx.cwd), units: [] });
-    await dispatch(unitTool, { action: 'start', source: 'text', id: 'ABC-1', text: 'a', mode: 'express' }, ctx);
+    await dispatch(unitTool, { action: 'start', source: 'text', id: 'ABC-1', text: 'a', mode: 'sketch' }, ctx);
     await dispatch(unitTool, { action: 'start', source: 'text', id: 'ABC-2', text: 'b' }, ctx);
     const status = await dispatch(unitTool, { action: 'status', id: 'ABC-1' }, ctx);
-    expect(status.text.split('\n')[0]).toBe('ABC-1 · scope · cycle 0 · express · no branch');
+    expect(status.text.split('\n')[0]).toBe('ABC-1 · scope · cycle 0 · sketch · no branch');
     const list = await dispatch(unitTool, { action: 'list' }, ctx);
     const units = (list.envelope.data as { units: Array<{ id: string }> }).units;
     expect(units.map((u) => u.id).sort()).toEqual(['ABC-1', 'ABC-2']);

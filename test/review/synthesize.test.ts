@@ -25,9 +25,6 @@ describe('REVIEW_COLUMNS', () => {
     expect(requiredColumns({ config: DEFAULTS, repo: 'local/x', mode: thorough })).toEqual(BASE);
     const ui: HarnessConfig = { ...DEFAULTS, repos: { 'local/x': { capabilities: { browser_ui: true, component_library: true } } } };
     expect(requiredColumns({ config: ui, repo: 'local/x', mode: thorough })).toEqual(expect.arrayContaining(['accessibility', 'browser', 'component_library']));
-    const cw: HarnessConfig = { ...DEFAULTS, seats: { ...DEFAULTS.seats, counterweight: { cli: 'second-opinion', http: null } } };
-    expect(requiredColumns({ config: cw, repo: 'local/x', mode: thorough })).toContain('counterweight');
-    expect(requiredColumns({ config: cw, repo: 'local/x', mode: resolveMode('express', DEFAULTS) })).not.toContain('counterweight');
   });
 });
 

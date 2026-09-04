@@ -22,7 +22,7 @@ async function unitCtx(mode = 'thorough', id = 'PR-1') {
 
 describe('pullreq body', () => {
   it('renders the ghostwritten body with every criterion and the mode section', async () => {
-    const ctx = await unitCtx('express');
+    const ctx = await unitCtx('sketch');
     await dispatch(evidenceTool, { action: 'record', id: 'PR-1', kind: 'criteria_validation', payload: { results: [{ criterion: 'AC-1', status: 'proven', proof: 'snapshot test' }] } }, ctx);
     fs.writeFileSync(path.join(unitDirFor(ctx, 'PR-1'), 'plan.md'), '# Plan\n\n## Deferred\n\n- Excel export\n');
     const r = await dispatch(pullreqTool, { action: 'body', id: 'PR-1' }, ctx);
@@ -30,7 +30,7 @@ describe('pullreq body', () => {
     expect(r.text).toContain('AC-1');
     expect(r.text).toContain('AC-2');
     expect(r.text).toContain('Excel export');
-    expect(r.text).toContain('reach_audit_recorded → warn');
+    expect(r.text).toContain('review_verdict_ship → off');
     const draft = path.join(unitDirFor(ctx, 'PR-1'), 'drafts', 'pr-body.md');
     expect(fs.existsSync(draft)).toBe(true);
     expect((r.envelope.data as { draft: string }).draft).toMatch(/pr-body\.md$/);

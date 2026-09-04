@@ -5,7 +5,6 @@ import { routeNext, type Route } from '../../src/pilot/route.js';
 import { createState, type Report, type StageName, type UnitState } from '../../src/store/state.js';
 
 const thorough = resolveMode('thorough', DEFAULTS);
-const express = resolveMode('express', DEFAULTS);
 const sketch = resolveMode('sketch', DEFAULTS);
 
 function st(stage: StageName, over: Partial<UnitState> = {}): UnitState {
@@ -40,10 +39,6 @@ const cases: Case[] = [
   ['challenge ship goes to verify with browser_ui', withReports('challenge', [rep('challenge', 'done', { verdict: 'ship' })]), thorough, true, { next: 'verify', decision: 'proceed' }],
   ['challenge findings retry via revise', withReports('challenge', [rep('challenge', 'done', { verdict: 'needs_attention' })]), thorough, false, { next: 'revise', decision: 'retry' }],
   ['verify done proceeds to publish', withReports('verify', [rep('verify', 'done')]), thorough, true, { next: 'publish', decision: 'proceed' }],
-  ['express: challenge ship goes to publish first even with browser_ui', withReports('challenge', [rep('challenge', 'done', { verdict: 'ship' })], { mode: 'express' }), express, true, { next: 'publish', decision: 'proceed' }],
-  ['express: publish done goes to verify after publish with browser_ui', withReports('publish', [rep('publish', 'done')], { mode: 'express' }), express, true, { next: 'verify', decision: 'proceed' }],
-  ['express: publish done goes to close without browser_ui', withReports('publish', [rep('publish', 'done')], { mode: 'express' }), express, false, { next: 'close', decision: 'proceed' }],
-  ['express: verify done after publish goes to close', withReports('verify', [rep('verify', 'done')], { mode: 'express' }), express, true, { next: 'close', decision: 'proceed' }],
   ['sketch: commit done skips straight to publish', withReports('commit', [rep('commit', 'done')], { mode: 'sketch' }), sketch, true, { next: 'publish', decision: 'proceed' }],
   ['publish done proceeds to close', withReports('publish', [rep('publish', 'done')]), thorough, false, { next: 'close', decision: 'proceed' }],
   ['close done is done', withReports('close', [rep('close', 'done')]), thorough, false, { next: null, decision: 'done' }],

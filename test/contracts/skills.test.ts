@@ -110,7 +110,7 @@ describe('skills', () => {
     expect(withModes).toEqual(['build', 'publish', 'review']);
     for (const stage of withModes) {
       const files = fs.readdirSync(path.join(skillsDir, stage, 'modes')).sort();
-      expect(files, stage).toEqual(['express.md', 'sketch.md']);
+      expect(files, stage).toEqual(['sketch.md']);
       const skill = skills.find((s) => s.name === stage)!;
       for (const f of files) {
         expect(skill.text, `${stage} must reference modes/${f}`).toContain(`@root/skills/${stage}/modes/${f}`);

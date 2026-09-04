@@ -64,7 +64,7 @@ export const render = (ctx) => {
         fs.writeFileSync(draft, renderAftercare(id, tri));
         lines.push('Drafted text per comment is at drafts/aftercare.md in the unit directory; the classification above is a wording heuristic, so re-bucket anything that reads wrong.', '');
     }
-    lines.push('## Calls', '', '```harness', `pullreq threads { "id": "${id}", "threads": [] }`, `ledger add { "kind": "ask", "text": "<standing ask from a comment>", "id": "${id}" }`, `unit start { "source": "pr", "ref": "${pr.url}", "mode": "express" }`, `unit report { "id": "${id}", "stage": "aftercare", "outcome": "done", "summary": "<buckets and actions>" }`, '```');
+    lines.push('## Calls', '', '```harness', `pullreq threads { "id": "${id}", "threads": [] }`, `ledger add { "kind": "ask", "text": "<standing ask from a comment>", "id": "${id}" }`, `unit start { "source": "pr", "ref": "${pr.url}" }`, `unit report { "id": "${id}", "stage": "aftercare", "outcome": "done", "summary": "<buckets and actions>" }`, '```');
     return lines.join('\n');
 };
 registerRenderer('aftercare', render);

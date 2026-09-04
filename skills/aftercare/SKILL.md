@@ -27,7 +27,7 @@ unit brief { "id": "<id>", "stage": "aftercare" }
 4. Post replies only with the user's approval.
 
 ```harness
-unit start { "source": "pr", "ref": "<pr url>", "mode": "express" }
+unit start { "source": "pr", "ref": "<pr url>" }
 ledger add { "kind": "ask", "text": "<standing ask from a comment>", "id": "<id>" }
 unit report { "id": "<id>", "stage": "aftercare", "outcome": "done", "summary": "<buckets and actions>" }
 ```

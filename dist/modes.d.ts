@@ -14,9 +14,9 @@ export declare class UnknownModeError extends Error {
     readonly mode: string;
     constructor(mode: string);
 }
-export declare const SKETCH_BANNER = "Nothing reviewed this diff: sketch mode skipped review, challenge and verify.";
-/** Built-in run modes per spec section 8. */
-export declare const BUILT_IN_MODES: Record<'thorough' | 'express' | 'sketch', ModeDef>;
+export declare const SKETCH_BANNER = "Nothing reviewed this diff: sketch mode skipped review and verify.";
+/** Built-in run modes: thorough runs everything; sketch runs scope through build only. */
+export declare const BUILT_IN_MODES: Record<'thorough' | 'sketch', ModeDef>;
 /**
  * Resolve a mode by name: built-ins first, layered with any `config.modes`
  * entry of the same name; custom modes extend their parent (default thorough).

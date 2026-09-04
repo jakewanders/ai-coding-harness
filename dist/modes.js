@@ -7,30 +7,19 @@ export class UnknownModeError extends Error {
         this.name = 'UnknownModeError';
     }
 }
-export const SKETCH_BANNER = 'Nothing reviewed this diff: sketch mode skipped review, challenge and verify.';
-/** Built-in run modes per spec section 8. */
+export const SKETCH_BANNER = 'Nothing reviewed this diff: sketch mode skipped review and verify.';
+/** Built-in run modes: thorough runs everything; sketch runs scope through build only. */
 export const BUILT_IN_MODES = {
     thorough: {
         name: 'thorough', extends: null, demote: {}, merge_dispatches: false, verify_after_publish: false, skip_stages: [], banner: null,
     },
-    express: {
-        name: 'express',
-        extends: 'thorough',
-        demote: { reach_audit_recorded: 'warn', counterweight_consulted: 'warn' },
-        merge_dispatches: true,
-        verify_after_publish: true,
-        skip_stages: [],
-        banner: null,
-    },
     sketch: {
         name: 'sketch',
         extends: 'thorough',
-        demote: {
-            impact_recorded: 'off', reach_audit_recorded: 'off', ledger_reverified: 'off', counterweight_consulted: 'off',
-            review_verdict_ship: 'off', challenge_passed: 'off', walkthrough_done: 'off',
-        },
-        merge_dispatches: true,
+        demote: { review_verdict_ship: 'off', ledger_reverified: 'off', walkthrough_done: 'off' },
+        merge_dispatches: false,
         verify_after_publish: false,
+        // 'challenge' is listed until the stage collapse removes that stage.
         skip_stages: ['review', 'challenge', 'verify'],
         banner: SKETCH_BANNER,
     },

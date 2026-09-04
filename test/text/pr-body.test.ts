@@ -68,23 +68,23 @@ describe('renderPrBody', () => {
     expect(renderPrBody(state(), requirement, resolveMode('thorough', DEFAULTS))).toMatch(/## Not built\n\n(none|nothing)/i);
   });
 
-  it('lists demotions for express and none for thorough', () => {
+  it('lists demotions for sketch and none for thorough', () => {
     const thorough = renderPrBody(state(), requirement, resolveMode('thorough', DEFAULTS));
     expect(thorough).toContain('## Mode');
     expect(thorough).toMatch(/thorough/);
-    expect(thorough).not.toContain('reach_audit_recorded');
+    expect(thorough).not.toContain('review_verdict_ship');
     expect(thorough).not.toContain('## Not proven');
-    const express = renderPrBody(state({ mode: 'express' }), requirement, resolveMode('express', DEFAULTS));
-    expect(express).toContain('reach_audit_recorded → warn');
-    expect(express).toContain('counterweight_consulted → warn');
-    expect(express).toContain('## Not proven');
+    const sketch = renderPrBody(state({ mode: 'sketch' }), requirement, resolveMode('sketch', DEFAULTS));
+    expect(sketch).toContain('review_verdict_ship → off');
+    expect(sketch).toContain('walkthrough_done → off');
+    expect(sketch).toContain('## Not proven');
   });
 
   it('opens a sketch body with the banner', () => {
     const body = renderPrBody(state({ mode: 'sketch' }), requirement, resolveMode('sketch', DEFAULTS));
     expect(body.split('\n')[0]).toMatch(/nothing reviewed/i);
     expect(body).toContain('## Not proven');
-    expect(body).toMatch(/review, challenge, verify/);
+    expect(body).toMatch(/review, (challenge, )?verify/);
   });
 
   it('copes with no requirement and no evidence', () => {

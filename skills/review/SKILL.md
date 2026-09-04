@@ -21,8 +21,8 @@ unit brief { "id": "<id>", "stage": "review" }
 
 If the header's `contract` is not `harness-brief/1`, stop and report.
 
-If the header mode is `express`, also read @root/skills/review/modes/express.md; if it is `sketch`,
-also read @root/skills/review/modes/sketch.md. Other modes need no extra reading.
+If the header mode is `sketch`, also read @root/skills/review/modes/sketch.md. Other modes need
+no extra reading.
 
 ## Procedure
 

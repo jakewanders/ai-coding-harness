@@ -127,10 +127,10 @@ describe('system infer and sync', () => {
 describe('system tokens', () => {
   it('returns a per-stage table whose total equals the sum, including shared prose and mode files', async () => {
     const ctx = makeCtx({ cwd: nodeRepo() });
-    const r = await dispatch(systemTool, { action: 'tokens', mode: 'express' }, ctx);
+    const r = await dispatch(systemTool, { action: 'tokens', mode: 'sketch' }, ctx);
     expect(r.envelope.ok).toBe(true);
     const data = r.envelope.data as { mode: string; rows: Array<{ stage: string; skill_bytes: number; mode_bytes: number; brief_bytes: number; bytes: number; tokens: number }>; shared: { bytes: number; tokens: number }; total: { bytes: number; tokens: number } };
-    expect(data.mode).toBe('express');
+    expect(data.mode).toBe('sketch');
     expect(data.rows.map((x) => x.stage)).toEqual(CORE_ORDER);
     for (const row of data.rows) {
       expect(row.skill_bytes).toBeGreaterThan(0);

@@ -81,7 +81,7 @@ describe('digest handoff', () => {
 
 describe('digest wrapup', () => {
   it('lists every timed stage, the PR link, the ledger, drafts and not-proven for reduced modes', async () => {
-    const ctx = await unitCtx('express');
+    const ctx = await unitCtx('sketch');
     const dir = unitDirFor(ctx, 'DG-1');
     const t = (stage: TimerRecord['stage'], start: string, end: string | null): TimerRecord => ({ stage, started_at: start, ended_at: end, idle_gaps_ms: 0 });
     const s = readState(dir);
