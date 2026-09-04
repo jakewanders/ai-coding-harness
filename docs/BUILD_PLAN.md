@@ -633,7 +633,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** heuristics map a set of fake tool names to the right seats and leave unknowns unmapped; the brief ends with the confirmation instruction; vocabulary lint remains zero (allow marks in place).
 
-- [ ] Task 34
+- [x] Task 34
 
 ### Task 35: Plugin packaging and dist freshness
 
