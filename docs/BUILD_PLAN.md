@@ -427,7 +427,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** write then search finds the unit by a decision keyword; reindex after deleting the index restores it; wrapup lists every stage that has a timer; handoff is saved under `drafts/`.
 
-- [ ] Task 17
+- [x] Task 17
 
 ### Task 18: Shared prose and the ten core stage skills
 

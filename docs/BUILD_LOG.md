@@ -18,3 +18,4 @@ One line per completed task: `NN · title · tests <n> · note`.
 14 · vcs tool: fetch, diff, branch, worktree, commit, cleanup · tests 165 · git diff skips untracked files, so vcs diff appends --no-index diffs for them; remote commits land in tests via the bare repo fetching from a clone, never push.
 15 · evidence tool and the first real gates · tests 178 · Gates must never read process.cwd() (it is this checkout under vitest); GateContext.cwd carries the caller cwd and GateOutcome.applicable=false yields n/a for kind-scoped gates.
 16 · pullreq tool: PR bookkeeping, ghostwritten body, worklog · tests 191 · recordActivity exists for idle-gap accrual but no tool calls it yet; timers only accrue idle when a later task wires activity touches.
+17 · digest and recall tools · tests 202 · Index entries are keyed by (repo, id); reindex walks the vault for units/<id>/digest.md so nested host/owner/name namespaces work.
