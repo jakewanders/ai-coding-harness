@@ -11,7 +11,8 @@ import { action, defineTool, fail, result, type ToolContext, type ToolResult } f
 import { CORE_STAGE_MODULES } from '../stages/index.js';
 import { syntheticId } from '../store/ids.js';
 import { appendHistory, createState, writeState, type SourceKind, type StageName, type UnitState } from '../store/state.js';
-import { listUnitIds, loadUnit, namespaceFor, resolveUnit, unitDirFor, type LoadedUnit } from '../store/units.js';
+import { applyTransition } from '../store/transition.js';
+import { listUnitIds, loadUnit, namespaceFor, resolveUnit, type LoadedUnit } from '../store/units.js';
 import { ensureUnitDir, ensureVault } from '../store/vault.js';
 
 const SOURCE_KINDS = ['ticket', 'pr', 'url', 'file', 'conversation', 'text'] as const;
@@ -204,15 +205,7 @@ export const unitTool = defineTool({
         const to = (input.to as StageName | undefined) ?? nextStageFor(state.stage, routing(state, ctx, mode));
         if (!to) return fail(`unit ${state.id}: no stage after ${state.stage}`);
         const at = ctx.now().toISOString();
-        const from = state.stage;
-        const previousStages = state.timers.map((t) => t.stage);
-        const afterRevise = from === 'commit' && to === 'review' && previousStages.at(-2) === 'revise';
-        const next: UnitState = {
-          ...state,
-          stage: to,
-          cycle: afterRevise ? state.cycle + 1 : state.cycle,
-          timers: [...state.timers.map((t) => (t.ended_at === null ? { ...t, ended_at: at } : t)), { stage: to, started_at: at, ended_at: null, idle_gaps_ms: 0 }],
-        };
+        const { state: next, from, cycleIncremented: afterRevise } = applyTransition(state, to, at);
         writeState(unit.dir, next, ctx.now);
         appendHistory(unit.dir, `advance: ${from} -> ${to}${afterRevise ? ` (cycle ${next.cycle})` : ''}`, ctx.now);
         const warn = verdict.warnings.length ? ` Warnings: ${verdict.warnings.map((g) => g.id).join(', ')}.` : '';

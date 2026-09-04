@@ -15,13 +15,15 @@ export function runGit(args: string[], cwd: string): string {
 /**
  * Create a temp git repo containing `files` with one commit on `branch`
  * (default main). With `remote`, also create a bare clone next to it, wire it
- * as `origin`, fetch it, and set origin/HEAD; the remote url is that path
+ * as `origin`, fetch it, and set origin/HEAD. With `under`, the repo is created inside that directory; the remote url is that path
  * unless a literal url string is given (which is then only added, never contacted).
  */
-export function makeRepo(files: Record<string, string>, opts: { remote?: string | boolean; branch?: string } = {}): string {
+export function makeRepo(files: Record<string, string>, opts: { remote?: string | boolean; branch?: string; under?: string } = {}): string {
   const branch = opts.branch ?? 'main';
-  const dir = makeTmpDir('harness-git');
+  const dir = opts.under ? fs.mkdtempSync(path.join(opts.under, 'repo-')) : makeTmpDir('harness-git');
   runGit(['init', '-q', '-b', branch], dir);
+  runGit(['config', 'user.name', 'Harness Test'], dir);
+  runGit(['config', 'user.email', 'harness@example.test'], dir);
   for (const [rel, content] of Object.entries(files)) {
     const abs = path.join(dir, rel);
     fs.mkdirSync(path.dirname(abs), { recursive: true });
@@ -39,4 +41,24 @@ export function makeRepo(files: Record<string, string>, opts: { remote?: string 
     runGit(['remote', 'add', 'origin', opts.remote], dir);
   }
   return dir;
+}
+
+/**
+ * Land a commit on the bare remote of `repo` without pushing: clone the bare
+ * repo, commit `files` there, then have the bare repo fetch that clone.
+ */
+export function landOnRemote(repo: string, files: Record<string, string>, message = 'remote change'): void {
+  const bare = runGit(['remote', 'get-url', 'origin'], repo);
+  const clone = makeTmpDir('harness-git-clone');
+  runGit(['clone', '-q', bare, clone], clone);
+  runGit(['config', 'user.name', 'Remote Person'], clone);
+  runGit(['config', 'user.email', 'remote@example.test'], clone);
+  for (const [rel, content] of Object.entries(files)) {
+    fs.mkdirSync(path.dirname(path.join(clone, rel)), { recursive: true });
+    fs.writeFileSync(path.join(clone, rel), content);
+  }
+  runGit(['add', '-A'], clone);
+  runGit(['commit', '-q', '-m', message], clone);
+  const branch = runGit(['symbolic-ref', '--short', 'HEAD'], clone);
+  runGit(['fetch', '-q', clone, `${branch}:${branch}`], bare);
 }
