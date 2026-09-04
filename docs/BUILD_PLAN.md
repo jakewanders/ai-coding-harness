@@ -643,7 +643,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** plugin version equals package version and `VERSION`; every skill dir is declared and every declared skill exists; hooks path and server path exist; `.mcp.json` server command references `dist/server.js`; `README.md` mentions every tool name.
 
-- [ ] Task 35
+- [x] Task 35
 
 ### Task 36: Token economy pass
 
