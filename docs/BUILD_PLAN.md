@@ -524,7 +524,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** `unit start` with an unknown mode fails validation naming the known modes; a custom mode from config is accepted; the express brief lists its two demotions; the sketch brief for `build` says nothing will review the diff; the mode files exist for exactly the stages the skills reference (skills contract test extended).
 
-- [ ] Task 24
+- [x] Task 24
 
 ### Task 25: `verify` stage: browser validation brief and gate
 
