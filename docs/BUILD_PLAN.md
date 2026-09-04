@@ -221,7 +221,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 - `repoNamespace('git@github.com:o/n.git', 'n')` is `github.com/o/n`; https form gives the same; `repoNamespace(null, 'dir')` is `local/dir`. (The host name in this test file is on an allow-marked line.)
 - `ensureVault` on a temp dir creates `.git`; calling twice is idempotent.
 
-- [ ] Task 4
+- [x] Task 4
 
 ### Task 5: Unit state, migrations, history
 
