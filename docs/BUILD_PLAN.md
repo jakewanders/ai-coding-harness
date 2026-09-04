@@ -613,7 +613,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** discovery order via two temp kit dirs with the same name; the example kit loads via `HARNESS_KIT_PATHS`; doc selection by capability and by tag; user config overrides a kit gate override; `system kits` lists the loaded kit; core still renders every stage with `kits: []`.
 
-- [ ] Task 32
+- [x] Task 32
 
 ### Task 33: `system` tool: doctor, config, infer, sync, tokens
 
