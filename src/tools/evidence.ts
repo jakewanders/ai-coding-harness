@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import { z } from 'zod';
 import { envelope } from '../contracts/envelope.js';
 import { EVIDENCE_KINDS, EVIDENCE_KIND_NAMES } from '../evidence/kinds.js';
@@ -8,6 +10,8 @@ import { isCoreStage, CORE_ORDER } from '../registry/stages.js';
 import { action, defineTool, fail, result, type ToolContext, type ToolResult } from '../registry/tools.js';
 import { appendHistory, writeState, type EvidenceRecord, type StageName } from '../store/state.js';
 import { loadUnit, type LoadedUnit } from '../store/units.js';
+import { requiredColumns } from '../review/columns.js';
+import { latestPerColumn, synthesize, type ReviewColumnRecord } from '../review/synthesize.js';
 
 function withUnit(ctx: ToolContext, id: string, fn: (unit: LoadedUnit) => Promise<ToolResult> | ToolResult): Promise<ToolResult> | ToolResult {
   const unit = loadUnit(ctx, id);
@@ -98,6 +102,30 @@ export const evidenceTool = defineTool({
             if (g) return result(gateLine(g), envelope(g.status !== 'fail', `${g.id}: ${g.status}`, { ...g, stage }));
           }
           return fail(`evidence check: no gate "${input.gate}" applies to ${unit.id}`);
+        }),
+    }),
+
+    synthesize: action({
+      describe: "Merge this cycle's review columns into one verdict (ship, needs_attention, not_ready); writes reviews/cycle-<n>.json and state.reviews.",
+      schema: z.object({ id: z.string().describe('Unit id.') }),
+      handler: async (input, ctx) =>
+        withUnit(ctx, input.id, (unit) => {
+          const mode = modeFor(unit, ctx);
+          const records = unit.state.evidence
+            .filter((e) => e.kind === 'review_column' && e.cycle === unit.state.cycle)
+            .map((e) => e.payload as ReviewColumnRecord);
+          const columns = latestPerColumn(records);
+          const required = requiredColumns({ config: ctx.config.config, repo: unit.state.repo, mode });
+          const synthesis = synthesize(columns, required);
+          const review = { cycle: unit.state.cycle, ...synthesis, columns: columns.map((c) => ({ column: c.column, findings: c.findings.length })), at: ctx.now().toISOString() };
+          fs.mkdirSync(path.join(unit.dir, 'reviews'), { recursive: true });
+          fs.writeFileSync(path.join(unit.dir, 'reviews', `cycle-${unit.state.cycle}.json`), JSON.stringify(review, null, 2) + '\n');
+          writeState(unit.dir, { ...unit.state, reviews: { ...(unit.state.reviews ?? {}), [unit.state.cycle]: synthesis.verdict } }, ctx.now);
+          appendHistory(unit.dir, `review synthesized for cycle ${unit.state.cycle}: ${synthesis.verdict}`, ctx.now);
+          const counts = Object.entries(synthesis.counts).map(([k, v]) => `${k} ${v}`).join(', ');
+          const lines = [`Cycle ${unit.state.cycle}: ${synthesis.verdict} (${counts}).`];
+          if (synthesis.missing_columns.length) lines.push(`Missing required columns: ${synthesis.missing_columns.join(', ')}.`);
+          return result(lines.join('\n'), envelope(synthesis.verdict === 'ship', `verdict ${synthesis.verdict}`, { id: unit.id, cycle: unit.state.cycle, ...synthesis, required }));
         }),
     }),
   },

@@ -94,6 +94,14 @@ export const ModeSchema = z.object({
   verify_after_publish: z.boolean().optional(),
 }).strict();
 
+export const DiffauditRuleSchema = z.object({
+  id: str,
+  pattern: str,
+  files: str,
+  severity: z.enum(['blocker', 'major', 'minor', 'note']).optional(),
+  message: str,
+}).strict();
+
 export const HarnessConfigSchema = z.object({
   schema: z.literal(1).optional(),
   store: StoreSchema.optional(),
@@ -106,6 +114,7 @@ export const HarnessConfigSchema = z.object({
   modes: z.record(str, ModeSchema).optional(),
   kits: strList.optional(),
   protected_branches: strList.optional(),
+  diffaudit: z.object({ rules: z.array(DiffauditRuleSchema).optional() }).strict().optional(),
 }).strict();
 
 export type HarnessConfig = z.infer<typeof HarnessConfigSchema>;
@@ -117,5 +126,6 @@ export type ModeConfig = z.infer<typeof ModeSchema>;
 export type GateOverride = z.infer<typeof GateOverrideSchema>;
 export type CustomGateConfig = z.infer<typeof CustomGateSchema>;
 export type EnvironmentConfig = z.infer<typeof EnvironmentSchema>;
+export type DiffauditRuleConfig = z.infer<typeof DiffauditRuleSchema>;
 
 export { DEFAULTS } from './defaults.js';

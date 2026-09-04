@@ -162,6 +162,18 @@ export declare const ModeSchema: z.ZodObject<{
     merge_dispatches: z.ZodOptional<z.ZodBoolean>;
     verify_after_publish: z.ZodOptional<z.ZodBoolean>;
 }, z.core.$strict>;
+export declare const DiffauditRuleSchema: z.ZodObject<{
+    id: z.ZodString;
+    pattern: z.ZodString;
+    files: z.ZodString;
+    severity: z.ZodOptional<z.ZodEnum<{
+        blocker: "blocker";
+        major: "major";
+        minor: "minor";
+        note: "note";
+    }>>;
+    message: z.ZodString;
+}, z.core.$strict>;
 export declare const HarnessConfigSchema: z.ZodObject<{
     schema: z.ZodOptional<z.ZodLiteral<1>>;
     store: z.ZodOptional<z.ZodObject<{
@@ -285,6 +297,20 @@ export declare const HarnessConfigSchema: z.ZodObject<{
     }, z.core.$strict>>>;
     kits: z.ZodOptional<z.ZodArray<z.ZodString>>;
     protected_branches: z.ZodOptional<z.ZodArray<z.ZodString>>;
+    diffaudit: z.ZodOptional<z.ZodObject<{
+        rules: z.ZodOptional<z.ZodArray<z.ZodObject<{
+            id: z.ZodString;
+            pattern: z.ZodString;
+            files: z.ZodString;
+            severity: z.ZodOptional<z.ZodEnum<{
+                blocker: "blocker";
+                major: "major";
+                minor: "minor";
+                note: "note";
+            }>>;
+            message: z.ZodString;
+        }, z.core.$strict>>>;
+    }, z.core.$strict>>;
 }, z.core.$strict>;
 export type HarnessConfig = z.infer<typeof HarnessConfigSchema>;
 export type RepoConfig = z.infer<typeof RepoSchema>;
@@ -295,4 +321,5 @@ export type ModeConfig = z.infer<typeof ModeSchema>;
 export type GateOverride = z.infer<typeof GateOverrideSchema>;
 export type CustomGateConfig = z.infer<typeof CustomGateSchema>;
 export type EnvironmentConfig = z.infer<typeof EnvironmentSchema>;
+export type DiffauditRuleConfig = z.infer<typeof DiffauditRuleSchema>;
 export { DEFAULTS } from './defaults.js';

@@ -21,4 +21,5 @@ export const DEFAULTS: HarnessConfig = {
   modes: {},
   kits: [],
   protected_branches: ['main', 'master', 'release/*'],
+  diffaudit: { rules: [] },
 };

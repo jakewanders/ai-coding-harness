@@ -77,6 +77,13 @@ export const ModeSchema = z.object({
     merge_dispatches: z.boolean().optional(),
     verify_after_publish: z.boolean().optional(),
 }).strict();
+export const DiffauditRuleSchema = z.object({
+    id: str,
+    pattern: str,
+    files: str,
+    severity: z.enum(['blocker', 'major', 'minor', 'note']).optional(),
+    message: str,
+}).strict();
 export const HarnessConfigSchema = z.object({
     schema: z.literal(1).optional(),
     store: StoreSchema.optional(),
@@ -89,5 +96,6 @@ export const HarnessConfigSchema = z.object({
     modes: z.record(str, ModeSchema).optional(),
     kits: strList.optional(),
     protected_branches: strList.optional(),
+    diffaudit: z.object({ rules: z.array(DiffauditRuleSchema).optional() }).strict().optional(),
 }).strict();
 export { DEFAULTS } from './defaults.js';
