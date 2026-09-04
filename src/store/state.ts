@@ -35,6 +35,8 @@ export interface UnitState {
   reports?: Record<string, Report[]>
   reviews?: Record<number, ReviewVerdict>
   bot?: { round: number; status: string; threads: Thread[] }
+  /** Convoy siblings: other unit ids piloted in the same batch group. */
+  siblings?: string[]
 }
 
 export const STATE_FILE = 'state.json';

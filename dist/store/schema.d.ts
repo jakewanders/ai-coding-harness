@@ -244,4 +244,5 @@ export declare const UnitStateSchema: z.ZodObject<{
             resolved: z.ZodBoolean;
         }, z.core.$strip>>;
     }, z.core.$strip>>;
+    siblings: z.ZodOptional<z.ZodArray<z.ZodString>>;
 }, z.core.$strip>;

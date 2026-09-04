@@ -322,5 +322,22 @@ export const unitTool = defineTool({
                 return result(text, envelope(disagreements.length === 0, disagreements.length ? `${disagreements.length} disagreement(s)` : 'consistent', { id: unit.id, stage: unit.state.stage, disagreements }));
             },
         }),
+        link: action({
+            describe: 'Record convoy siblings symmetrically on every unit in the group.',
+            schema: z.object({ id: z.string().describe('Unit id.'), related: z.array(z.string().min(1)).min(1).describe('Sibling unit ids in the same convoy group.') }),
+            handler: async (input, ctx) => {
+                const ids = [...new Set([input.id, ...input.related])];
+                const units = ids.map((id) => ({ id, unit: loadUnit(ctx, id) }));
+                const missing = units.filter((u) => !u.unit).map((u) => u.id);
+                if (missing.length)
+                    return fail(`unit link: unknown unit(s): ${missing.join(', ')}`);
+                for (const { id, unit } of units) {
+                    const siblings = [...new Set([...(unit.state.siblings ?? []), ...ids.filter((x) => x !== id)])].sort();
+                    writeState(unit.dir, { ...unit.state, siblings }, ctx.now);
+                    appendHistory(unit.dir, `convoy siblings: ${siblings.join(', ')}`, ctx.now);
+                }
+                return result(`Linked ${ids.join(', ')} as convoy siblings.`, envelope(true, `${ids.length} units linked`, { ids }));
+            },
+        }),
     },
 });

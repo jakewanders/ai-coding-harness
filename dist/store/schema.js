@@ -94,4 +94,5 @@ export const UnitStateSchema = z.object({
     bot: z
         .object({ round: z.number().int().nonnegative(), status: z.string(), threads: z.array(ThreadSchema) })
         .optional(),
+    siblings: z.array(z.string()).optional(),
 });

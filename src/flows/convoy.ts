@@ -1,0 +1,32 @@
+import { registerRenderer, type BriefRenderer } from '../registry/stages.js';
+import { OVERLAP_THRESHOLD } from '../pilot/cluster.js';
+
+export const render: BriefRenderer = () => [
+  '# convoy',
+  '',
+  'Run several units as a batch: pre-flight each one (scope and plan only), cluster by predicted file overlap, get the grouping approved, then pilot the groups sequentially with cross-linked state.',
+  '',
+  '## Steps',
+  '',
+  '1. Start every unit from its ticket. For each, dispatch the scope stage and then the plan stage exactly as pilot would (`unit brief` with `quiet: true`, `unit report`, `unit route`), stopping after plan.',
+  `2. Read each plan.md and predict the files it touches (backticked paths and Files: lines). Cluster the units: two units share a group when the Jaccard overlap of their predicted files is at least ${OVERLAP_THRESHOLD}; overlap is transitive.`,
+  '3. **Approval checkpoint.** Show the proposed grouping to the user as a table (group → ids → shared files) and wait for explicit approval or edits. Do not pilot anything before approval.',
+  '4. Link the members of each group with `unit link` so every state lists its convoy siblings; briefs and PR bodies can then cross-reference them.',
+  '5. Pilot the groups sequentially: for each group, run the pilot loop for its units in order, one unit at a time, so shared files are never edited by two units at once. Between groups, refresh remote refs.',
+  '6. Render one wrap-up per unit and a short batch summary (groups, PRs, deferred items).',
+  '',
+  '## Calls',
+  '',
+  '```harness',
+  'unit start { "source": "ticket", "ref": "<id>" }',
+  'unit brief { "id": "<id>", "stage": "scope", "quiet": true }',
+  'unit route { "id": "<id>" }',
+  'unit link { "id": "<id>", "related": ["<sibling id>"] }',
+  'unit brief { "id": "<id>", "stage": "pilot", "quiet": true }',
+  'digest wrapup { "id": "<id>" }',
+  '```',
+  '',
+  'Standing rules apply to every dispatch; the approval checkpoint is not optional.',
+].join('\n');
+
+registerRenderer('convoy', render);
