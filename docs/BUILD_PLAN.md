@@ -268,7 +268,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 - A repo with no remote yields `namespace` starting `local/`.
 - `inferProfile` on an empty temp dir returns zero guesses and does not throw.
 
-- [ ] Task 7
+- [x] Task 7
 
 ### Task 8: Unit ids and ticket patterns
 

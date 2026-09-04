@@ -8,3 +8,4 @@ One line per completed task: `NN · title · tests <n> · note`.
 04 · Vault paths and repo namespace · tests 38 · repoNamespace lowercases the host and keeps nested group paths; ensureVault uses init.defaultBranch=main so it is quiet under a temp HOME.
 05 · Unit state, migrations, history · tests 48 · Zod schema lives in store/schema.ts to avoid a state/migrations import cycle; evidence/kinds.ts created early with the kind names only.
 06 · Configuration layers · tests 60 · valid_keys comes from walking the zod def tree (object/record/array/optional); fixed a millisecond-flaky round-trip expectation in the state test.
+07 · Zero-config repo inference · tests 75 · Test repos get their bare origin through git clone --bare plus fetch and remote set-head, so no test ever runs git push.
