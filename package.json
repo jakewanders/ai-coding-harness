@@ -1,0 +1,39 @@
+{
+  "name": "ai-coding-harness",
+  "version": "0.1.0",
+  "description": "Tracker-driven development lifecycle engine: an MCP server, stage skills, and safety hooks for coding agents.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=22"
+  },
+  "files": [
+    "dist",
+    "skills",
+    "hooks",
+    "examples",
+    ".claude-plugin",
+    ".mcp.json",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "check:dist": "node -e \"process.exit(0)\"",
+    "gen:tools": "node -e \"process.exit(0)\""
+  },
+  "license": "MIT",
+  "private": true,
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "yaml": "2.9.0",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.1",
+    "typescript": "7.0.2",
+    "vitest": "5.0.0"
+  }
+}
