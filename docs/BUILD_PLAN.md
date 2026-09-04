@@ -383,7 +383,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** (real temp repos with bare remotes) `diff` uses `origin/main` and includes a fetched remote commit; `diff` refuses local-ref comparison when a remote exists; `worktree` creates a sibling directory and records a home-relative path; `commit` is refused when a blocking gate fails and succeeds once evidence exists (register `self_critique` and a green `check` run in the test); `cleanup` removes the worktree.
 
-- [ ] Task 14
+- [x] Task 14
 
 ### Task 15: `evidence` tool and the first real gates
 
