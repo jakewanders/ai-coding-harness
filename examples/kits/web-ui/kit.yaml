@@ -1,0 +1,8 @@
+# Example kit: opinions for repos that ship a browser UI.
+gates:
+  walkthrough_done:
+    severity: block
+docs:
+  - path: docs/ui-conventions.md
+    capabilities: [browser_ui]
+    tags: [ui]

@@ -8,9 +8,9 @@ export const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)
 
 /** A ToolContext bound to the hermetic env of the current test. */
 export function makeCtx(overrides: Partial<ToolContext> = {}): ToolContext {
-  const env = { ...process.env };
+  const env = overrides.env ?? { ...process.env };
   const cwd = overrides.cwd ?? process.env.HARNESS_HOME!;
-  const config = loadConfig({ cwd, env });
+  const config = overrides.config ?? loadConfig({ cwd, env, pluginRoot: repoRoot });
   return {
     cwd,
     env,

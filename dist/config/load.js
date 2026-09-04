@@ -2,11 +2,12 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { DEFAULTS } from './defaults.js';
-import { HarnessConfigSchema } from './schema.js';
-import { documentError, lineOfPath, parseYamlDocument } from './yaml.js';
+import { discoverKits } from '../kits/discover.js';
+import { validateLayer } from './validate.js';
+import { documentError, parseYamlDocument } from './yaml.js';
+export { MIGRATION_NOTE, validKeysAt, validateLayer } from './validate.js';
 export const USER_CONFIG_RELATIVE = path.join('.harness', 'config.yaml');
 export const REPO_CONFIG_FILE = '.harness.yaml';
-export const MIGRATION_NOTE = 'run `system config` to migrate';
 function isPlainObject(v) {
     return typeof v === 'object' && v !== null && !Array.isArray(v);
 }
@@ -42,90 +43,6 @@ export function findGitRoot(cwd) {
         dir = parent;
     }
 }
-function defOf(schema) {
-    return schema._zod.def;
-}
-function unwrap(schema) {
-    let s = schema;
-    for (;;) {
-        const d = defOf(s);
-        if ((d.type === 'optional' || d.type === 'nullable' || d.type === 'default') && d.innerType)
-            s = d.innerType;
-        else
-            return s;
-    }
-}
-/** Schema node reached by following `segments` through objects, records and arrays. */
-function schemaAt(root, segments) {
-    let s = unwrap(root);
-    for (const seg of segments) {
-        if (!s)
-            return null;
-        const d = defOf(s);
-        if (d.type === 'object' && d.shape)
-            s = d.shape[String(seg)] ?? null;
-        else if (d.type === 'record' && d.valueType)
-            s = d.valueType;
-        else if (d.type === 'array' && d.element)
-            s = d.element;
-        else
-            return null;
-        if (s)
-            s = unwrap(s);
-    }
-    return s;
-}
-/** Keys allowed at the object found at `segments`, or undefined if not an object. */
-export function validKeysAt(root, segments) {
-    const s = schemaAt(root, segments);
-    if (!s)
-        return undefined;
-    const d = defOf(s);
-    return d.type === 'object' && d.shape ? Object.keys(d.shape) : undefined;
-}
-// ---- layer validation ---------------------------------------------------------
-function issueToError(issue, file, located) {
-    const base = issue.path.map((p) => String(typeof p === 'symbol' ? p.description : p));
-    let segments = [...issue.path.filter((p) => typeof p !== 'symbol')];
-    let message = issue.message;
-    let parentSegments = segments.slice(0, -1);
-    if (issue.code === 'unrecognized_keys') {
-        const key = issue.keys[0] ?? '';
-        parentSegments = segments;
-        segments = [...segments, key];
-        message = `unknown key "${key}"`;
-    }
-    const dotted = [...base, ...(issue.code === 'unrecognized_keys' ? [issue.keys[0] ?? ''] : [])].join('.');
-    return {
-        file,
-        path: dotted,
-        line: located ? lineOfPath(located, segments) : null,
-        message,
-        valid_keys: validKeysAt(HarnessConfigSchema, parentSegments),
-    };
-}
-/** Validate one layer's raw value. Returns the typed config or a single ConfigError. */
-export function validateLayer(raw, file, located) {
-    if (!isPlainObject(raw)) {
-        return { error: { file, path: '', line: located ? lineOfPath(located, []) : null, message: 'config must be a mapping' } };
-    }
-    if ('schema' in raw && raw.schema !== 1) {
-        return {
-            error: {
-                file,
-                path: 'schema',
-                line: located ? lineOfPath(located, ['schema']) : null,
-                message: `unsupported config schema ${JSON.stringify(raw.schema)}; expected 1 (${MIGRATION_NOTE})`,
-            },
-        };
-    }
-    const result = HarnessConfigSchema.safeParse(raw);
-    if (!result.success) {
-        const issue = result.error.issues[0];
-        return { error: issueToError(issue, file, located) };
-    }
-    return { config: result.data };
-}
 function loadFileLayer(name, file) {
     if (!file || !fs.existsSync(file))
         return { report: { name, file: null, ok: true }, config: null };
@@ -146,40 +63,52 @@ function loadFileLayer(name, file) {
         return { report: { name, file, ok: false, error: validated.error }, config: null };
     return { report: { name, file, ok: true }, config: validated.config };
 }
-/**
- * Load configuration: defaults → kit fragments → user file → repo file.
- * A broken layer is skipped and reported; this never throws.
- */
-export function loadConfig(opts) {
-    const env = opts.env ?? process.env;
-    const layers = [];
+function mergeLayers(defaults, kitFragments, user, repo) {
+    const layers = [{ name: 'defaults', file: null, ok: true }];
     const errors = [];
-    let config = structuredClone(DEFAULTS);
-    layers.push({ name: 'defaults', file: null, ok: true });
-    for (const [i, fragment] of (opts.kitFragments ?? []).entries()) {
-        const file = `kit-fragment-${i + 1}`;
+    let config = structuredClone(defaults);
+    for (const { fragment, file } of kitFragments) {
         const validated = validateLayer(fragment, file, null);
         if ('error' in validated) {
-            layers.push({ name: 'kit', file: null, ok: false, error: validated.error });
+            layers.push({ name: 'kit', file, ok: false, error: validated.error });
             errors.push(validated.error);
         }
         else {
-            layers.push({ name: 'kit', file: null, ok: true });
+            layers.push({ name: 'kit', file, ok: true });
             config = deepMerge(config, validated.config);
         }
     }
+    for (const layer of [user, repo]) {
+        layers.push(layer.report);
+        if (layer.report.error)
+            errors.push(layer.report.error);
+        if (layer.config)
+            config = deepMerge(config, layer.config);
+    }
+    return { config, layers, errors };
+}
+/**
+ * Load configuration: defaults → kit fragments → user file → repo file.
+ * Kits named by the user and repo layers are discovered along the kit search
+ * path and merged below them. A broken layer is skipped and reported; this
+ * never throws.
+ */
+export function loadConfig(opts) {
+    const env = opts.env ?? process.env;
     const user = loadFileLayer('user', userConfigPath(env));
-    layers.push(user.report);
-    if (user.report.error)
-        errors.push(user.report.error);
-    if (user.config)
-        config = deepMerge(config, user.config);
     const gitRoot = findGitRoot(opts.cwd);
     const repo = loadFileLayer('repo', gitRoot ? path.join(gitRoot, REPO_CONFIG_FILE) : null);
-    layers.push(repo.report);
-    if (repo.report.error)
-        errors.push(repo.report.error);
-    if (repo.config)
-        config = deepMerge(config, repo.config);
-    return { config, layers, errors };
+    const explicit = (opts.kitFragments ?? []).map((fragment, i) => ({ fragment, file: `kit-fragment-${i + 1}` }));
+    const first = mergeLayers(DEFAULTS, explicit, user, repo);
+    const names = first.config.kits ?? [];
+    const home = env.HARNESS_HOME || os.homedir();
+    const discovery = names.length ? discoverKits(names, env, home, opts.pluginRoot ?? process.cwd()) : [];
+    const missing = names.filter((n) => !discovery.some((k) => k.name === n));
+    const kitLayers = [...discovery.map((k) => ({ fragment: k.fragment, file: path.join(k.dir, 'kit.yaml') })), ...explicit];
+    const merged = mergeLayers(DEFAULTS, kitLayers, user, repo);
+    const errors = [...merged.errors];
+    for (const name of missing) {
+        errors.push({ file: repo.report.file ?? user.report.file ?? 'config', path: 'kits', line: null, message: `kit "${name}" not found on the kit search path (HARNESS_KIT_PATHS, ~/.harness/kits, plugin cache, ../ai-coding-harness-kits/kits)` });
+    }
+    return { config: merged.config, layers: merged.layers, errors, kits: discovery };
 }

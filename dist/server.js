@@ -14,7 +14,7 @@ export function pluginRoot() {
 }
 /** Build the tool context for a process: config from cwd + env, vault, root. */
 export function makeContext(cwd = process.cwd(), env = process.env) {
-    const config = loadConfig({ cwd, env });
+    const config = loadConfig({ cwd, env, pluginRoot: pluginRoot() });
     return {
         cwd,
         env,

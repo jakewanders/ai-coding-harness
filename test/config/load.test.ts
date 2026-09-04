@@ -127,15 +127,14 @@ describe('loadConfig', () => {
   });
 
   it('places kit fragments below the user layer', () => {
-    userFile('schema: 1\nkits: [from-user]\nprotected_branches: [user-branch]\n');
+    userFile('schema: 1\nprotected_branches: [user-branch]\n');
     const cwd = makeTmpDir('harness-nogit');
     const loaded = loadConfig({
       cwd,
       env: process.env,
-      kitFragments: [{ kits: ['from-kit'], gates: { kit_gate: { severity: 'warn', requires: null } } }],
+      kitFragments: [{ protected_branches: ['from-kit'], gates: { kit_gate: { severity: 'warn', requires: null } } }],
     });
     expect(loaded.errors).toEqual([]);
-    expect(loaded.config.kits).toEqual(['from-user']);
     expect(loaded.config.protected_branches).toEqual(['user-branch']);
     expect(loaded.config.gates).toEqual({ kit_gate: { severity: 'warn', requires: null } });
     expect(loaded.layers.map((l) => l.name)).toEqual(['defaults', 'kit', 'user', 'repo']);

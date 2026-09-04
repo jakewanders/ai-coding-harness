@@ -16,7 +16,7 @@ export function pluginRoot(): string {
 
 /** Build the tool context for a process: config from cwd + env, vault, root. */
 export function makeContext(cwd: string = process.cwd(), env: NodeJS.ProcessEnv = process.env): ToolContext {
-  const config = loadConfig({ cwd, env });
+  const config = loadConfig({ cwd, env, pluginRoot: pluginRoot() });
   return {
     cwd,
     env,

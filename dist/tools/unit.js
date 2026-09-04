@@ -14,6 +14,7 @@ import { hasCapability, hasSeat, resolveGates, transitionAllowed } from '../regi
 import { CORE_ORDER, isCoreStage, nextStageFor, stageEntry } from '../registry/stages.js';
 import { action, defineTool, fail, result } from '../registry/tools.js';
 import { CORE_STAGE_MODULES } from '../stages/index.js';
+import { selectDocs } from '../kits/select.js';
 import { syntheticId } from '../store/ids.js';
 import { appendHistory, createState, writeState } from '../store/state.js';
 import { applyTransition } from '../store/transition.js';
@@ -151,7 +152,9 @@ export const unitTool = defineTool({
                 let gates = [];
                 if (unit && isCoreStage(stageName))
                     gates = await gatesFor(stageName, unit, ctx, modeOf(unit.state, ctx));
-                const header = buildHeader({ state: unit?.state ?? null, stage: stageName, config: ctx.config, namespace: ns, root: ctx.root, gates, baseBranch: defaultBranch(ctx.cwd) });
+                const repoProfile = ctx.config.config.repos?.[unit?.state.repo ?? ns];
+                const docs = selectDocs(ctx.config.kits ?? [], { tags: repoProfile?.tags ?? [], capabilities: (repoProfile?.capabilities ?? {}) });
+                const header = buildHeader({ state: unit?.state ?? null, stage: stageName, config: ctx.config, namespace: ns, root: ctx.root, gates, docs, baseBranch: defaultBranch(ctx.cwd) });
                 const briefCtx = { state: unit?.state ?? null, config: ctx.config, header, vault: ctx.vault, root: ctx.root, quiet: input.quiet ?? false, unitDir: unit?.dir ?? null, cwd: ctx.cwd };
                 const text = renderBrief(briefCtx);
                 return result(text, envelope(true, `brief for ${stageName}${unit ? ` (${unit.id})` : ''}`, { unit: unit?.id ?? null, stage: stageName, gates: header.gates, config_errors: header.config_errors.length }));
