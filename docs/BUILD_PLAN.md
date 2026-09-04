@@ -456,7 +456,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** a table of `(state, mode) → route` cases covering every rule above, including express `verify_after_publish` ordering and sketch skipping straight from `commit` to `publish`; `reconcile` reports each disagreement kind and reports none for a consistent pair; `report` persists and `route` reads it.
 
-- [ ] Task 19
+- [x] Task 19
 
 ## Milestone 2 — Quality machinery
 
