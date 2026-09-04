@@ -31,3 +31,4 @@ One line per completed task: `NN · title · tests <n> · note`.
 27 · screen and shape flows with verdict consensus · tests 344 · The shape brief writes drafts/clarify.md as a side effect of rendering so the draft always matches what the reader saw; consensus agreement is over present calls, missing slots go to dissent.
 28 · inspect, respond, aftercare flows · tests 350 · Aftercare bucketing is a wording heuristic and the brief says so; respond and aftercare write their drafts during render like shape does.
 29 · botprs and draft flows · tests 355 · seats.tracker gains an optional create list (not in spec section 5 but required by the draft flow); the draft brief detects create tools by name when the list is empty.
+30 · reviewbot tool and post-publish loop · tests 362 · Route.next widened to StageName | FlowName | null so respond can be dispatched from publish without a stage transition; the bot loop only exists when the reviewbot seat is wired.

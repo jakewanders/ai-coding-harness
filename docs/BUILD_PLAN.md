@@ -591,7 +591,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** round cap; route table additions; unwired seat → route goes straight to `close`.
 
-- [ ] Task 30
+- [x] Task 30
 
 ### Task 31: `convoy` flow
 
