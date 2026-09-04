@@ -192,7 +192,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Done when:** suite green with zero hits.
 
-- [ ] Task 2
+- [x] Task 2
 
 ### Task 3: Result envelope and brief header contracts
 
