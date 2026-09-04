@@ -19,3 +19,4 @@ One line per completed task: `NN · title · tests <n> · note`.
 15 · evidence tool and the first real gates · tests 178 · Gates must never read process.cwd() (it is this checkout under vitest); GateContext.cwd carries the caller cwd and GateOutcome.applicable=false yields n/a for kind-scoped gates.
 16 · pullreq tool: PR bookkeeping, ghostwritten body, worklog · tests 191 · recordActivity exists for idle-gap accrual but no tool calls it yet; timers only accrue idle when a later task wires activity touches.
 17 · digest and recall tools · tests 202 · Index entries are keyed by (repo, id); reindex walks the vault for units/<id>/digest.md so nested host/owner/name namespaces work.
+18 · Shared prose and the ten core stage skills · tests 211 · Call templates live in fenced ```harness blocks (tool action {json}) so the contract test can check every tool/action against the registry; frontmatter descriptions must be quoted when they contain a colon.

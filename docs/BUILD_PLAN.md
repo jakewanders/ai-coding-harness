@@ -441,7 +441,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** every `skills/*/SKILL.md` has the required frontmatter keys; every `@root/` reference resolves to an existing file; every tool and action name mentioned in a fenced call template exists in the registry; each core stage skill's first call template is `unit brief`; no skill inlines the text of a `_shared` file (check a distinctive sentence from each shared file appears only in that file).
 
-- [ ] Task 18
+- [x] Task 18
 
 ### Task 19: `pilot` flow: route, report, answer, reconcile
 
