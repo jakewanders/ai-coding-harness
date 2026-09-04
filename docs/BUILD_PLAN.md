@@ -601,7 +601,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** clustering on three fixtures where two overlap; `link` persists symmetrically; the brief contains the approval checkpoint.
 
-- [ ] Task 31
+- [x] Task 31
 
 ## Milestone 4 — Kits, doctor, setup, distribution
 

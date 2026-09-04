@@ -32,3 +32,4 @@ One line per completed task: `NN · title · tests <n> · note`.
 28 · inspect, respond, aftercare flows · tests 350 · Aftercare bucketing is a wording heuristic and the brief says so; respond and aftercare write their drafts during render like shape does.
 29 · botprs and draft flows · tests 355 · seats.tracker gains an optional create list (not in spec section 5 but required by the draft flow); the draft brief detects create tools by name when the list is empty.
 30 · reviewbot tool and post-publish loop · tests 362 · Route.next widened to StageName | FlowName | null so respond can be dispatched from publish without a stage transition; the bot loop only exists when the reviewbot seat is wired.
+31 · convoy flow · tests 367 · Milestone 3 complete; predictFiles only accepts tokens with an extension so command names and bare words in backticks are not mistaken for paths.
