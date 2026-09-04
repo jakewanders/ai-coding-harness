@@ -235,7 +235,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 - Reading a schema-0 fixture returns schema 1 and rewrites the file to schema 1.
 - `appendHistory` appends and preserves earlier lines.
 
-- [ ] Task 5
+- [x] Task 5
 
 ### Task 6: Configuration layers
 
