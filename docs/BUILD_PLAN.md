@@ -175,7 +175,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Done when:** `npm test`, `npm run typecheck`, `npm run build` pass; `dist/index.js` exists and is committed.
 
-- [ ] Task 1
+- [x] Task 1
 
 ### Task 2: Vocabulary lint
 
