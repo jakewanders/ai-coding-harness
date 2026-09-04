@@ -1,0 +1,126 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { describe, expect, it } from 'vitest';
+import { dispatch } from '../../src/registry/tools.js';
+import { readState, writeState, type UnitState } from '../../src/store/state.js';
+import { unitDirFor } from '../../src/store/units.js';
+import { unitTool } from '../../src/tools/unit.js';
+import { makeCtx } from '../helpers/ctx.js';
+import { makeRepo } from '../helpers/git.js';
+
+async function unitCtx(mode = 'thorough', id = 'PL-1') {
+  const ctx = makeCtx({ cwd: makeRepo({ 'README.md': 'x' }) });
+  await dispatch(unitTool, { action: 'start', source: 'ticket', ref: id, mode }, ctx);
+  return ctx;
+}
+
+function satisfyCommitGates(dir: string) {
+  const s: UnitState = readState(dir);
+  const at = '2026-09-04T00:00:00.000Z';
+  writeState(dir, {
+    ...s,
+    evidence: [...s.evidence, { kind: 'self_critique', cycle: s.cycle, recorded_at: at, payload: { findings: [] } }, { kind: 'pii', cycle: s.cycle, recorded_at: at, payload: { findings: [] } }],
+    runs: [...s.runs, { id: `r-${s.cycle}`, command: 'true', exit: 0, summary: '', log: '~/l.log', started_at: at, ended_at: at, cycle: s.cycle }],
+  });
+}
+
+describe('unit report and route', () => {
+  it('persists reports per stage and cycle, and route reads them', async () => {
+    const ctx = await unitCtx();
+    const first = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
+    expect(first.envelope.data).toMatchObject({ next: 'scope', decision: 'proceed' });
+    expect(readState(unitDirFor(ctx, 'PL-1')).stage).toBe('scope');
+    const r = await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'scope', outcome: 'done', summary: 'criteria recorded', artifacts: { requirement: '~/x/requirement.md' } }, ctx);
+    expect(r.envelope.ok).toBe(true);
+    const state = readState(unitDirFor(ctx, 'PL-1'));
+    expect(state.reports!.scope).toHaveLength(1);
+    expect(state.reports!.scope![0]).toMatchObject({ stage: 'scope', cycle: 0, outcome: 'done', summary: 'criteria recorded', at: '2026-09-04T12:00:00.000Z' });
+    const route = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
+    expect(route.envelope.ok).toBe(true);
+    expect(route.envelope.data).toMatchObject({ next: 'plan', decision: 'proceed', from: 'scope' });
+    expect(readState(unitDirFor(ctx, 'PL-1')).stage).toBe('plan');
+    expect(route.envelope.next[0]).toMatchObject({ tool: 'unit', action: 'brief' });
+  });
+
+  it('returns blocked with the report questions and does not move', async () => {
+    const ctx = await unitCtx();
+    await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'scope', outcome: 'blocked', summary: 'ambiguous', questions: ['Which locale?'] }, ctx);
+    const route = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
+    expect(route.envelope.ok).toBe(false);
+    expect(route.envelope.data).toMatchObject({ decision: 'blocked', questions: ['Which locale?'] });
+    expect(readState(unitDirFor(ctx, 'PL-1')).stage).toBe('scope');
+    const answered = await dispatch(unitTool, { action: 'answer', id: 'PL-1', answers: { 'Which locale?': 'en-US only' } }, ctx);
+    expect(answered.envelope.ok).toBe(true);
+    expect(readState(unitDirFor(ctx, 'PL-1')).answers).toEqual({ 'Which locale?': 'en-US only' });
+    expect(fs.readFileSync(path.join(unitDirFor(ctx, 'PL-1'), 'history.md'), 'utf8')).toContain('en-US only');
+  });
+
+  it('turns failing gates into a blocked route with remedies as questions', async () => {
+    const ctx = await unitCtx();
+    const dir = unitDirFor(ctx, 'PL-1');
+    for (const to of ['plan', 'build', 'commit']) await dispatch(unitTool, { action: 'advance', id: 'PL-1', to }, ctx);
+    await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'commit', outcome: 'done', summary: 'committed' }, ctx);
+    const blocked = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
+    expect(blocked.envelope.data).toMatchObject({ decision: 'blocked', next: 'commit' });
+    expect((blocked.envelope.data as { questions: string[] }).questions.join(' ')).toContain('self_critique');
+    satisfyCommitGates(dir);
+    const ok = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
+    expect(ok.envelope.data).toMatchObject({ decision: 'proceed', next: 'review' });
+    expect(readState(dir).stage).toBe('review');
+  });
+
+  it('retries to revise on a needs_attention verdict and marks challenge passed on ship', async () => {
+    const ctx = await unitCtx();
+    const dir = unitDirFor(ctx, 'PL-1');
+    writeState(dir, { ...readState(dir), stage: 'review' });
+    await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'review', outcome: 'done', summary: 'two majors', verdict: 'needs_attention' }, ctx);
+    const retry = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
+    expect(retry.envelope.data).toMatchObject({ decision: 'retry', next: 'revise', verdict: 'needs_attention' });
+    expect(readState(dir).stage).toBe('revise');
+    writeState(dir, { ...readState(dir), stage: 'challenge' });
+    await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'challenge', outcome: 'done', summary: 'clean', verdict: 'ship' }, ctx);
+    expect(readState(dir).challenge_passed).toBe(true);
+    const onward = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
+    expect(onward.envelope.data).toMatchObject({ decision: 'proceed', next: 'publish' });
+  });
+
+  it('rejects a report for a stage other than the current one', async () => {
+    const ctx = await unitCtx();
+    const r = await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'publish', outcome: 'done', summary: 'x' }, ctx);
+    expect(r.envelope.ok).toBe(false);
+  });
+});
+
+describe('unit reconcile', () => {
+  it('reports disagreements from the supplied live facts without mutating state', async () => {
+    const ctx = await unitCtx();
+    const dir = unitDirFor(ctx, 'PL-1');
+    writeState(dir, { ...readState(dir), stage: 'review', branch: 'PL-1-thing' });
+    const before = fs.readFileSync(path.join(dir, 'state.json'), 'utf8');
+    const r = await dispatch(unitTool, { action: 'reconcile', id: 'PL-1', live: { branch: 'main', uncommitted: true, pr_state: 'open' } }, ctx);
+    expect(r.envelope.ok).toBe(false);
+    const kinds = (r.envelope.data as { disagreements: Array<{ kind: string }> }).disagreements.map((d) => d.kind).sort();
+    expect(kinds).toEqual(['branch_differs', 'pr_unrecorded', 'uncommitted_work']);
+    expect(fs.readFileSync(path.join(dir, 'state.json'), 'utf8')).toBe(before);
+    const clean = await dispatch(unitTool, { action: 'reconcile', id: 'PL-1', live: { branch: 'PL-1-thing', uncommitted: false, pr_state: 'none' } }, ctx);
+    expect(clean.envelope.ok).toBe(true);
+    expect(clean.envelope.data).toMatchObject({ disagreements: [] });
+  });
+});
+
+describe('pilot brief', () => {
+  it('renders the dispatch template, standing-rules pointer, route call and checkpoint rules', async () => {
+    const ctx = await unitCtx();
+    const r = await dispatch(unitTool, { action: 'brief', id: 'PL-1', stage: 'pilot' }, ctx);
+    expect(r.envelope.ok).toBe(true);
+    expect(r.text).toContain('# pilot');
+    expect(r.text).toContain('@root/skills/_shared/standing-rules.md');
+    expect(r.text).toContain('@root/skills/scope/SKILL.md');
+    expect(r.text).toContain('"quiet": true');
+    expect(r.text).toContain('unit report');
+    expect(r.text).toContain('unit route');
+    expect(r.text).toContain('unit answer');
+    expect(r.text).toMatch(/checkpoint/i);
+    expect(r.text).toContain('PL-1');
+  });
+});

@@ -1,4 +1,5 @@
 import type { ToolDef } from './tools.js';
+import '../flows/index.js';
 import '../gates/index.js';
 import { digestTool } from '../tools/digest.js';
 import { evidenceTool } from '../tools/evidence.js';

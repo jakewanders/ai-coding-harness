@@ -2,10 +2,14 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
 import { buildHeader, renderBrief } from '../brief/render.js';
+import '../flows/index.js';
 import '../gates/index.js';
 import { envelope } from '../contracts/envelope.js';
 import { defaultBranch } from '../git/exec.js';
 import { resolveMode, UnknownModeError } from '../modes.js';
+import { reconcile } from '../pilot/reconcile.js';
+import { routeNext } from '../pilot/route.js';
+import { statusHint } from '../config/tickets.js';
 import { hasCapability, resolveGates, transitionAllowed } from '../registry/gates.js';
 import { CORE_ORDER, isCoreStage, nextStageFor, stageEntry } from '../registry/stages.js';
 import { action, defineTool, fail, result } from '../registry/tools.js';
@@ -209,6 +213,105 @@ export const unitTool = defineTool({
                 appendHistory(unit.dir, `advance: ${from} -> ${to}${afterRevise ? ` (cycle ${next.cycle})` : ''}`, ctx.now);
                 const warn = verdict.warnings.length ? ` Warnings: ${verdict.warnings.map((g) => g.id).join(', ')}.` : '';
                 return result(`${state.id}: ${from} -> ${to}.${warn}`, envelope(true, `advanced ${from} -> ${to}`, { id: state.id, from, to, cycle: next.cycle, warnings: verdict.warnings }, briefNext(state.id, `now at ${to}`)));
+            },
+        }),
+        report: action({
+            describe: 'Store a stage report (outcome, summary, questions, verdict, artifacts) for the current cycle; a ship verdict at challenge marks it passed.',
+            schema: z.object({
+                id: z.string().describe('Unit id.'),
+                stage: z.string().describe('Stage the report is for; must be the current stage.'),
+                outcome: z.enum(['done', 'blocked', 'failed']),
+                summary: z.string().min(1),
+                questions: z.array(z.string()).optional(),
+                verdict: z.enum(['ship', 'needs_attention', 'not_ready']).optional(),
+                artifacts: z.record(z.string(), z.string()).optional(),
+            }),
+            handler: async (input, ctx) => {
+                const unit = loadUnit(ctx, input.id);
+                if (!unit)
+                    return notFound(input.id, ctx);
+                if (input.stage !== unit.state.stage)
+                    return fail(`unit report: ${unit.id} is at ${unit.state.stage}, not ${input.stage}`);
+                const report = { stage: input.stage, cycle: unit.state.cycle, outcome: input.outcome, summary: input.summary, questions: input.questions ?? [], artifacts: input.artifacts ?? {}, at: ctx.now().toISOString(), ...(input.verdict ? { verdict: input.verdict } : {}) };
+                const reports = { ...(unit.state.reports ?? {}) };
+                reports[input.stage] = [...(reports[input.stage] ?? []), report];
+                const reviews = input.verdict && (input.stage === 'review' || input.stage === 'challenge') ? { ...(unit.state.reviews ?? {}), [unit.state.cycle]: input.verdict } : unit.state.reviews;
+                const challengePassed = unit.state.challenge_passed || (input.stage === 'challenge' && input.verdict === 'ship');
+                writeState(unit.dir, { ...unit.state, reports, ...(reviews ? { reviews } : {}), challenge_passed: challengePassed }, ctx.now);
+                appendHistory(unit.dir, `report ${input.stage}: ${input.outcome}${input.verdict ? ` (${input.verdict})` : ''} — ${input.summary}`, ctx.now);
+                return result(`Report stored for ${input.stage} (${input.outcome}${input.verdict ? `, ${input.verdict}` : ''}).`, envelope(true, `report ${input.outcome}`, { id: unit.id, report, challenge_passed: challengePassed }, [{ tool: 'unit', action: 'route', why: 'ask the engine what to do next' }]));
+            },
+        }),
+        route: action({
+            describe: 'Decide the next stage from the reports (proceed, retry, blocked, done); applies the move when gates allow it.',
+            schema: z.object({ id: z.string().describe('Unit id.') }),
+            handler: async (input, ctx) => {
+                const unit = loadUnit(ctx, input.id);
+                if (!unit)
+                    return notFound(input.id, ctx);
+                const mode = modeOf(unit.state, ctx);
+                const browserUi = hasCapability(ctx.config.config, unit.state.repo, 'browser_ui');
+                const route = routeNext(unit.state, mode, browserUi);
+                const from = unit.state.stage;
+                const base = { id: unit.id, from, ...route };
+                if (route.decision === 'blocked') {
+                    return result([`Blocked at ${from}.`, ...route.questions.map((q) => `- ${q}`)].join('\n'), envelope(false, `blocked at ${from}`, base));
+                }
+                if (route.decision === 'done')
+                    return result(`${unit.id} is done.`, envelope(true, 'done', base, [{ tool: 'digest', action: 'wrapup', why: 'render the wrap-up for the user' }]));
+                const next = route.next;
+                if (next !== from) {
+                    if (route.decision === 'proceed') {
+                        const gates = await gatesFor(from, unit, ctx, mode);
+                        const verdict = transitionAllowed(gates);
+                        if (!verdict.ok) {
+                            const questions = verdict.blocking.map((g) => `${g.id}: ${g.remedy ?? 'gate failing'}`);
+                            return result([`Cannot leave ${from}: gates failing.`, ...questions.map((q) => `- ${q}`)].join('\n'), envelope(false, `blocked at ${from} by gates`, { ...base, next: from, decision: 'blocked', questions, blocking: verdict.blocking }));
+                        }
+                    }
+                    const at = ctx.now().toISOString();
+                    const { state: moved, cycleIncremented } = applyTransition(unit.state, next, at);
+                    writeState(unit.dir, moved, ctx.now);
+                    appendHistory(unit.dir, `route: ${from} -> ${next} (${route.decision})${cycleIncremented ? ` cycle ${moved.cycle}` : ''}`, ctx.now);
+                }
+                const why = route.decision === 'retry' ? `retry at ${next}; request its brief with quiet: true and dispatch` : `dispatch ${next}; request its brief with quiet: true`;
+                return result(`${route.decision}: ${next}${route.verdict ? ` (verdict ${route.verdict})` : ''}.`, envelope(true, `${route.decision} -> ${next}`, base, briefNext(unit.id, why)));
+            },
+        }),
+        answer: action({
+            describe: "Store the user's answers to blocked questions.",
+            schema: z.object({ id: z.string().describe('Unit id.'), answers: z.record(z.string(), z.string()).describe('question -> answer') }),
+            handler: async (input, ctx) => {
+                const unit = loadUnit(ctx, input.id);
+                if (!unit)
+                    return notFound(input.id, ctx);
+                const answers = { ...unit.state.answers, ...input.answers };
+                writeState(unit.dir, { ...unit.state, answers }, ctx.now);
+                for (const [q, a] of Object.entries(input.answers))
+                    appendHistory(unit.dir, `answer: ${q} -> ${a}`, ctx.now);
+                return result(`Stored ${Object.keys(input.answers).length} answer(s).`, envelope(true, 'answers stored', { id: unit.id, answers }, [{ tool: 'unit', action: 'route', why: 'route again with the answers in state' }]));
+            },
+        }),
+        reconcile: action({
+            describe: 'Compare stored state with live facts you gathered (branch, uncommitted work, PR state, tracker status); reports disagreements, mutates nothing.',
+            schema: z.object({
+                id: z.string().describe('Unit id.'),
+                live: z.object({
+                    branch: z.string().optional(),
+                    uncommitted: z.boolean().optional(),
+                    pr_state: z.enum(['open', 'merged', 'closed', 'none']).optional(),
+                    tracker_status: z.string().optional(),
+                }),
+            }),
+            handler: async (input, ctx) => {
+                const unit = loadUnit(ctx, input.id);
+                if (!unit)
+                    return notFound(input.id, ctx);
+                const boundary = { scope: 'scope', plan: 'build', build: 'build', commit: 'build', review: 'build', revise: 'build', challenge: 'build', verify: 'build', publish: 'publish', close: 'close' };
+                const expected = statusHint(unit.id, boundary[unit.state.stage] ?? 'build', ctx.config.config);
+                const disagreements = reconcile(unit.state, input.live, { expectedTrackerStatus: expected });
+                const text = disagreements.length ? ['Disagreements between state and live reality:', ...disagreements.map((d) => `- ${d.kind}: ${d.detail}`)].join('\n') : 'State agrees with live reality.';
+                return result(text, envelope(disagreements.length === 0, disagreements.length ? `${disagreements.length} disagreement(s)` : 'consistent', { id: unit.id, stage: unit.state.stage, disagreements }));
             },
         }),
     },

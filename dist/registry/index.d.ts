@@ -1,4 +1,5 @@
 import type { ToolDef } from './tools.js';
+import '../flows/index.js';
 import '../gates/index.js';
 /** Every tool the server exposes, in the order they appear in docs/tools.md. */
 export declare function allTools(): ToolDef[];
