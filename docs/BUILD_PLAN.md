@@ -516,7 +516,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** resolution order with each configuration; the http provider calls the injected fetch and never the global one; the stub's text contains `fallback-stub`; a finding class seen four times is reported in `capped` and excluded from `active`; gate is `n/a` when unwired.
 
-- [ ] Task 23
+- [x] Task 23
 
 ### Task 24: Run modes wired through brief, route, and PR body
 
