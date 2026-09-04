@@ -1,4 +1,5 @@
-import { placeholderRenderer } from '../stages/_placeholder.js';
+import { CORE_STAGE_MODULES } from '../stages/index.js';
+import { flowStub } from '../stages/_shared.js';
 export const CORE_ORDER = [
     'scope', 'plan', 'build', 'commit', 'review', 'revise', 'challenge', 'verify', 'publish', 'close',
 ];
@@ -9,25 +10,25 @@ export const FLOW_NAMES = [
 const SPEC_BANNER_STAGES = new Set(['scope', 'plan', 'build', 'review', 'revise', 'challenge', 'verify']);
 /** Flows that start from a source or nothing rather than an existing unit id. */
 const NO_ID_FLOWS = new Set(['convoy', 'botprs', 'draft', 'setup']);
-const renderers = new Map();
-/** Replace the renderer for a stage or flow; used by the stage modules as they land. */
+const flowRenderers = new Map();
+/** Install a flow's renderer; flow modules call this as they land. */
 export function registerRenderer(name, render) {
-    renderers.set(name, render);
+    flowRenderers.set(name, render);
 }
-function renderFor(name) {
-    return (ctx) => (renderers.get(name) ?? placeholderRenderer(name))(ctx);
+function flowRender(name) {
+    return (ctx) => (flowRenderers.get(name) ?? flowStub(name))(ctx);
 }
 export const STAGES = [
     ...CORE_ORDER.map((name) => ({
         name,
-        render: renderFor(name),
+        render: CORE_STAGE_MODULES[name].render,
         takesNoId: false,
         standalone: false,
         specBanner: SPEC_BANNER_STAGES.has(name),
     })),
     ...FLOW_NAMES.map((name) => ({
         name,
-        render: renderFor(name),
+        render: flowRender(name),
         takesNoId: NO_ID_FLOWS.has(name),
         standalone: true,
         specBanner: false,
@@ -39,8 +40,28 @@ export function stageEntry(name) {
 export function isCoreStage(name) {
     return CORE_ORDER.includes(name);
 }
-/** The core stage after `stage`, or null after close. */
-export function nextCoreStage(stage) {
-    const i = CORE_ORDER.indexOf(stage);
-    return i >= 0 && i + 1 < CORE_ORDER.length ? CORE_ORDER[i + 1] : null;
+/**
+ * Default next core stage. Revise returns to commit; verify runs only with
+ * browser_ui and, when the mode says so, after publish; skipped stages are
+ * jumped over. Null after close.
+ */
+export function nextStageFor(current, opts) {
+    const order = opts.verifyAfterPublish
+        ? ['scope', 'plan', 'build', 'commit', 'review', 'challenge', 'publish', 'verify', 'close']
+        : ['scope', 'plan', 'build', 'commit', 'review', 'challenge', 'verify', 'publish', 'close'];
+    if (current === 'revise')
+        return 'commit';
+    if (current === 'close')
+        return null;
+    let i = order.indexOf(current);
+    while (i + 1 < order.length) {
+        const candidate = order[i + 1];
+        i += 1;
+        if (opts.skip.includes(candidate))
+            continue;
+        if (candidate === 'verify' && !opts.browserUi)
+            continue;
+        return candidate;
+    }
+    return null;
 }

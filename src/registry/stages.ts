@@ -1,6 +1,7 @@
 import type { LoadedConfig } from '../config/load.js';
 import type { BriefHeader } from '../contracts/header.js';
-import { placeholderRenderer } from '../stages/_placeholder.js';
+import { CORE_STAGE_MODULES } from '../stages/index.js';
+import { flowStub } from '../stages/_shared.js';
 import type { StageName, UnitState } from '../store/state.js';
 
 export type FlowName = 'pilot'|'convoy'|'screen'|'shape'|'inspect'|'respond'|'aftercare'|'botprs'|'draft'|'setup';
@@ -39,28 +40,28 @@ const SPEC_BANNER_STAGES = new Set<StageName>(['scope', 'plan', 'build', 'review
 /** Flows that start from a source or nothing rather than an existing unit id. */
 const NO_ID_FLOWS = new Set<FlowName>(['convoy', 'botprs', 'draft', 'setup']);
 
-const renderers = new Map<string, BriefRenderer>();
+const flowRenderers = new Map<FlowName, BriefRenderer>();
 
-/** Replace the renderer for a stage or flow; used by the stage modules as they land. */
-export function registerRenderer(name: StageName | FlowName, render: BriefRenderer): void {
-  renderers.set(name, render);
+/** Install a flow's renderer; flow modules call this as they land. */
+export function registerRenderer(name: FlowName, render: BriefRenderer): void {
+  flowRenderers.set(name, render);
 }
 
-function renderFor(name: string): BriefRenderer {
-  return (ctx) => (renderers.get(name) ?? placeholderRenderer(name))(ctx);
+function flowRender(name: FlowName): BriefRenderer {
+  return (ctx) => (flowRenderers.get(name) ?? flowStub(name))(ctx);
 }
 
 export const STAGES: StageEntry[] = [
   ...CORE_ORDER.map((name): StageEntry => ({
     name,
-    render: renderFor(name),
+    render: CORE_STAGE_MODULES[name].render,
     takesNoId: false,
     standalone: false,
     specBanner: SPEC_BANNER_STAGES.has(name),
   })),
   ...FLOW_NAMES.map((name): StageEntry => ({
     name,
-    render: renderFor(name),
+    render: flowRender(name),
     takesNoId: NO_ID_FLOWS.has(name),
     standalone: true,
     specBanner: false,
@@ -75,8 +76,30 @@ export function isCoreStage(name: string): name is StageName {
   return (CORE_ORDER as string[]).includes(name);
 }
 
-/** The core stage after `stage`, or null after close. */
-export function nextCoreStage(stage: StageName): StageName | null {
-  const i = CORE_ORDER.indexOf(stage);
-  return i >= 0 && i + 1 < CORE_ORDER.length ? CORE_ORDER[i + 1]! : null;
+export interface RoutingOptions {
+  skip: StageName[];
+  browserUi: boolean;
+  verifyAfterPublish: boolean;
+}
+
+/**
+ * Default next core stage. Revise returns to commit; verify runs only with
+ * browser_ui and, when the mode says so, after publish; skipped stages are
+ * jumped over. Null after close.
+ */
+export function nextStageFor(current: StageName, opts: RoutingOptions): StageName | null {
+  const order: StageName[] = opts.verifyAfterPublish
+    ? ['scope', 'plan', 'build', 'commit', 'review', 'challenge', 'publish', 'verify', 'close']
+    : ['scope', 'plan', 'build', 'commit', 'review', 'challenge', 'verify', 'publish', 'close'];
+  if (current === 'revise') return 'commit';
+  if (current === 'close') return null;
+  let i = order.indexOf(current);
+  while (i + 1 < order.length) {
+    const candidate = order[i + 1]!;
+    i += 1;
+    if (opts.skip.includes(candidate)) continue;
+    if (candidate === 'verify' && !opts.browserUi) continue;
+    return candidate;
+  }
+  return null;
 }

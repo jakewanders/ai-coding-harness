@@ -21,10 +21,19 @@ export interface StageEntry {
 }
 export declare const CORE_ORDER: StageName[];
 export declare const FLOW_NAMES: readonly FlowName[];
-/** Replace the renderer for a stage or flow; used by the stage modules as they land. */
-export declare function registerRenderer(name: StageName | FlowName, render: BriefRenderer): void;
+/** Install a flow's renderer; flow modules call this as they land. */
+export declare function registerRenderer(name: FlowName, render: BriefRenderer): void;
 export declare const STAGES: StageEntry[];
 export declare function stageEntry(name: string): StageEntry | undefined;
 export declare function isCoreStage(name: string): name is StageName;
-/** The core stage after `stage`, or null after close. */
-export declare function nextCoreStage(stage: StageName): StageName | null;
+export interface RoutingOptions {
+    skip: StageName[];
+    browserUi: boolean;
+    verifyAfterPublish: boolean;
+}
+/**
+ * Default next core stage. Revise returns to commit; verify runs only with
+ * browser_ui and, when the mode says so, after publish; skipped stages are
+ * jumped over. Null after close.
+ */
+export declare function nextStageFor(current: StageName, opts: RoutingOptions): StageName | null;
