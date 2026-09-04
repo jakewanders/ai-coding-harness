@@ -366,7 +366,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** `exec run` with `command: 'echo hi'` records exit 0 and a log containing `hi`; a failing command records its exit code; a `timeoutMs: 100` sleep records `timedOut`; missing both `name` and `command` fails validation with a helpful summary; `exec commands` on a repo with no config returns inferred commands flagged `inferred`.
 
-- [ ] Task 13
+- [x] Task 13
 
 ### Task 14: `vcs` tool: fetch, diff, branch, worktree, commit, cleanup
 
