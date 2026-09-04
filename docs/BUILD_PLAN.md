@@ -581,7 +581,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** both briefs render with empty config; `renderTicket` numbers criteria `AC-n`; the botprs brief says "skip and say so" when the codehost seat is unwired.
 
-- [ ] Task 29
+- [x] Task 29
 
 ### Task 30: `reviewbot` tool and post-publish loop
 
