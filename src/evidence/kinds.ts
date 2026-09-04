@@ -51,6 +51,8 @@ export const ReachAuditSchema = z.object({
   surfaces: z.array(z.object({
     surface: nonEmpty,
     subjects: z.array(z.object({ kind: z.enum(REACH_SUBJECT_KINDS), name: nonEmpty, extended: z.boolean() })),
+    waived: z.boolean().optional(),
+    reason: z.string().optional(),
   })),
 }).strict();
 

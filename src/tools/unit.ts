@@ -200,15 +200,16 @@ export const unitTool = defineTool({
         if (input.to !== undefined && !isCoreStage(input.to)) return fail(`unit advance: unknown target stage "${input.to}"; core stages: ${CORE_ORDER.join(', ')}`);
         if (state.stage === 'close') return fail(`unit ${state.id} is already closed`);
 
-        const gates = await gatesFor(state.stage, unit, ctx, mode);
+        const to = (input.to as StageName | undefined) ?? nextStageFor(state.stage, routing(state, ctx, mode));
+        if (!to) return fail(`unit ${state.id}: no stage after ${state.stage}`);
+        // The correction loop (back to revise, and revise -> commit) is a retry, not a promotion: no gates.
+        const correction = to === 'revise' || (state.stage === 'revise' && to === 'commit');
+        const gates = correction ? [] : await gatesFor(state.stage, unit, ctx, mode);
         const verdict = transitionAllowed(gates);
         if (!verdict.ok) {
           const lines = [`Cannot leave ${state.stage}: ${verdict.blocking.length} blocking gate(s).`, ...verdict.blocking.map((g) => `- ${g.id}: ${g.remedy ?? 'no remedy given'}`)];
           return result(lines.join('\n'), envelope(false, `advance blocked at ${state.stage}`, { id: state.id, stage: state.stage, blocking: verdict.blocking, warnings: verdict.warnings }));
         }
-
-        const to = (input.to as StageName | undefined) ?? nextStageFor(state.stage, routing(state, ctx, mode));
-        if (!to) return fail(`unit ${state.id}: no stage after ${state.stage}`);
         const at = ctx.now().toISOString();
         const { state: next, from, cycleIncremented: afterRevise } = applyTransition(state, to, at);
         writeState(unit.dir, next, ctx.now);

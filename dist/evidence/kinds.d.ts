@@ -50,6 +50,8 @@ export declare const ReachAuditSchema: z.ZodObject<{
             name: z.ZodString;
             extended: z.ZodBoolean;
         }, z.core.$strip>>;
+        waived: z.ZodOptional<z.ZodBoolean>;
+        reason: z.ZodOptional<z.ZodString>;
     }, z.core.$strip>>;
 }, z.core.$strict>;
 export declare const ScreenVerdictSchema: z.ZodObject<{
