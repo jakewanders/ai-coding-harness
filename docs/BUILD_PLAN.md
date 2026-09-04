@@ -476,7 +476,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** each analyzer on small fixture diffs (a new export with one importer; an added `console.log(user.email)`; a PR body sentence "This always retries"; a new route not mentioned by any e2e spec; a criterion with no matching hunk); gate pass/fail flips with the records.
 
-- [ ] Task 20
+- [x] Task 20
 
 ### Task 21: `diffaudit` tool, review columns, synthesis, challenge
 
