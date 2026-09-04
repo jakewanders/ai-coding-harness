@@ -37,3 +37,4 @@ One line per completed task: `NN · title · tests <n> · note`.
 33 · system tool: doctor, config, infer, sync, tokens · tests 382 · system sync would push the vault remote when store.remote is set; tests only cover the skipped path and the loop itself never runs git push.
 34 · setup flow · tests 387 · Tool names must be split on underscores before regex matching because \b does not fire inside mcp__name__verb; product names appear only in seat-heuristics.ts on allow-marked lines.
 35 · Plugin packaging and dist freshness · tests 394 · typescript 7 does not export bin/tsc through package exports, so check-dist spawns node on node_modules/typescript/bin/tsc by path; from here every iteration also runs npm run check:dist.
+36 · Token economy pass · tests 397 · No stage crossed the 4,000-token threshold (thorough total 9,986 estimated tokens), so no reference.md appendices were split out; the doc and the drift test keep the numbers honest.

@@ -653,7 +653,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** a contract test reads `docs/token-budget.md` and asserts the recorded total is within 10% of a live `system tokens` run (so the doc cannot go stale); every stage brief plus skill stays under 6,000 estimated tokens.
 
-- [ ] Task 36
+- [x] Task 36
 
 ## Milestone 5 — Final audit
 
