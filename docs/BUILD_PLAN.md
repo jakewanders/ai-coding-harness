@@ -561,7 +561,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** consensus table; the screen brief lists four calls; shape brief on a unit without criteria says so and drafts the question file.
 
-- [ ] Task 27
+- [x] Task 27
 
 ### Task 28: `inspect`, `respond`, `aftercare` flows
 
