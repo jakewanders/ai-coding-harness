@@ -502,7 +502,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** add then list; recheck flips the gate for that unit only; closed entries do not block; the review brief includes an open entry's text.
 
-- [ ] Task 22
+- [x] Task 22
 
 ### Task 23: Counterweight resolution and convergence
 
