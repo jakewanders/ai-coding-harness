@@ -80,3 +80,4 @@ unbuilt checkout, kits with an example, and a hermetic 397-test suite with a voc
 lint at zero. Tag `v0.1.0` is created locally and nothing was pushed.
 
 BUILD COMPLETE 2026-09-04 · tests 397 · tools 13 · stages 10 · flows 10 · gates 14 · tokens 9986
+LEAN PASS COMPLETE 2026-09-04 · tests 350 · tools 12 · stages 6 · flows 7 · gates 10

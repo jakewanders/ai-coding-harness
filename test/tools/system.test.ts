@@ -3,6 +3,7 @@ import path from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { describe, expect, it } from 'vitest';
 import { HarnessConfigSchema } from '../../src/config/schema.js';
+import { VERSION } from '../../src/index.js';
 import { dispatch } from '../../src/registry/tools.js';
 import { ensureVault } from '../../src/store/vault.js';
 import { systemTool } from '../../src/tools/system.js';
@@ -42,7 +43,7 @@ describe('system doctor', () => {
     expect(data.vault).toMatchObject({ git: false, remote: null });
     expect(data.vault.path.length).toBeGreaterThan(0);
     expect(data.build).toMatchObject({ dist: true, matches: true });
-    expect(data.build.version).toBe('0.1.0');
+    expect(data.build.version).toBe(VERSION);
     const proposed = parseYaml(data.proposed_repo_config) as Record<string, unknown>;
     expect(HarnessConfigSchema.safeParse(proposed).success).toBe(true);
     expect(proposed.schema).toBe(1);

@@ -1,5 +1,43 @@
 # Changelog
 
+## 0.2.0 — 2026-09-04 (lean)
+
+A middle ground between the full 0.1.0 pipeline and an unstructured session. The core
+value stays: the per-repo vault with digests, recall and the carry-forward ledger;
+evidence gates that the hooks enforce even on a raw `git commit`; requirements pinned to
+numbered acceptance criteria with a scope ledger in the PR body. Batch runs (`convoy`),
+ticket triage (`screen`) and browser validation (`verify`) are kept.
+
+### Collapsed
+- Ten core stages → six: scope, build, review, verify, publish, close. Plan and commit
+  fold into build (the build brief carries the plan and commit procedure; `vcs commit`
+  moves build → review). Revise and challenge fold into review (a review verdict other
+  than ship routes back to build; the adversarial pass is a review column).
+- Fourteen gates → ten: check_command_green, self_critique_recorded,
+  defect_repro_before_fix, pii_audit_clean guard build; review_verdict_ship and
+  ledger_reverified guard review; walkthrough_done, criteria_validated, claims_audited
+  guard publish; pr_recorded guards close.
+- Twelve evidence kinds → nine (impact, reach_audit and counterweight removed);
+  thirteen review columns → six (criteria_forward, criteria_reverse, adversarial,
+  diffaudit, ledger, browser).
+- Three modes → two: thorough and sketch (sketch skips review and verify).
+- The cycle increments each time review starts again.
+
+### Removed
+- Flows shape, botprs, draft. Tool `reviewbot` and the post-publish bot loop (the pilot
+  brief runs `respond` once when a bot requests changes). The counterweight seat and the
+  second-opinion provider chain. Actions `unit explain`, `unit reconcile`,
+  `pullreq worklog`, `digest handoff`, `system tokens`, `system sync`.
+- `docs/token-budget.md` and its drift test.
+- `analyze impact` and `analyze reach` are informational: they print results and record
+  nothing.
+
+### Migration
+- 0.1.0 vault states read without a schema bump: the old stage names plan, commit and
+  revise normalize to build, challenge to review, on read. `seats.counterweight` still
+  validates in config and is ignored.
+
+
 ## 0.1.0 — 2026-09-04
 
 First release of `harness`, the tracker-driven development lifecycle engine, as a
