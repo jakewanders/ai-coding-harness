@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
-import { allGates, defineGate, registerGate } from '../../src/registry/gates.js';
 import { dispatch } from '../../src/registry/tools.js';
 import { readState, writeState } from '../../src/store/state.js';
 import { unitDirFor } from '../../src/store/units.js';
@@ -17,19 +16,6 @@ async function unitInRepo(opts: { remote?: boolean; under?: string; config?: str
   const ctx = makeCtx({ cwd: repo });
   await dispatch(unitTool, { action: 'start', source: 'ticket', ref: id }, ctx);
   return { repo, ctx };
-}
-
-function ensureCommitGate() {
-  if (allGates().some((g) => g.id === 'test_vcs_commit_gate')) return;
-  registerGate(defineGate({
-    id: 'test_vcs_commit_gate', stage: 'commit', description: 'test stand-in for the commit gates', severity: 'block',
-    check: ({ state }) => {
-      if (!state.id.startsWith('VCS-')) return { pass: true };
-      const critique = state.evidence.some((e) => e.kind === 'self_critique');
-      const green = state.runs.some((r) => r.exit === 0);
-      return critique && green ? { pass: true } : { pass: false, remedy: 'record self_critique evidence and a green check run' };
-    },
-  }));
 }
 
 describe('vcs fetch', () => {
@@ -123,7 +109,6 @@ describe('vcs worktree and branch', () => {
 
 describe('vcs status and commit', () => {
   it('refuses to commit while a blocking gate fails, then commits and moves to review', async () => {
-    ensureCommitGate();
     const { ctx } = await unitInRepo();
     await dispatch(vcsTool, { action: 'worktree', id: 'VCS-1' }, ctx);
     for (const to of ['plan', 'build', 'commit']) await dispatch(unitTool, { action: 'advance', id: 'VCS-1', to }, ctx);
@@ -136,14 +121,18 @@ describe('vcs status and commit', () => {
 
     const refused = await dispatch(vcsTool, { action: 'commit', id: 'VCS-1', message: 'VCS-1: add feature' }, ctx);
     expect(refused.envelope.ok).toBe(false);
-    expect(refused.text).toContain('record self_critique evidence');
+    expect(refused.text).toContain('self_critique');
+    expect(refused.text).toContain('pii');
     expect(runGit(['status', '--porcelain'], wt)).toContain('feature.txt');
 
     const dir = unitDirFor(ctx, 'VCS-1');
     const s = readState(dir);
     writeState(dir, {
       ...s,
-      evidence: [{ kind: 'self_critique', cycle: 0, recorded_at: '2026-09-04T00:00:00.000Z', payload: { findings: [] } }],
+      evidence: [
+        { kind: 'self_critique', cycle: 0, recorded_at: '2026-09-04T00:00:00.000Z', payload: { findings: [] } },
+        { kind: 'pii', cycle: 0, recorded_at: '2026-09-04T00:00:00.000Z', payload: { findings: [] } },
+      ],
       runs: [{ id: 'r1', command: 'true', exit: 0, summary: '', log: '~/x.log', started_at: '2026-09-04T00:00:00.000Z', ended_at: '2026-09-04T00:00:01.000Z' }],
     });
     const ok = await dispatch(vcsTool, { action: 'commit', id: 'VCS-1', message: 'VCS-1: add feature' }, ctx);

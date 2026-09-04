@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
+import '../gates/index.js';
 import { envelope } from '../contracts/envelope.js';
 import { baseRefFor, diffAgainst, fetchOrigin, hasRemote, isProtected, porcelainStatus, refuseLocalRef } from '../git/diff.js';
 import { currentBranch, git, gitRoot } from '../git/exec.js';
@@ -167,7 +168,7 @@ export const vcsTool = defineTool({
             if (!(e instanceof UnknownModeError)) throw e;
             mode = resolveMode('thorough', ctx.config.config);
           }
-          const gates = await resolveGates('commit', { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree }, mode);
+          const gates = await resolveGates('commit', { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree, cwd: ctx.cwd }, mode);
           const verdict = transitionAllowed(gates);
           if (!verdict.ok) {
             const lines = ['Commit refused: commit-stage gates are failing.', ...verdict.blocking.map((g) => `- ${g.id}: ${g.remedy ?? 'no remedy given'}`)];

@@ -8,7 +8,7 @@ import { defineGate, registerGate, allGates } from '../../src/registry/gates.js'
 import { dispatch } from '../../src/registry/tools.js';
 import { STAGES } from '../../src/registry/stages.js';
 import { namespaceFor, unitDirFor } from '../../src/store/units.js';
-import { readState } from '../../src/store/state.js';
+import { readState, writeState, type UnitState } from '../../src/store/state.js';
 import { unitTool } from '../../src/tools/unit.js';
 import { makeCtx } from '../helpers/ctx.js';
 import { makeRepo } from '../helpers/git.js';
@@ -184,19 +184,33 @@ describe('unit advance', () => {
     for (const to of ['plan', 'build', 'commit']) {
       expect((await dispatch(unitTool, { action: 'advance', id: 'ABC-1', to }, ctx)).envelope.ok).toBe(true);
     }
+    satisfyCommitGates(unitDirFor(ctx, 'ABC-1'));
     const r = await dispatch(unitTool, { action: 'advance', id: 'ABC-1' }, ctx);
     expect(r.envelope.data).toMatchObject({ from: 'commit', to: 'publish' });
     await dispatch(unitTool, { action: 'start', source: 'text', id: 'ABC-2', text: 'b' }, ctx);
     for (const to of ['plan', 'build', 'commit', 'review', 'revise', 'commit']) {
+      if (readState(unitDirFor(ctx, 'ABC-2')).stage === 'commit') satisfyCommitGates(unitDirFor(ctx, 'ABC-2'));
       expect((await dispatch(unitTool, { action: 'advance', id: 'ABC-2', to }, ctx)).envelope.ok).toBe(true);
     }
     expect(readState(unitDirFor(ctx, 'ABC-2')).cycle).toBe(0);
+    satisfyCommitGates(unitDirFor(ctx, 'ABC-2'));
     const again = await dispatch(unitTool, { action: 'advance', id: 'ABC-2', to: 'review' }, ctx);
     expect(again.envelope.data).toMatchObject({ from: 'commit', to: 'review', cycle: 1 });
     const bad = await dispatch(unitTool, { action: 'advance', id: 'ABC-2', to: 'nowhere' }, ctx);
     expect(bad.envelope.ok).toBe(false);
   });
 });
+
+/** Give a unit the evidence and green run the real commit gates require in its current cycle. */
+function satisfyCommitGates(dir: string) {
+  const s: UnitState = readState(dir);
+  const at = '2026-09-04T00:00:00.000Z';
+  writeState(dir, {
+    ...s,
+    evidence: [...s.evidence, { kind: 'self_critique', cycle: s.cycle, recorded_at: at, payload: { findings: [] } }, { kind: 'pii', cycle: s.cycle, recorded_at: at, payload: { findings: [] } }],
+    runs: [...s.runs, { id: `r-${s.cycle}`, command: 'true', exit: 0, summary: '', log: '~/l.log', started_at: at, ended_at: at, cycle: s.cycle }],
+  });
+}
 
 describe('unit explain', () => {
   it('describes the next stage with gates, seats and outputs without touching state', async () => {

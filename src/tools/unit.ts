@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
 import { buildHeader, renderBrief } from '../brief/render.js';
+import '../gates/index.js';
 import { envelope, type NextAction } from '../contracts/envelope.js';
 import { defaultBranch } from '../git/exec.js';
 import { resolveMode, UnknownModeError, type ModeDef } from '../modes.js';
@@ -35,7 +36,7 @@ function modeOf(state: UnitState, ctx: ToolContext): ModeDef {
 }
 
 async function gatesFor(stage: StageName, unit: LoadedUnit, ctx: ToolContext, mode: ModeDef): Promise<ResolvedGate[]> {
-  return resolveGates(stage, { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree }, mode);
+  return resolveGates(stage, { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree, cwd: ctx.cwd }, mode);
 }
 
 function routing(state: UnitState, ctx: ToolContext, mode: ModeDef) {

@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
 import { buildHeader, renderBrief } from '../brief/render.js';
+import '../gates/index.js';
 import { envelope } from '../contracts/envelope.js';
 import { defaultBranch } from '../git/exec.js';
 import { resolveMode, UnknownModeError } from '../modes.js';
@@ -32,7 +33,7 @@ function modeOf(state, ctx) {
     }
 }
 async function gatesFor(stage, unit, ctx, mode) {
-    return resolveGates(stage, { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree }, mode);
+    return resolveGates(stage, { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree, cwd: ctx.cwd }, mode);
 }
 function routing(state, ctx, mode) {
     return { skip: mode.skip_stages, browserUi: hasCapability(ctx.config.config, state.repo, 'browser_ui'), verifyAfterPublish: mode.verify_after_publish };

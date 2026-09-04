@@ -14,6 +14,7 @@ export interface RunRecord {
     log: string;
     started_at: string;
     ended_at: string;
+    cycle?: number;
 }
 export interface CommitRecord {
     sha: string;

@@ -30,6 +30,7 @@ export const RunRecordSchema = z.object({
   log: z.string(),
   started_at: iso,
   ended_at: iso,
+  cycle: z.number().int().nonnegative().optional(),
 });
 
 export const CommitRecordSchema = z.object({

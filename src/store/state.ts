@@ -13,7 +13,7 @@ export type UnitKind = 'feature' | 'bug' | 'chore' | 'unknown';
 export type SourceKind = 'ticket' | 'pr' | 'url' | 'file' | 'conversation' | 'text';
 export type ReviewVerdict = 'ship' | 'needs_attention' | 'not_ready';
 
-export interface RunRecord { id: string; command: string; exit: number; summary: string; log: string; started_at: string; ended_at: string }
+export interface RunRecord { id: string; command: string; exit: number; summary: string; log: string; started_at: string; ended_at: string; cycle?: number }
 export interface CommitRecord { sha: string; message: string; at: string; cycle: number }
 export interface Thread { id: string; author: string; body: string; path?: string; line?: number; resolved: boolean }
 export interface PrRecord { url: string; number: number | null; base: string; head: string; opened_at: string; threads: Thread[] }

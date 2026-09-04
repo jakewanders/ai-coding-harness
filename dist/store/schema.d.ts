@@ -21,6 +21,7 @@ export declare const RunRecordSchema: z.ZodObject<{
     log: z.ZodString;
     started_at: z.ZodString;
     ended_at: z.ZodString;
+    cycle: z.ZodOptional<z.ZodNumber>;
 }, z.core.$strip>;
 export declare const CommitRecordSchema: z.ZodObject<{
     sha: z.ZodString;
@@ -170,6 +171,7 @@ export declare const UnitStateSchema: z.ZodObject<{
         log: z.ZodString;
         started_at: z.ZodString;
         ended_at: z.ZodString;
+        cycle: z.ZodOptional<z.ZodNumber>;
     }, z.core.$strip>>;
     pr: z.ZodNullable<z.ZodObject<{
         url: z.ZodString;

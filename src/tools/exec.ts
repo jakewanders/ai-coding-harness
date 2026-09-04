@@ -104,7 +104,7 @@ export const execTool = defineTool({
         if (out.stderr.trim()) logLines.push('--- stderr ---', out.stderr.trimEnd());
         fs.writeFileSync(logAbs, logLines.join('\n') + '\n');
         const log = homeRelative(logAbs);
-        const record: RunRecord = { id, command: command!, exit: out.exit, summary, log, started_at: started.toISOString(), ended_at: ended.toISOString() };
+        const record: RunRecord = { id, command: command!, exit: out.exit, summary, log, started_at: started.toISOString(), ended_at: ended.toISOString(), cycle: unit.state.cycle };
         writeState(unit.dir, { ...unit.state, runs: [...unit.state.runs, record] }, ctx.now);
         appendHistory(unit.dir, `run ${id}: ${command} -> exit ${out.exit}${out.timedOut ? ' (timed out)' : ''}`, ctx.now);
 

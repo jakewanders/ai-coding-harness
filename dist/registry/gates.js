@@ -38,6 +38,8 @@ async function evaluate(gate, check) {
         return { ...gate, status: 'n/a' };
     try {
         const outcome = await check();
+        if (outcome.applicable === false)
+            return { ...gate, status: 'n/a' };
         return outcome.pass ? { ...gate, status: 'pass' } : { ...gate, status: 'fail', ...(outcome.remedy ? { remedy: outcome.remedy } : {}) };
     }
     catch (e) {

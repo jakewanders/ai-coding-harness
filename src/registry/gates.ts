@@ -11,11 +11,15 @@ export interface GateContext {
   config: HarnessConfig;
   unitDir: string;
   worktree: string | null;
+  /** Checkout the tool was invoked from; used when the unit has no worktree. */
+  cwd?: string;
 }
 
 export interface GateOutcome {
   pass: boolean;
   remedy?: string;
+  /** False when the gate does not apply to this unit (resolves to n/a). */
+  applicable?: boolean;
 }
 
 export interface GateDef {
@@ -80,6 +84,7 @@ async function evaluate(gate: ResolvedGate, check: () => GateOutcome | Promise<G
   if (gate.severity === 'off') return { ...gate, status: 'n/a' };
   try {
     const outcome = await check();
+    if (outcome.applicable === false) return { ...gate, status: 'n/a' };
     return outcome.pass ? { ...gate, status: 'pass' } : { ...gate, status: 'fail', ...(outcome.remedy ? { remedy: outcome.remedy } : {}) };
   } catch (e) {
     return { ...gate, status: 'fail', remedy: `gate check threw: ${e instanceof Error ? e.message : String(e)}` };
