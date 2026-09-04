@@ -29,7 +29,7 @@ const SAMPLES: Record<EvidenceKind, { valid: unknown; invalid: unknown }> = {
   criteria_validation: { valid: { results: [{ criterion: 'AC-1', status: 'proven', proof: 'test x' }] }, invalid: { results: [{ criterion: 'AC-1', status: 'kinda' }] } },
   claims: { valid: { claims: [{ text: 'faster', status: 'verified', evidence: 'bench' }] }, invalid: { claims: [{ text: 'faster' }] } },
   waiver: { valid: { gate: 'pii_audit_clean', rationale: 'test fixture data only' }, invalid: { gate: 'pii_audit_clean' } },
-  browser_findings: { valid: { environment: 'qa', findings: [{ severity: 'minor', text: 'x', in_scope: true }] }, invalid: { environment: 'qa', findings: [{ severity: 'minor', text: 'x' }] } },
+  browser_findings: { valid: { criteria: [{ id: 'AC-1', result: 'pass', notes: 'ok', screenshots: [] }], runtime_errors: [], e2e: null, out_of_scope: [] }, invalid: { criteria: [{ id: 'AC-1', result: 'meh', notes: '', screenshots: [] }], runtime_errors: [], e2e: null, out_of_scope: [] } },
   counterweight: { valid: { provider: 'fallback-stub', findings: [{ class: 'naming', severity: 'note', text: 'x' }] }, invalid: { findings: [] } },
   review_column: { valid: { column: 'security', findings: [{ severity: 'blocker', text: 'x', path: 'src/a.ts', line: 1 }] }, invalid: { column: 'vibes', findings: [] } },
 };

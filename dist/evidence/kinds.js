@@ -68,14 +68,16 @@ export const WaiverSchema = z.object({
     rationale: nonEmpty,
 }).strict();
 export const BrowserFindingsSchema = z.object({
-    environment: nonEmpty,
-    findings: z.array(z.object({
-        criterion: z.string().optional(),
-        severity: FindingSeveritySchema,
-        text: nonEmpty,
-        in_scope: z.boolean(),
-        screenshot: z.string().optional(),
+    environment: z.string().optional(),
+    criteria: z.array(z.object({
+        id: nonEmpty,
+        result: z.enum(['pass', 'fail', 'blocked']),
+        notes: z.string(),
+        screenshots: z.array(z.string()),
     })),
+    runtime_errors: z.array(z.string()),
+    e2e: z.object({ command: nonEmpty, exit: z.number().int() }).nullable(),
+    out_of_scope: z.array(z.string()),
 }).strict();
 export const CounterweightSchema = z.object({
     provider: nonEmpty,
@@ -133,8 +135,8 @@ export const EVIDENCE_KINDS = {
     },
     browser_findings: {
         schema: BrowserFindingsSchema,
-        describe: 'Findings from exercising acceptance criteria in a real browser against a chosen environment.',
-        remedy: 'record browser_findings with { environment, findings: [{ criterion?, severity, text, in_scope, screenshot? }] }',
+        describe: 'Per-criterion browser results against the sut environment, runtime errors, the e2e run, and out-of-scope observations that cannot affect the verdict.',
+        remedy: 'record browser_findings with { criteria: [{ id: AC-n, result: pass|fail|blocked, notes, screenshots: [] }], runtime_errors: [], e2e: { command, exit } | null, out_of_scope: [] }',
     },
     counterweight: {
         schema: CounterweightSchema,

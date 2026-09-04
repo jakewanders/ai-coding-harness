@@ -13,7 +13,7 @@ Follow @root/skills/_shared/standing-rules.md, @root/skills/_shared/scope-rules.
 
 ## First action
 
-Request the brief. Everything below assumes you have read its header and stage material.
+Request the brief. Its Walkthrough section lists every criterion, the environments by role, the e2e command, and the screenshot and scope rules.
 
 ```harness
 unit brief { "id": "<id>", "stage": "verify" }
@@ -23,19 +23,22 @@ If the header's `contract` is not `harness-brief/1`, stop and report.
 
 ## Procedure
 
-1. Pick the environment by role from the brief (`sut` for the change, `reference` for comparisons). Boot the app with the repo's boot command if needed.
-2. Exercise every acceptance criterion in the browser, including the edge cases each implies. No roaming regression sweeps.
-3. Record `browser_findings` with `in_scope` set honestly; out-of-scope observations cannot drive the verdict.
-4. Record `criteria_validation` per criterion with the proof.
+1. Use the `sut` environment from the brief. Credentials are named by env var; read them from `~/.harness/.env` yourself and never write their values into notes, findings or the PR.
+2. Boot the app if needed, then exercise every acceptance criterion in the browser, including the edge cases the brief asks you to derive. Record `pass`, `fail` or `blocked` per criterion with what you saw.
+3. Reproduce any runtime error against the `reference` environment before treating it as a regression; list them in `runtime_errors`.
+4. Run the e2e suite through `exec run` and record `{ command, exit }`; set `e2e: null` only when none exists.
+5. Take an annotated screenshot per criterion; attach through the codehost seat when wired, otherwise keep the paths and say the attachment was skipped.
+6. Out-of-scope observations go into `out_of_scope`; they never change a criterion's result.
 
 ## Calls
 
 ```harness
 exec run { "id": "<id>", "name": "boot" }
-evidence record { "id": "<id>", "kind": "browser_findings", "payload": { "environment": "<name>", "findings": [] } }
-evidence record { "id": "<id>", "kind": "criteria_validation", "payload": { "results": [{ "criterion": "AC-1", "status": "proven", "proof": "<what you saw>" }] } }
+exec run { "id": "<id>", "name": "e2e" }
+evidence record { "id": "<id>", "kind": "browser_findings", "payload": { "criteria": [{ "id": "AC-1", "result": "pass", "notes": "<what you saw>", "screenshots": [] }], "runtime_errors": [], "e2e": { "command": "<e2e command>", "exit": 0 }, "out_of_scope": [] } }
+evidence check { "id": "<id>", "gate": "walkthrough_done" }
 ```
 
 ## Done when
 
-Every criterion has a validation result and `unit advance` succeeds.
+Every criterion has a browser result, `walkthrough_done` passes, and `unit advance` succeeds.

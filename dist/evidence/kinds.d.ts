@@ -118,19 +118,23 @@ export declare const WaiverSchema: z.ZodObject<{
     rationale: z.ZodString;
 }, z.core.$strict>;
 export declare const BrowserFindingsSchema: z.ZodObject<{
-    environment: z.ZodString;
-    findings: z.ZodArray<z.ZodObject<{
-        criterion: z.ZodOptional<z.ZodString>;
-        severity: z.ZodEnum<{
-            blocker: "blocker";
-            major: "major";
-            minor: "minor";
-            note: "note";
+    environment: z.ZodOptional<z.ZodString>;
+    criteria: z.ZodArray<z.ZodObject<{
+        id: z.ZodString;
+        result: z.ZodEnum<{
+            blocked: "blocked";
+            fail: "fail";
+            pass: "pass";
         }>;
-        text: z.ZodString;
-        in_scope: z.ZodBoolean;
-        screenshot: z.ZodOptional<z.ZodString>;
+        notes: z.ZodString;
+        screenshots: z.ZodArray<z.ZodString>;
     }, z.core.$strip>>;
+    runtime_errors: z.ZodArray<z.ZodString>;
+    e2e: z.ZodNullable<z.ZodObject<{
+        command: z.ZodString;
+        exit: z.ZodNumber;
+    }, z.core.$strip>>;
+    out_of_scope: z.ZodArray<z.ZodString>;
 }, z.core.$strict>;
 export declare const CounterweightSchema: z.ZodObject<{
     provider: z.ZodString;
