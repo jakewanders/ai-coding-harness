@@ -397,7 +397,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** each kind accepts a valid payload and rejects an invalid one with its remedy in the summary; an empty `self_critique.findings` passes the gate; the bug gate is `n/a` for `kind: 'feature'` and `fail` for a bug with no record; a waiver flips it to pass; `evidence gates` statuses match `resolveGates` for the same state.
 
-- [ ] Task 15
+- [x] Task 15
 
 ### Task 16: `pullreq` tool: PR bookkeeping, ghostwritten body, worklog
 
