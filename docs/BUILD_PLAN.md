@@ -280,7 +280,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** each function on positive and negative inputs; `syntheticId` is stable for equal text and differs for different text; `unitFromBranch('feat/ABC-12-login')` is `ABC-12`; `statusHint` returns null when no rule matches.
 
-- [ ] Task 8
+- [x] Task 8
 
 ### Task 9: Tool registry, dispatch, server, generated inventory
 
