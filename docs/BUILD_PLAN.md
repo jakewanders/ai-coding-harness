@@ -251,7 +251,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 - A YAML syntax error reports a non-null `line`.
 - Kit fragments sit below the user layer: user wins on conflict.
 
-- [ ] Task 6
+- [x] Task 6
 
 ### Task 7: Zero-config repo inference
 
