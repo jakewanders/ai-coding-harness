@@ -4,7 +4,6 @@ import { SCREEN_SLOTS } from '../review/consensus.js';
 export const render = (ctx) => {
     const id = ctx.state?.id ?? '<id>';
     const hint = ctx.state ? statusHint(ctx.state.id, 'scope', ctx.config.config) : null;
-    const cw = ctx.header.seats.counterweight;
     const lines = [
         '# screen',
         '',
@@ -12,8 +11,8 @@ export const render = (ctx) => {
         '',
         '## Four structured calls',
         '',
-        'Make one call per dimension per model and record each one. The `second` model is the counterweight seat',
-        `(${cw === 'unwired' ? 'unwired here: the provider falls back to the declared same-model stub; say so in the reasons' : `wired: ${cw.join(', ')}`}).`,
+        'Make one call per dimension per model and record each one. There is no second-opinion seat: the `second` call is',
+        'a second framing by the same model, made after the primary call and arguing the opposite case first; say so in its reasons.',
         'Each call answers: is the ticket valid (buildable and worth building as written), invalid, or unclear? Give reasons.',
         '',
         '- technical: can this be built as described in this repo, and is the described change coherent?',

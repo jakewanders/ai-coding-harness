@@ -7,25 +7,18 @@ import { z } from 'zod';
 export const EVIDENCE_KIND_NAMES = [
     'self_critique',
     'defect_repro',
-    'reach_audit',
     'screen_verdict',
-    'impact',
     'pii',
     'criteria_validation',
     'claims',
     'waiver',
     'browser_findings',
-    'counterweight',
     'review_column',
 ];
 export const SEVERITIES_FINDING = ['blocker', 'major', 'minor', 'note'];
 export const FindingSeveritySchema = z.enum(SEVERITIES_FINDING);
 export const PII_SINKS = ['log', 'storage', 'analytics', 'error_body', 'other'];
-export const REACH_SUBJECT_KINDS = ['e2e', 'mock', 'contract', 'unit', 'other'];
-export const REVIEW_COLUMNS = [
-    'criteria_forward', 'criteria_reverse', 'architecture', 'security', 'tests', 'performance',
-    'component_library', 'accessibility', 'diffaudit', 'ledger', 'adversarial', 'counterweight', 'browser',
-];
+export const REVIEW_COLUMNS = ['criteria_forward', 'criteria_reverse', 'adversarial', 'diffaudit', 'ledger', 'browser'];
 const nonEmpty = z.string().min(1);
 export const SelfCritiqueSchema = z.object({
     findings: z.array(z.object({ severity: FindingSeveritySchema, text: nonEmpty, addressed: z.boolean() })),
@@ -36,23 +29,11 @@ export const DefectReproSchema = z.object({
     red_output: z.string(),
     green_output: z.string().optional(),
 }).strict();
-export const ReachAuditSchema = z.object({
-    surfaces: z.array(z.object({
-        surface: nonEmpty,
-        subjects: z.array(z.object({ kind: z.enum(REACH_SUBJECT_KINDS), name: nonEmpty, extended: z.boolean() })),
-        waived: z.boolean().optional(),
-        reason: z.string().optional(),
-    })),
-}).strict();
 export const ScreenVerdictSchema = z.object({
     dimension: z.enum(['technical', 'product']),
     model: z.enum(['primary', 'second']),
     verdict: z.enum(['valid', 'invalid', 'unclear']),
     reasons: z.array(z.string()),
-}).strict();
-export const ImpactSchema = z.object({
-    changed: z.array(z.object({ path: nonEmpty, consumers: z.array(z.string()) })),
-    summary: z.string(),
 }).strict();
 export const PiiSchema = z.object({
     findings: z.array(z.object({ file: nonEmpty, line: z.number().int().nonnegative(), sink: z.enum(PII_SINKS), text: nonEmpty })),
@@ -79,10 +60,6 @@ export const BrowserFindingsSchema = z.object({
     e2e: z.object({ command: nonEmpty, exit: z.number().int() }).nullable(),
     out_of_scope: z.array(z.string()),
 }).strict();
-export const CounterweightSchema = z.object({
-    provider: nonEmpty,
-    findings: z.array(z.object({ class: nonEmpty, severity: FindingSeveritySchema, text: nonEmpty })),
-}).strict();
 export const ReviewColumnSchema = z.object({
     column: z.enum(REVIEW_COLUMNS),
     findings: z.array(z.object({ severity: FindingSeveritySchema, text: nonEmpty, path: z.string().optional(), line: z.number().int().optional() })),
@@ -98,20 +75,10 @@ export const EVIDENCE_KINDS = {
         describe: 'A failing test captured before the fix: location, command, verbatim red output, later the green output.',
         remedy: 'record defect_repro with { test_location, command, red_output } captured before the fix (green_output optional)',
     },
-    reach_audit: {
-        schema: ReachAuditSchema,
-        describe: 'For each new surface, whether each relevant gate subject list (e2e specs, mocks, contracts) was extended to cover it.',
-        remedy: 'record reach_audit with { surfaces: [{ surface, subjects: [{ kind, name, extended }] }] }',
-    },
     screen_verdict: {
         schema: ScreenVerdictSchema,
         describe: 'A structured validity call on a ticket along one dimension by one model.',
         remedy: 'record screen_verdict with { dimension: technical|product, model: primary|second, verdict: valid|invalid|unclear, reasons: [] }',
-    },
-    impact: {
-        schema: ImpactSchema,
-        describe: 'Impact radius computed from the diff: what changed and who consumes it.',
-        remedy: 'record impact with { changed: [{ path, consumers: [] }], summary }',
     },
     pii: {
         schema: PiiSchema,
@@ -138,14 +105,9 @@ export const EVIDENCE_KINDS = {
         describe: 'Per-criterion browser results against the sut environment, runtime errors, the e2e run, and out-of-scope observations that cannot affect the verdict.',
         remedy: 'record browser_findings with { criteria: [{ id: AC-n, result: pass|fail|blocked, notes, screenshots: [] }], runtime_errors: [], e2e: { command, exit } | null, out_of_scope: [] }',
     },
-    counterweight: {
-        schema: CounterweightSchema,
-        describe: 'Second-opinion model findings with the provider that produced them.',
-        remedy: 'record counterweight with { provider, findings: [{ class, severity, text }] }',
-    },
     review_column: {
         schema: ReviewColumnSchema,
-        describe: 'One review column (criteria, specialist lens, diffaudit, ledger, adversarial, counterweight, browser) for the current cycle.',
+        describe: 'One review column (criteria forward/reverse, adversarial, diffaudit, ledger, browser) for the current cycle.',
         remedy: 'record review_column with { column, findings: [{ severity, text, path?, line? }] }',
     },
 };

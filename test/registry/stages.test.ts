@@ -9,7 +9,7 @@ function emptyContext(): BriefContext {
   const header: BriefHeader = {
     contract: BRIEF_CONTRACT, unit: 'local-00000000', mode: 'thorough', stage: 'scope', repo: 'local/x',
     worktree: null, base_branch: 'main', root: '/root',
-    seats: { tracker: 'unwired', codehost: 'unwired', docs: 'unwired', design: 'unwired', chat: 'unwired', reviewbot: 'unwired', counterweight: 'unwired' },
+    seats: { tracker: 'unwired', codehost: 'unwired', docs: 'unwired', design: 'unwired', chat: 'unwired', reviewbot: 'unwired' },
     capabilities: {}, gates: [], docs: [], config_errors: [],
   };
   return { state: null, config: loadConfig({ cwd: makeTmpDir('harness-nogit'), env: process.env }), header, vault: '/vault', root: '/root', quiet: false, unitDir: null };

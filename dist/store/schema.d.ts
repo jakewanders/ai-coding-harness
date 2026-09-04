@@ -61,12 +61,9 @@ export declare const EvidenceRecordSchema: z.ZodObject<{
     kind: z.ZodEnum<{
         browser_findings: "browser_findings";
         claims: "claims";
-        counterweight: "counterweight";
         criteria_validation: "criteria_validation";
         defect_repro: "defect_repro";
-        impact: "impact";
         pii: "pii";
-        reach_audit: "reach_audit";
         review_column: "review_column";
         screen_verdict: "screen_verdict";
         self_critique: "self_critique";
@@ -134,12 +131,9 @@ export declare const UnitStateSchema: z.ZodObject<{
         kind: z.ZodEnum<{
             browser_findings: "browser_findings";
             claims: "claims";
-            counterweight: "counterweight";
             criteria_validation: "criteria_validation";
             defect_repro: "defect_repro";
-            impact: "impact";
             pii: "pii";
-            reach_audit: "reach_audit";
             review_column: "review_column";
             screen_verdict: "screen_verdict";
             self_critique: "self_critique";

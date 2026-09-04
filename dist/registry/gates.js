@@ -21,7 +21,7 @@ export function hasCapability(config, repo, capability) {
     const caps = config.repos?.[repo]?.capabilities;
     return Boolean(caps?.[capability]);
 }
-/** Is the seat wired (tool names, or cli/http for counterweight)? */
+/** Is the seat wired with at least one tool name? */
 export function hasSeat(config, seat) {
     if (!SEAT_NAMES.includes(seat))
         return false;

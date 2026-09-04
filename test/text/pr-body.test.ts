@@ -25,8 +25,6 @@ function state(over: Partial<UnitState> = {}): UnitState {
       ev('self_critique', { findings: [{ severity: 'minor', text: 'naming', addressed: true }] }),
       ev('defect_repro', { test_location: 'test/login.test.ts', command: 'npm test', red_output: 'FAIL 1', green_output: 'PASS 1' }),
       ev('pii', { findings: [] }),
-      ev('impact', { changed: [{ path: 'src/auth.ts', consumers: ['src/app.ts', 'src/api.ts'] }], summary: 'two consumers' }),
-      ev('reach_audit', { surfaces: [{ surface: 'GET /login', subjects: [{ kind: 'e2e', name: 'login.spec', extended: true }] }] }),
       ev('criteria_validation', { results: [{ criterion: 'AC-1', status: 'proven', proof: 'login.test.ts' }, { criterion: 'AC-2', status: 'unproven', proof: '' }] }),
       ev('waiver', { gate: 'pii_audit_clean', rationale: 'fixture emails only' }),
     ],
@@ -51,8 +49,6 @@ describe('renderPrBody', () => {
     expect(body).toMatch(/self-critique: 1 finding/i);
     expect(body).toMatch(/defect repro.*red.*green/i);
     expect(body).toMatch(/personal-data audit: clean/i);
-    expect(body).toMatch(/impact: 1 changed path, 2 consumer/i);
-    expect(body).toMatch(/reach: 1 surface/i);
     expect(body).toContain('## Waivers');
     expect(body).toContain('pii_audit_clean');
     expect(body).toContain('fixture emails only');

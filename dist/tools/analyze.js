@@ -48,10 +48,10 @@ function gateNext(id, gate) {
 const diffInput = { id: z.string().describe('Unit id.'), diff: z.string().optional().describe('Unified diff; defaults to the worktree against the remote base.') };
 export const analyzeTool = defineTool({
     name: 'analyze',
-    description: 'Deterministic analyses over the diff and PR prose; each one records its result as evidence of the matching kind.',
+    description: 'Deterministic analyses over the diff and PR prose; pii, claims and criteria_map record evidence, impact and reach are informational.',
     actions: {
         impact: action({
-            describe: 'Impact radius: changed exports and the files importing them; records impact evidence.',
+            describe: 'Impact radius: changed exports and the files importing them (informational; records nothing).',
             schema: z.object(diffInput),
             handler: async (input, ctx) => withUnit(ctx, input.id, (unit, worktree) => {
                 const diff = diffFor(input.diff, unit, worktree);
@@ -67,9 +67,8 @@ export const analyzeTool = defineTool({
                             byFile.get(e.file).add(c.file);
                 const changed = [...byFile.entries()].map(([p, consumers]) => ({ path: p, consumers: [...consumers].sort() }));
                 const summary = `${r.changed_exports.length} changed export(s) in ${changed.length} file(s); ${r.consumers.length} consumer file(s)`;
-                record(unit, ctx, 'impact', { changed, summary });
                 const lines = [summary, ...r.changed_exports.map((e) => `- ${e.file}: ${e.name}`), ...(r.consumers.length ? ['consumers:', ...r.consumers.map((c) => `- ${c.file} imports ${c.imports.join(', ')}`)] : [])];
-                return result(lines.join('\n'), envelope(true, summary, { id: unit.id, ...r, changed }, gateNext(unit.id, 'impact_recorded')));
+                return result(lines.join('\n'), envelope(true, summary, { id: unit.id, ...r, changed }));
             }),
         }),
         pii: action({
@@ -103,7 +102,7 @@ export const analyzeTool = defineTool({
             }),
         }),
         reach: action({
-            describe: 'Coverage-reach audit: new files, exports and routes and the e2e/mock/contract subject files that mention them; records reach_audit evidence.',
+            describe: 'Coverage-reach audit: new files, exports and routes and the e2e/mock/contract subject files that mention them (informational; records nothing).',
             schema: z.object({
                 ...diffInput,
                 subjects: z.object({ e2e_globs: z.array(z.string()), mock_globs: z.array(z.string()), contract_globs: z.array(z.string()) }).optional().describe('Subject-list globs; defaults cover common layouts.'),
@@ -113,11 +112,9 @@ export const analyzeTool = defineTool({
                 if ('error' in diff)
                     return fail(`analyze reach: ${diff.error}`);
                 const surfaces = reachAudit(diff, input.subjects ?? DEFAULT_SUBJECTS, worktree);
-                const payload = { surfaces: surfaces.map((s) => ({ surface: s.surface, subjects: s.covered_by.map((name, i) => ({ kind: s.covered_kinds[i], name, extended: true })) })) };
-                record(unit, ctx, 'reach_audit', payload);
                 const uncovered = surfaces.filter((s) => !s.covered_by.length);
                 const lines = surfaces.length ? surfaces.map((s) => `- ${s.kind} ${s.surface}: ${s.covered_by.length ? s.covered_by.join(', ') : 'UNCOVERED'}`) : ['No new surfaces in this diff.'];
-                return result(lines.join('\n'), envelope(uncovered.length === 0, uncovered.length ? `${uncovered.length} uncovered surface(s)` : `${surfaces.length} surface(s) covered`, { id: unit.id, surfaces, uncovered: uncovered.map((s) => s.surface) }, gateNext(unit.id, 'reach_audit_recorded')));
+                return result(lines.join('\n'), envelope(uncovered.length === 0, uncovered.length ? `${uncovered.length} uncovered surface(s)` : `${surfaces.length} surface(s) covered`, { id: unit.id, surfaces, uncovered: uncovered.map((s) => s.surface) }));
             }),
         }),
         criteria_map: action({

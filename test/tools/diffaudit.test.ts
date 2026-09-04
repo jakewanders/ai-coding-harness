@@ -92,7 +92,7 @@ describe('diffaudit tool', () => {
 });
 
 describe('evidence synthesize and the challenge gates', () => {
-  const BASE = ['criteria_forward', 'criteria_reverse', 'architecture', 'security', 'tests', 'performance', 'diffaudit', 'ledger', 'adversarial'];
+  const BASE = ['criteria_forward', 'criteria_reverse', 'adversarial', 'diffaudit', 'ledger'];
 
   async function recordColumns(ctx: ReturnType<typeof makeCtx>, id: string, overrides: Record<string, unknown[]> = {}) {
     for (const column of BASE) {
@@ -111,13 +111,13 @@ describe('evidence synthesize and the challenge gates', () => {
     let gate = await dispatch(evidenceTool, { action: 'check', id: 'DA-1', gate: 'review_verdict_ship' }, ctx);
     expect(gate.envelope.data).toMatchObject({ status: 'fail' });
 
-    await recordColumns(ctx, 'DA-1', { security: [{ severity: 'major', text: 'unescaped input' }] });
+    await recordColumns(ctx, 'DA-1', { adversarial: [{ severity: 'major', text: 'unescaped input' }] });
     const attention = await dispatch(evidenceTool, { action: 'synthesize', id: 'DA-1' }, ctx);
     expect(attention.envelope.data).toMatchObject({ verdict: 'needs_attention', counts: { major: 1 } });
     expect(JSON.parse(fs.readFileSync(path.join(dir, 'reviews', 'cycle-0.json'), 'utf8'))).toMatchObject({ cycle: 0, verdict: 'needs_attention' });
     expect(readState(dir).reviews).toEqual({ 0: 'needs_attention' });
 
-    await dispatch(evidenceTool, { action: 'record', id: 'DA-1', kind: 'review_column', payload: { column: 'security', findings: [] } }, ctx);
+    await dispatch(evidenceTool, { action: 'record', id: 'DA-1', kind: 'review_column', payload: { column: 'adversarial', findings: [] } }, ctx);
     const ship = await dispatch(evidenceTool, { action: 'synthesize', id: 'DA-1' }, ctx);
     expect(ship.envelope.ok).toBe(true);
     expect(ship.envelope.data).toMatchObject({ verdict: 'ship' });

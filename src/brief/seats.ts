@@ -9,14 +9,8 @@ export function seatWiring(config: HarnessConfig): Record<SeatName, string[] | '
   const out = {} as Record<SeatName, string[] | 'unwired'>;
   for (const seat of SEAT_NAMES) {
     const names: string[] = [];
-    if (seat === 'counterweight') {
-      const cw = seats.counterweight;
-      if (cw?.cli) names.push(`cli:${cw.cli}`);
-      if (cw?.http) names.push(`http:${cw.http}`);
-    } else {
-      const entry = seats[seat] as Record<string, string[] | undefined> | undefined;
-      for (const list of Object.values(entry ?? {})) for (const name of list ?? []) if (!names.includes(name)) names.push(name);
-    }
+    const entry = seats[seat] as Record<string, string[] | undefined> | undefined;
+    for (const list of Object.values(entry ?? {})) for (const name of list ?? []) if (!names.includes(name)) names.push(name);
     out[seat] = names.length ? names : 'unwired';
   }
   return out;

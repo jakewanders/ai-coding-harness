@@ -6,25 +6,22 @@ import { REVIEW_COLUMNS, requiredColumns } from '../../src/review/columns.js';
 import { synthesize, type ReviewColumnRecord } from '../../src/review/synthesize.js';
 
 const col = (column: string, findings: Array<{ severity: 'blocker' | 'major' | 'minor' | 'note'; text: string }> = []): ReviewColumnRecord => ({ column, findings });
-const BASE = ['criteria_forward', 'criteria_reverse', 'architecture', 'security', 'tests', 'performance', 'diffaudit', 'ledger', 'adversarial'];
+const BASE = ['criteria_forward', 'criteria_reverse', 'adversarial', 'diffaudit', 'ledger'];
 const all = BASE.map((c) => col(c));
 
 describe('REVIEW_COLUMNS', () => {
-  it('lists the thirteen spec columns with their capability requirements', () => {
-    expect(REVIEW_COLUMNS.map((c) => c.id)).toEqual(['criteria_forward', 'criteria_reverse', 'architecture', 'security', 'tests', 'performance', 'component_library', 'accessibility', 'diffaudit', 'ledger', 'adversarial', 'counterweight', 'browser']);
+  it('lists the six lean columns with their capability requirements', () => {
+    expect(REVIEW_COLUMNS.map((c) => c.id)).toEqual(['criteria_forward', 'criteria_reverse', 'adversarial', 'diffaudit', 'ledger', 'browser']);
     const req = Object.fromEntries(REVIEW_COLUMNS.map((c) => [c.id, c.requires ?? null]));
-    expect(req.component_library).toBe('component_library');
-    expect(req.accessibility).toBe('browser_ui');
     expect(req.browser).toBe('browser_ui');
-    expect(req.counterweight).toBe('counterweight');
-    expect(req.security).toBeNull();
+    expect(req.adversarial).toBeNull();
   });
 
   it('derives the required set from capabilities, seat wiring and mode', () => {
     const thorough = resolveMode('thorough', DEFAULTS);
     expect(requiredColumns({ config: DEFAULTS, repo: 'local/x', mode: thorough })).toEqual(BASE);
-    const ui: HarnessConfig = { ...DEFAULTS, repos: { 'local/x': { capabilities: { browser_ui: true, component_library: true } } } };
-    expect(requiredColumns({ config: ui, repo: 'local/x', mode: thorough })).toEqual(expect.arrayContaining(['accessibility', 'browser', 'component_library']));
+    const ui: HarnessConfig = { ...DEFAULTS, repos: { 'local/x': { capabilities: { browser_ui: true } } } };
+    expect(requiredColumns({ config: ui, repo: 'local/x', mode: thorough })).toEqual([...BASE, 'browser']);
   });
 });
 

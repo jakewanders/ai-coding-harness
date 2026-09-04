@@ -77,8 +77,7 @@ describe('unit report and route', () => {
     const retry = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
     expect(retry.envelope.data).toMatchObject({ decision: 'retry', next: 'build', verdict: 'needs_attention' });
     expect(readState(dir).stage).toBe('build');
-    // reach_audit_recorded still guards review until the gate prune removes it.
-    writeState(dir, { ...readState(dir), stage: 'review', evidence: [{ kind: 'reach_audit', cycle: 0, recorded_at: '2026-09-04T00:00:00.000Z', payload: { surfaces: [] } }] });
+    writeState(dir, { ...readState(dir), stage: 'review' });
     await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'review', outcome: 'done', summary: 'clean', verdict: 'ship' }, ctx);
     const onward = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
     expect(onward.envelope.data).toMatchObject({ decision: 'proceed', next: 'publish' });

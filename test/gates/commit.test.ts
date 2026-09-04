@@ -38,6 +38,13 @@ describe('registered gates', () => {
     expect(ids.defect_repro_before_fix).toMatchObject({ stage: 'build', severity: 'block' });
     expect(ids.pii_audit_clean).toMatchObject({ stage: 'build', severity: 'block' });
     expect(ids.pr_recorded).toMatchObject({ stage: 'close', severity: 'block' });
+    expect(ids.review_verdict_ship).toMatchObject({ stage: 'review', severity: 'block' });
+    expect(ids.ledger_reverified).toMatchObject({ stage: 'review', severity: 'warn' });
+    expect(ids.walkthrough_done).toMatchObject({ stage: 'publish', severity: 'block', requires: 'browser_ui' });
+    expect(Object.keys(ids).sort()).toEqual([
+      'check_command_green', 'claims_audited', 'criteria_validated', 'defect_repro_before_fix', 'ledger_reverified',
+      'pii_audit_clean', 'pr_recorded', 'review_verdict_ship', 'self_critique_recorded', 'walkthrough_done',
+    ]);
   });
 });
 

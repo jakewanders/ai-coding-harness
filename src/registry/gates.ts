@@ -71,7 +71,7 @@ export function hasCapability(config: HarnessConfig, repo: string, capability: s
   return Boolean(caps?.[capability]);
 }
 
-/** Is the seat wired (tool names, or cli/http for counterweight)? */
+/** Is the seat wired with at least one tool name? */
 export function hasSeat(config: HarnessConfig, seat: string): boolean {
   if (!(SEAT_NAMES as readonly string[]).includes(seat)) return false;
   return seatWiring(config)[seat as SeatName] !== 'unwired';

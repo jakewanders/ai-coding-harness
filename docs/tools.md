@@ -46,12 +46,12 @@ Requirement context for a unit: record the normalized requirement, pin the sourc
 
 ## `analyze`
 
-Deterministic analyses over the diff and PR prose; each one records its result as evidence of the matching kind. Actions: impact, pii, claims, reach, criteria_map.
+Deterministic analyses over the diff and PR prose; pii, claims and criteria_map record evidence, impact and reach are informational. Actions: impact, pii, claims, reach, criteria_map.
 
-- `impact` — Impact radius: changed exports and the files importing them; records impact evidence.
+- `impact` — Impact radius: changed exports and the files importing them (informational; records nothing).
 - `pii` — Personal-data audit over added lines; records pii evidence (empty findings means clean).
 - `claims` — Extract assertive claims from PR prose (default: drafts/pr-body.md) and record them as unverified claims evidence.
-- `reach` — Coverage-reach audit: new files, exports and routes and the e2e/mock/contract subject files that mention them; records reach_audit evidence.
+- `reach` — Coverage-reach audit: new files, exports and routes and the e2e/mock/contract subject files that mention them (informational; records nothing).
 - `criteria_map` — Map acceptance criteria to hunks by keyword overlap; records a provisional criteria_validation (matched criteria still need real proof).
 
 ## `evidence`

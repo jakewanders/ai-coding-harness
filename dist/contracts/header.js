@@ -6,7 +6,7 @@ import { z } from 'zod';
  * before any prose. Published in docs/brief-contract.md.
  */
 export const BRIEF_CONTRACT = 'harness-brief/1';
-export const SEAT_NAMES = ['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot', 'counterweight'];
+export const SEAT_NAMES = ['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot'];
 export const SEVERITIES = ['block', 'warn', 'off'];
 export const GATE_STATUSES = ['pass', 'fail', 'n/a'];
 export const ConfigErrorSchema = z.object({
@@ -33,7 +33,6 @@ export const HeaderSchema = z.object({
         design: SeatWiringSchema,
         chat: SeatWiringSchema,
         reviewbot: SeatWiringSchema,
-        counterweight: SeatWiringSchema,
     }).strict(),
     capabilities: z.record(z.string(), z.unknown()),
     gates: z.array(z.object({

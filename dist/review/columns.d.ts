@@ -3,19 +3,15 @@ import type { ModeDef } from '../modes.js';
 export interface ReviewColumnDef {
     id: string;
     describe: string;
-    /** Capability (or the `counterweight` seat) the column needs. */
+    /** Repo capability the column needs. */
     requires?: string;
 }
-/** The thirteen review columns from spec section 8. */
+/** The six lean review columns. */
 export declare const REVIEW_COLUMNS: ReviewColumnDef[];
 export interface RequiredColumnsInput {
     config: HarnessConfig;
     repo: string;
-    mode: ModeDef;
+    mode?: ModeDef;
 }
-/**
- * Columns a synthesized verdict needs: every column whose requirement is met.
- * The counterweight column is required only when its seat is wired and the
- * mode keeps counterweight_consulted at block.
- */
-export declare function requiredColumns({ config, repo, mode }: RequiredColumnsInput): string[];
+/** Columns a synthesized verdict needs: every column whose capability requirement is met. */
+export declare function requiredColumns({ config, repo }: RequiredColumnsInput): string[];

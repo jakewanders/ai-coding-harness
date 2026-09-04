@@ -1,26 +1,24 @@
-import { EVIDENCE_KINDS } from '../evidence/kinds.js';
+import fs from 'node:fs';
+import path from 'node:path';
 import { defineGate, registerGate } from '../registry/gates.js';
-import { recordsThisCycle } from './_shared.js';
-export const impactRecorded = registerGate(defineGate({
-    id: 'impact_recorded',
+export const reviewVerdictShip = registerGate(defineGate({
+    id: 'review_verdict_ship',
     stage: 'review',
-    description: 'An impact record (changed paths and their consumers) exists for this cycle.',
-    severity: 'warn',
-    check: (ctx) => (recordsThisCycle(ctx, 'impact').length ? { pass: true } : { pass: false, remedy: `${EVIDENCE_KINDS.impact.remedy}; analyze impact computes it from the diff` }),
-}));
-export const reachAuditRecorded = registerGate(defineGate({
-    id: 'reach_audit_recorded',
-    stage: 'review',
-    description: 'A reach_audit record for this cycle where every new surface is covered by a subject list or explicitly waived with a reason.',
+    description: "The current cycle's synthesized review verdict is ship.",
     severity: 'block',
     check: (ctx) => {
-        const latest = recordsThisCycle(ctx, 'reach_audit').at(-1);
-        if (!latest)
-            return { pass: false, remedy: `${EVIDENCE_KINDS.reach_audit.remedy}; analyze reach computes it from the diff` };
-        const surfaces = (latest.payload?.surfaces ?? []);
-        const uncovered = surfaces.filter((s) => !(s.subjects?.length > 0) && !(s.waived === true && s.reason?.trim()));
-        if (!uncovered.length)
+        let verdict = ctx.state.reviews?.[ctx.state.cycle];
+        if (!verdict) {
+            const file = path.join(ctx.unitDir, 'reviews', `cycle-${ctx.state.cycle}.json`);
+            if (fs.existsSync(file)) {
+                try {
+                    verdict = JSON.parse(fs.readFileSync(file, 'utf8')).verdict;
+                }
+                catch { /* unreadable review file counts as missing */ }
+            }
+        }
+        if (verdict === 'ship')
             return { pass: true };
-        return { pass: false, remedy: `uncovered surface(s): ${uncovered.map((s) => s.surface).join(', ')}; extend the e2e/mock/contract subject lists or set waived: true with a reason` };
+        return { pass: false, remedy: verdict ? `review verdict for cycle ${ctx.state.cycle} is ${verdict}; fix the findings in build and re-review, then evidence synthesize` : `no synthesized review for cycle ${ctx.state.cycle}; record the review columns and run evidence synthesize` };
     },
 }));

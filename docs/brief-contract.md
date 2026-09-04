@@ -20,7 +20,6 @@ seats:
   design: unwired
   chat: unwired
   reviewbot: unwired
-  counterweight: unwired
 capabilities:
   isolation: worktree
   browser_ui: true
@@ -44,7 +43,7 @@ config_errors:
 | `worktree` | string or null | Home-relative path of the unit's worktree, `null` when working in place. |
 | `base_branch` | string | Branch the unit will merge into. |
 | `root` | string | Absolute plugin install root. Prose refers to it as `@root/`. |
-| `seats` | map of seat → list of tool names or `unwired` | Which session tools fill each capability seat: `tracker`, `codehost`, `docs`, `design`, `chat`, `reviewbot`, `counterweight`. |
+| `seats` | map of seat → list of tool names or `unwired` | Which session tools fill each capability seat: `tracker`, `codehost`, `docs`, `design`, `chat`, `reviewbot`. |
 | `capabilities` | map | Repo profile capabilities such as `isolation` and `browser_ui`. |
 | `gates` | list of `{ id, severity, status }` | Gates for this stage. `severity` is `block`, `warn`, or `off`; `status` is `pass`, `fail`, or `n/a`. |
 | `docs` | list of absolute paths | Convention documents selected for this unit. |

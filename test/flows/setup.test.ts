@@ -34,7 +34,6 @@ describe('mapToolsToSeats', () => {
     expect(seats.design).toEqual(['mcp__figma__get_file']);
     expect(seats.chat).toEqual(['mcp__slack__post_message']);
     expect(seats.reviewbot).toEqual(['mcp__coderabbit__get_review_status']);
-    expect(seats.counterweight).toEqual([]);
     const all = Object.values(seats).flat();
     expect(all).not.toContain('mcp__weather__forecast');
     expect(all).not.toContain('Bash');
@@ -51,7 +50,7 @@ describe('mapToolsToSeats', () => {
     expect(seats.reviewbot).toEqual(['bot__review_status']);
     const all = Object.values(seats).flat();
     expect(new Set(all).size).toBe(all.length);
-    expect(mapToolsToSeats([])).toEqual({ tracker: [], codehost: [], docs: [], design: [], chat: [], reviewbot: [], counterweight: [] });
+    expect(mapToolsToSeats([])).toEqual({ tracker: [], codehost: [], docs: [], design: [], chat: [], reviewbot: [] });
   });
 });
 
@@ -78,7 +77,6 @@ describe('setup brief', () => {
     expect(r.text).toContain('system doctor');
     expect(r.text).toContain('system seats');
     expect(r.text).toMatch(/reviewbot/);
-    expect(r.text).toMatch(/counterweight/);
     expect(r.text).toMatch(/kits/);
     expect(r.text).toMatch(/environments/);
     expect(r.text).toContain('system config');

@@ -52,20 +52,6 @@ function evidenceSection(state) {
     }
     const pii = latestThisCycle(state, 'pii')?.payload;
     lines.push(pii ? `- personal-data audit: ${pii.findings?.length ? plural(pii.findings.length, 'finding') : 'clean'}` : '- personal-data audit: not recorded');
-    const impact = latestThisCycle(state, 'impact')?.payload;
-    if (impact) {
-        const consumers = new Set((impact.changed ?? []).flatMap((c) => c.consumers ?? []));
-        lines.push(`- impact: ${plural(impact.changed?.length ?? 0, 'changed path')}, ${plural(consumers.size, 'consumer')}`);
-    }
-    else
-        lines.push('- impact: not recorded');
-    const reach = latestThisCycle(state, 'reach_audit')?.payload;
-    if (reach) {
-        const subjects = (reach.surfaces ?? []).flatMap((s) => s.subjects ?? []);
-        lines.push(`- reach: ${plural(reach.surfaces?.length ?? 0, 'surface')}, ${subjects.filter((s) => s.extended).length}/${subjects.length} subject lists extended`);
-    }
-    else
-        lines.push('- reach: not recorded');
     return lines;
 }
 function waiversSection(state) {

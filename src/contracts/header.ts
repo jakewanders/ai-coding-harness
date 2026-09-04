@@ -9,7 +9,7 @@ import { z } from 'zod';
 
 export const BRIEF_CONTRACT = 'harness-brief/1';
 
-export const SEAT_NAMES = ['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot', 'counterweight'] as const;
+export const SEAT_NAMES = ['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot'] as const;
 export type SeatName = (typeof SEAT_NAMES)[number];
 
 export const SEVERITIES = ['block', 'warn', 'off'] as const;
@@ -74,7 +74,6 @@ export const HeaderSchema: z.ZodType<BriefHeader> = z.object({
     design: SeatWiringSchema,
     chat: SeatWiringSchema,
     reviewbot: SeatWiringSchema,
-    counterweight: SeatWiringSchema,
   }).strict(),
   capabilities: z.record(z.string(), z.unknown()),
   gates: z.array(

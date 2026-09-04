@@ -22,16 +22,13 @@ const finding = { severity: 'major', text: 'x', addressed: false };
 const SAMPLES: Record<EvidenceKind, { valid: unknown; invalid: unknown }> = {
   self_critique: { valid: { findings: [finding] }, invalid: { findings: [{ severity: 'huge', text: 'x', addressed: false }] } },
   defect_repro: { valid: { test_location: 'test/a.test.ts', command: 'npm test', red_output: 'FAIL 1' }, invalid: { test_location: 'x', command: 'y' } },
-  reach_audit: { valid: { surfaces: [{ surface: 'POST /x', subjects: [{ kind: 'e2e', name: 'x.spec', extended: true }] }] }, invalid: { surfaces: [{ surface: 'x', subjects: [{ kind: 'nope', name: 'x', extended: true }] }] } },
   screen_verdict: { valid: { dimension: 'technical', model: 'primary', verdict: 'valid', reasons: ['clear'] }, invalid: { dimension: 'technical', model: 'primary', verdict: 'maybe', reasons: [] } },
-  impact: { valid: { changed: [{ path: 'src/a.ts', consumers: ['src/b.ts'] }], summary: 'one consumer' }, invalid: { changed: 'src/a.ts' } },
   pii: { valid: { findings: [{ file: 'src/a.ts', line: 3, sink: 'log', text: 'email' }] }, invalid: { findings: [{ file: 'src/a.ts', line: 3, sink: 'tv', text: 'x' }] } },
   criteria_validation: { valid: { results: [{ criterion: 'AC-1', status: 'proven', proof: 'test x' }] }, invalid: { results: [{ criterion: 'AC-1', status: 'kinda' }] } },
   claims: { valid: { claims: [{ text: 'faster', status: 'verified', evidence: 'bench' }] }, invalid: { claims: [{ text: 'faster' }] } },
   waiver: { valid: { gate: 'pii_audit_clean', rationale: 'test fixture data only' }, invalid: { gate: 'pii_audit_clean' } },
   browser_findings: { valid: { criteria: [{ id: 'AC-1', result: 'pass', notes: 'ok', screenshots: [] }], runtime_errors: [], e2e: null, out_of_scope: [] }, invalid: { criteria: [{ id: 'AC-1', result: 'meh', notes: '', screenshots: [] }], runtime_errors: [], e2e: null, out_of_scope: [] } },
-  counterweight: { valid: { provider: 'fallback-stub', findings: [{ class: 'naming', severity: 'note', text: 'x' }] }, invalid: { findings: [] } },
-  review_column: { valid: { column: 'security', findings: [{ severity: 'blocker', text: 'x', path: 'src/a.ts', line: 1 }] }, invalid: { column: 'vibes', findings: [] } },
+  review_column: { valid: { column: 'adversarial', findings: [{ severity: 'blocker', text: 'x', path: 'src/a.ts', line: 1 }] }, invalid: { column: 'vibes', findings: [] } },
 };
 
 describe('EVIDENCE_KINDS', () => {
@@ -50,7 +47,6 @@ describe('EVIDENCE_KINDS', () => {
   it('accepts explicit empty findings lists', () => {
     expect(EVIDENCE_KINDS.self_critique.schema.safeParse({ findings: [] }).success).toBe(true);
     expect(EVIDENCE_KINDS.pii.schema.safeParse({ findings: [] }).success).toBe(true);
-    expect(EVIDENCE_KINDS.reach_audit.schema.safeParse({ surfaces: [] }).success).toBe(true);
   });
 });
 

@@ -26,20 +26,15 @@ async function gate(ctx: ReturnType<typeof makeCtx>, id: string, gateId: string)
 }
 
 describe('analyze impact', () => {
-  it('computes consumers from the given diff, records impact evidence, and flips the gate', async () => {
+  it('computes consumers from the given diff and records nothing', async () => {
     const ctx = await unitCtx({ 'src/util/format.ts': 'export function formatMoney() {}\n', 'src/cart.ts': "import { formatMoney } from './util/format.js';\n" });
     const dir = unitDirFor(ctx, 'AN-1');
-    writeState(dir, { ...readState(dir), stage: 'review' });
-    expect(await gate(ctx, 'AN-1', 'impact_recorded')).toBe('fail');
     const r = await dispatch(analyzeTool, { action: 'impact', id: 'AN-1', diff: NEW_EXPORT_DIFF }, ctx);
     expect(r.envelope.ok).toBe(true);
     expect(r.envelope.data).toMatchObject({ changed_exports: [{ file: 'src/util/format.ts', name: 'formatMoney' }], consumers: [{ file: 'src/cart.ts', imports: ['formatMoney'] }] });
-    const state = readState(dir);
-    expect(state.evidence.filter((e) => e.kind === 'impact')).toHaveLength(1);
-    expect(state.evidence[0]!.payload).toMatchObject({ changed: [{ path: 'src/util/format.ts', consumers: ['src/cart.ts'] }] });
-    expect(r.envelope.next[0]).toMatchObject({ tool: 'evidence', action: 'check' });
-    expect(r.envelope.next[0]!.why).toContain('impact_recorded');
-    expect(await gate(ctx, 'AN-1', 'impact_recorded')).toBe('pass');
+    expect(readState(dir).evidence).toEqual([]);
+    expect(r.envelope.next).toEqual([]);
+    expect(r.text).toContain('src/cart.ts');
   });
 
   it('reads the diff from git when none is given', async () => {
@@ -91,21 +86,17 @@ describe('analyze claims', () => {
 });
 
 describe('analyze reach', () => {
-  it('records surfaces with subjects and the gate fails while a surface is uncovered', async () => {
+  it('reports surfaces with their covering subject files and records nothing', async () => {
     const ctx = await unitCtx({ 'e2e/export.spec.ts': "request('/api/export')\n", 'README.md': 'x' });
     const dir = unitDirFor(ctx, 'AN-1');
-    writeState(dir, { ...readState(dir), stage: 'review' });
     const r = await dispatch(analyzeTool, { action: 'reach', id: 'AN-1', diff: ROUTE_DIFF }, ctx);
     expect(r.envelope.ok).toBe(false);
     const surfaces = (r.envelope.data as { surfaces: Array<{ surface: string; covered_by: string[] }> }).surfaces;
     expect(surfaces.find((s) => s.surface === '/api/export')!.covered_by).toEqual(['e2e/export.spec.ts']);
     expect(surfaces.find((s) => s.surface === '/api/export/csv')!.covered_by).toEqual([]);
-    expect(await gate(ctx, 'AN-1', 'reach_audit_recorded')).toBe('fail');
-    const payload = readState(dir).evidence.find((e) => e.kind === 'reach_audit')!.payload as { surfaces: Array<{ surface: string; subjects: Array<{ kind: string; name: string; extended: boolean }> }> };
-    expect(payload.surfaces.find((s) => s.surface === '/api/export')!.subjects).toEqual([{ kind: 'e2e', name: 'e2e/export.spec.ts', extended: true }]);
-    const waived = payload.surfaces.map((s) => (s.subjects.length ? s : { ...s, waived: true, reason: 'internal helper, no external surface' }));
-    await dispatch(evidenceTool, { action: 'record', id: 'AN-1', kind: 'reach_audit', payload: { surfaces: waived } }, ctx);
-    expect(await gate(ctx, 'AN-1', 'reach_audit_recorded')).toBe('pass');
+    expect((r.envelope.data as { uncovered: string[] }).uncovered).toContain('/api/export/csv');
+    expect(readState(dir).evidence).toEqual([]);
+    expect(r.envelope.next).toEqual([]);
   });
 });
 

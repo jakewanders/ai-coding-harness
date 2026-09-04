@@ -26,7 +26,6 @@ export const render = (ctx) => {
         '## 3. Questions',
         '',
         '- reviewbot: is a review bot installed on the repo? Which tool reports its status and threads?',
-        '- counterweight: is there a second-opinion model available as a CLI command or an HTTP endpoint (key in ~/.harness/.env as COUNTERWEIGHT_API_KEY)? Otherwise the declared same-model stub is used.',
         '- kits: which kits should load (for example web-ui for browser repos)? They must be findable on the kit search path.',
         '- environments: which urls exist for sut, reference and production, and what env-var prefix holds their credentials?',
         '',

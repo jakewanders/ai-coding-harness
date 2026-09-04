@@ -30,7 +30,6 @@ function sampleHeader(): BriefHeader {
       design: 'unwired',
       chat: 'unwired',
       reviewbot: 'unwired',
-      counterweight: 'unwired',
     },
     capabilities: { isolation: 'worktree', browser_ui: true },
     gates: [{ id: 'self_critique_recorded', severity: 'block', status: 'pass' }],
@@ -59,8 +58,8 @@ describe('HeaderSchema', () => {
     expect(() => HeaderSchema.parse({ ...h, gates: [{ id: 'x', severity: 'block', status: 'maybe' }] })).toThrow();
   });
 
-  it('lists the seven seats in spec order', () => {
-    expect(SEAT_NAMES).toEqual(['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot', 'counterweight']);
+  it('lists the six seats in spec order', () => {
+    expect(SEAT_NAMES).toEqual(['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot']);
   });
 });
 

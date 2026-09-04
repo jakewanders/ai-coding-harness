@@ -5,7 +5,7 @@ import { z } from 'zod';
  * before any prose. Published in docs/brief-contract.md.
  */
 export declare const BRIEF_CONTRACT = "harness-brief/1";
-export declare const SEAT_NAMES: readonly ['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot', 'counterweight'];
+export declare const SEAT_NAMES: readonly ['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot'];
 export type SeatName = (typeof SEAT_NAMES)[number];
 export declare const SEVERITIES: readonly ['block', 'warn', 'off'];
 export type Severity = (typeof SEVERITIES)[number];

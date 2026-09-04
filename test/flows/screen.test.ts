@@ -57,7 +57,7 @@ describe('screen brief', () => {
     for (const combo of ['"dimension": "technical", "model": "primary"', '"dimension": "technical", "model": "second"', '"dimension": "product", "model": "primary"', '"dimension": "product", "model": "second"']) {
       expect(r.text).toContain(combo);
     }
-    expect(r.text).toMatch(/counterweight/i);
+    expect(r.text).toMatch(/second (call|model|framing)/i);
     expect(r.text).toMatch(/consensus/i);
     expect(r.text).toContain('In Analysis');
     expect(r.text).toContain('SC-1');
