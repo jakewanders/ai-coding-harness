@@ -23,7 +23,7 @@ unit brief { "id": "<id>", "stage": "screen" }
 ## Procedure
 
 1. Pin the ticket text (`spec pin`) so the verdicts are about what was actually written.
-2. Make the technical and product calls yourself as the primary model; obtain the second-model calls through the counterweight seat (the brief says whether it is wired or the declared stub).
+2. Make the technical and product calls as the primary model; then make the second calls as a second framing, arguing the opposite case first, and say so in their reasons.
 3. Record all four with `evidence record` (kind `screen_verdict`), then list them and compute the consensus as the brief describes.
 4. Report the verdict, agreement and dissent; propose the status hint only through the tracker seat and only with the user's approval.
 

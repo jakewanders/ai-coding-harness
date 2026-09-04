@@ -21,7 +21,7 @@ unit brief { "stage": "setup" }
 
 1. `system doctor` and explain the report in plain words.
 2. `system seats` with every visible tool name; confirm the mapping with the user.
-3. Ask about the review bot, the counterweight model, kits and environments.
+3. Ask about the review bot, kits and environments.
 4. Show the proposal from `system config` in propose mode and revise it with the user.
 5. Write it with `system config` in write mode only after the user confirms.
 

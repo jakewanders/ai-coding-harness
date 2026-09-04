@@ -70,7 +70,8 @@ describe('convoy brief', () => {
     const r = await dispatch(unitTool, { action: 'brief', stage: 'convoy', quiet: true }, ctx);
     expect(r.envelope.ok).toBe(true);
     expect(r.text).toContain('# convoy');
-    expect(r.text).toMatch(/scope.*plan/i);
+    expect(r.text).toMatch(/scope only/i);
+    expect(r.text).toContain('Files:');
     expect(r.text).toMatch(/cluster/i);
     expect(r.text).toMatch(/approv/i);
     expect(r.text).toMatch(/checkpoint/i);

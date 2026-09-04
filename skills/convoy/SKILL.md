@@ -1,6 +1,6 @@
 ---
 name: convoy
-description: "Batch several units: scope and plan each, cluster by predicted file overlap, get the grouping approved, then pilot the groups sequentially."
+description: "Batch several units: scope each, cluster by predicted file overlap, get the grouping approved, then pilot the groups sequentially."
 flow: convoy
 argument-hint: "<source> [id] [mode]"
 ---
@@ -20,7 +20,7 @@ unit brief { "stage": "convoy" }
 
 ## Procedure
 
-1. Start each unit and run scope then plan for it through the pilot loop, stopping after plan.
+1. Start each unit and run scope for it through the pilot loop, stopping after scope; the requirement's `Files:` line feeds the clustering.
 2. Cluster by predicted file overlap as the brief describes; present the grouping and wait for approval.
 3. Link siblings with `unit link`, then pilot each approved group sequentially with @root/skills/pilot/SKILL.md.
 4. Finish with one wrap-up per unit and a batch summary.
