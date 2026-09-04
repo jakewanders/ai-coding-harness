@@ -336,7 +336,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 - `advance` from `scope` to `plan` succeeds with no gates; a fake blocking gate registered in the test makes `advance` return `ok: false` with the remedy.
 - `explain` never changes the state file (hash before and after).
 
-- [ ] Task 11
+- [x] Task 11
 
 ### Task 12: `spec` tool: requirement context
 
