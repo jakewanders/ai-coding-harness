@@ -492,7 +492,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** a rule fixture hits an added line and not a removed one; synthesis verdict table (blocker → not_ready; missing required column → not_ready; major only → needs_attention; minors → ship); `challenge_passed` stays true after a subsequent `revise` cycle.
 
-- [ ] Task 21
+- [x] Task 21
 
 ### Task 22: `ledger` tool and re-verification
 
