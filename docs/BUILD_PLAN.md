@@ -352,7 +352,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** round-trip of record/criteria/related through `get`; bug heuristic sets `kind: 'bug'`; explicit `kind` wins; criteria renumber on re-set.
 
-- [ ] Task 12
+- [x] Task 12
 
 ### Task 13: `exec` tool: command running with logs
 
