@@ -207,7 +207,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 - `renderHeader` output starts with ` ```yaml\ncontract: harness-brief/1` and parses with `yaml`.
 - `docs/brief-contract.md` contains every key of `BriefHeader` (test reads the doc and checks each key name appears).
 
-- [ ] Task 3
+- [x] Task 3
 
 ### Task 4: Vault paths and repo namespace
 
