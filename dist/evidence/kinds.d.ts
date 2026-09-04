@@ -59,16 +59,16 @@ export declare const ScreenVerdictSchema: z.ZodObject<{
         product: "product";
         technical: "technical";
     }>;
-    reviewer: z.ZodEnum<{
+    model: z.ZodEnum<{
         primary: "primary";
         second: "second";
     }>;
     verdict: z.ZodEnum<{
         invalid: "invalid";
-        needs_info: "needs_info";
+        unclear: "unclear";
         valid: "valid";
     }>;
-    rationale: z.ZodString;
+    reasons: z.ZodArray<z.ZodString>;
 }, z.core.$strict>;
 export declare const ImpactSchema: z.ZodObject<{
     changed: z.ZodArray<z.ZodObject<{

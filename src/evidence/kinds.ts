@@ -58,9 +58,9 @@ export const ReachAuditSchema = z.object({
 
 export const ScreenVerdictSchema = z.object({
   dimension: z.enum(['technical', 'product']),
-  reviewer: z.enum(['primary', 'second']),
-  verdict: z.enum(['valid', 'invalid', 'needs_info']),
-  rationale: nonEmpty,
+  model: z.enum(['primary', 'second']),
+  verdict: z.enum(['valid', 'invalid', 'unclear']),
+  reasons: z.array(z.string()),
 }).strict();
 
 export const ImpactSchema = z.object({
@@ -132,8 +132,8 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, EvidenceKindDef> = {
   },
   screen_verdict: {
     schema: ScreenVerdictSchema,
-    describe: 'A structured validity call on a ticket along one dimension by one reviewer.',
-    remedy: 'record screen_verdict with { dimension: technical|product, reviewer: primary|second, verdict: valid|invalid|needs_info, rationale }',
+    describe: 'A structured validity call on a ticket along one dimension by one model.',
+    remedy: 'record screen_verdict with { dimension: technical|product, model: primary|second, verdict: valid|invalid|unclear, reasons: [] }',
   },
   impact: {
     schema: ImpactSchema,

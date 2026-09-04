@@ -23,7 +23,7 @@ const SAMPLES: Record<EvidenceKind, { valid: unknown; invalid: unknown }> = {
   self_critique: { valid: { findings: [finding] }, invalid: { findings: [{ severity: 'huge', text: 'x', addressed: false }] } },
   defect_repro: { valid: { test_location: 'test/a.test.ts', command: 'npm test', red_output: 'FAIL 1' }, invalid: { test_location: 'x', command: 'y' } },
   reach_audit: { valid: { surfaces: [{ surface: 'POST /x', subjects: [{ kind: 'e2e', name: 'x.spec', extended: true }] }] }, invalid: { surfaces: [{ surface: 'x', subjects: [{ kind: 'nope', name: 'x', extended: true }] }] } },
-  screen_verdict: { valid: { dimension: 'technical', reviewer: 'primary', verdict: 'valid', rationale: 'clear' }, invalid: { dimension: 'technical', reviewer: 'primary', verdict: 'maybe', rationale: 'x' } },
+  screen_verdict: { valid: { dimension: 'technical', model: 'primary', verdict: 'valid', reasons: ['clear'] }, invalid: { dimension: 'technical', model: 'primary', verdict: 'maybe', reasons: [] } },
   impact: { valid: { changed: [{ path: 'src/a.ts', consumers: ['src/b.ts'] }], summary: 'one consumer' }, invalid: { changed: 'src/a.ts' } },
   pii: { valid: { findings: [{ file: 'src/a.ts', line: 3, sink: 'log', text: 'email' }] }, invalid: { findings: [{ file: 'src/a.ts', line: 3, sink: 'tv', text: 'x' }] } },
   criteria_validation: { valid: { results: [{ criterion: 'AC-1', status: 'proven', proof: 'test x' }] }, invalid: { results: [{ criterion: 'AC-1', status: 'kinda' }] } },
