@@ -21,7 +21,7 @@ export const StoreSchema = z.object({
 }).strict();
 
 export const SeatsSchema = z.object({
-  tracker: z.object({ fetch: strList.optional(), comment: strList.optional(), transition_hint: strList.optional() }).strict().optional(),
+  tracker: z.object({ fetch: strList.optional(), comment: strList.optional(), transition_hint: strList.optional(), create: strList.optional() }).strict().optional(),
   codehost: z.object({
     open_pr: strList.optional(), read_threads: strList.optional(), comment: strList.optional(),
     resolve_thread: strList.optional(), attach: strList.optional(),

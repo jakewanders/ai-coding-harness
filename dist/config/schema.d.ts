@@ -21,6 +21,7 @@ export declare const SeatsSchema: z.ZodObject<{
         fetch: z.ZodOptional<z.ZodArray<z.ZodString>>;
         comment: z.ZodOptional<z.ZodArray<z.ZodString>>;
         transition_hint: z.ZodOptional<z.ZodArray<z.ZodString>>;
+        create: z.ZodOptional<z.ZodArray<z.ZodString>>;
     }, z.core.$strict>>;
     codehost: z.ZodOptional<z.ZodObject<{
         open_pr: z.ZodOptional<z.ZodArray<z.ZodString>>;
@@ -185,6 +186,7 @@ export declare const HarnessConfigSchema: z.ZodObject<{
             fetch: z.ZodOptional<z.ZodArray<z.ZodString>>;
             comment: z.ZodOptional<z.ZodArray<z.ZodString>>;
             transition_hint: z.ZodOptional<z.ZodArray<z.ZodString>>;
+            create: z.ZodOptional<z.ZodArray<z.ZodString>>;
         }, z.core.$strict>>;
         codehost: z.ZodOptional<z.ZodObject<{
             open_pr: z.ZodOptional<z.ZodArray<z.ZodString>>;

@@ -5,3 +5,5 @@ import './shape.js';
 import './inspect.js';
 import './respond.js';
 import './aftercare.js';
+import './botprs.js';
+import './draft.js';
