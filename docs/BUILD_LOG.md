@@ -38,3 +38,45 @@ One line per completed task: `NN · title · tests <n> · note`.
 34 · setup flow · tests 387 · Tool names must be split on underscores before regex matching because \b does not fire inside mcp__name__verb; product names appear only in seat-heuristics.ts on allow-marked lines.
 35 · Plugin packaging and dist freshness · tests 394 · typescript 7 does not export bin/tsc through package exports, so check-dist spawns node on node_modules/typescript/bin/tsc by path; from here every iteration also runs npm run check:dist.
 36 · Token economy pass · tests 397 · No stage crossed the 4,000-token threshold (thorough total 9,986 estimated tokens), so no reference.md appendices were split out; the doc and the drift test keep the numbers honest.
+37 · Final audit and release readiness · tests 397 · Checklist run 2026-09-04; no [!] tasks were ever raised, so BLOCKERS.md has no entries to retry.
+
+## Task 37 checklist output (2026-09-04)
+
+```
+=== typecheck
+> tsc --noEmit -p tsconfig.json          exit=0
+=== test
+ Test Files  59 passed (59)
+      Tests  397 passed (397)
+=== build
+> tsc -p tsconfig.json                   exit=0
+=== check:dist
+dist/ is fresh
+=== gen:tools
+wrote docs/tools.md
+=== gates
+14 check_command_green self_critique_recorded defect_repro_before_fix pii_audit_clean impact_recorded reach_audit_recorded ledger_reverified counterweight_consulted review_verdict_ship challenge_passed walkthrough_done criteria_validated claims_audited pr_recorded
+=== tools/stages/flows
+tools 13 core 10 flows 10 stages 20
+=== docs freshness (test/contracts: envelope, header, inventory, render-empty, skills, plugin, token-budget)
+ Test Files  7 passed (7)
+      Tests  36 passed (36)
+=== vocabulary lint
+zero hits (test/lint/vocabulary.test.ts, part of the suite)
+=== blockers
+grep -c '^- \[!\]' docs/BUILD_PLAN.md -> 0; docs/BLOCKERS.md has no entries
+=== git status --porcelain (after the log commit)
+(empty)
+```
+
+## Closing summary
+
+Thirty-seven tasks over five milestones, each landed as `step NN` plus `log: step NN`
+with the suite green at every commit. The engine ships thirteen tools behind one dispatch
+and envelope, ten core stages and ten standalone flows behind one stage registry, fourteen
+gates behind one resolver that also feeds the hooks and the brief header, twelve evidence
+kinds, three run modes plus custom modes, dependency-free safety hooks that fail loud on an
+unbuilt checkout, kits with an example, and a hermetic 397-test suite with a vocabulary
+lint at zero. Tag `v0.1.0` is created locally and nothing was pushed.
+
+BUILD COMPLETE 2026-09-04 · tests 397 · tools 13 · stages 10 · flows 10 · gates 14 · tokens 9986

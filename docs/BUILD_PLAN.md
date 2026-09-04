@@ -670,4 +670,4 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 - `git tag v0.1.0` created locally. Nothing pushed.
 - Final line appended to `docs/BUILD_LOG.md`: `BUILD COMPLETE <date> · tests <n> · tools 13 · stages 10 · flows 10 · gates <n> · tokens <total>`.
 
-- [ ] Task 37
+- [x] Task 37
