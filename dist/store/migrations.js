@@ -1,0 +1,65 @@
+import { STATE_SCHEMA, UnitStateSchema } from './schema.js';
+export class UnknownSchemaError extends Error {
+    schema;
+    constructor(schema) {
+        super(`unknown state schema: ${JSON.stringify(schema)}`);
+        this.schema = schema;
+        this.name = 'UnknownSchemaError';
+    }
+}
+function isRecord(v) {
+    return typeof v === 'object' && v !== null && !Array.isArray(v);
+}
+/**
+ * Schema 0 is the synthetic pre-release shape: the stage lived under a
+ * differently named key and most collections were optional.
+ */
+const from0 = (raw) => {
+    const { phaseName, ...rest } = raw; // harness-lint: allow
+    const stage = rest.stage ?? phaseName ?? 'scope'; // harness-lint: allow
+    const now = new Date().toISOString();
+    return {
+        schema: 1,
+        id: rest.id,
+        repo: rest.repo ?? 'local/unknown',
+        tracked: rest.tracked ?? false,
+        source: rest.source ?? { kind: 'text', ref: null, pinned: false },
+        mode: rest.mode ?? 'thorough',
+        stage,
+        cycle: rest.cycle ?? 0,
+        kind: rest.kind ?? 'unknown',
+        worktree: rest.worktree ?? null,
+        branch: rest.branch ?? null,
+        base_branch: rest.base_branch ?? 'main',
+        evidence: rest.evidence ?? [],
+        commits: rest.commits ?? [],
+        runs: rest.runs ?? [],
+        pr: rest.pr ?? null,
+        timers: rest.timers ?? [],
+        answers: rest.answers ?? {},
+        challenge_passed: rest.challenge_passed ?? false,
+        created_at: rest.created_at ?? now,
+        updated_at: rest.updated_at ?? now,
+    };
+};
+/** `n → n+1` steps keyed by the schema they upgrade from. */
+export const MIGRATIONS = { 0: from0 };
+/** Lift any known state shape to the current schema and validate it. */
+export function migrate(raw) {
+    if (!isRecord(raw))
+        throw new UnknownSchemaError(raw);
+    let current = raw;
+    const initial = current.schema;
+    if (typeof initial !== 'number' || !Number.isInteger(initial) || initial < 0 || initial > STATE_SCHEMA) {
+        throw new UnknownSchemaError(initial);
+    }
+    let schema = initial;
+    while (schema < STATE_SCHEMA) {
+        const step = MIGRATIONS[schema];
+        if (!step)
+            throw new UnknownSchemaError(schema);
+        current = step(current);
+        schema = current.schema;
+    }
+    return UnitStateSchema.parse(current);
+}
