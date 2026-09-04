@@ -36,7 +36,7 @@ function splitAroundKnown(segment: string, knownIds: string[]): string[] {
 export function slugify(title: string): string {
   return title
     .normalize('NFKD')
-    .replace(/[̀-ͯ]/g, '')
+    .replace(/[\u0300-\u036f]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
