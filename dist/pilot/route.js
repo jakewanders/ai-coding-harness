@@ -2,6 +2,7 @@ import { nextStageFor } from '../registry/stages.js';
 export const MAX_REVIEW_CYCLES = 4;
 export const MAX_COMMIT_FAILURES = 2;
 export const MAX_OTHER_FAILURES = 1;
+export const MAX_BOT_ROUNDS = 2;
 function reportsFor(state, stage) {
     return (state.reports?.[stage] ?? []).filter((r) => r.cycle === state.cycle);
 }
@@ -10,9 +11,11 @@ function afterChallenge(state, mode, browserUi) {
 }
 /**
  * Decide what the conductor does next from the unit's reports for the
- * current stage and cycle. Pure: never mutates the state.
+ * current stage and cycle. Pure: never mutates the state. With a wired
+ * reviewbot seat, a publish report routes to the respond flow while the bot
+ * requests changes and the round cap is not exceeded.
  */
-export function routeNext(state, mode, browserUi = false) {
+export function routeNext(state, mode, browserUi = false, reviewbotWired = false) {
     const stage = state.stage;
     const reports = reportsFor(state, stage);
     const latest = reports.at(-1);
@@ -44,6 +47,9 @@ export function routeNext(state, mode, browserUi = false) {
             return { next: 'challenge', decision: 'proceed', verdict, questions: [] };
         }
         return { next: afterChallenge(state, mode, browserUi), decision: 'proceed', verdict, questions: [] };
+    }
+    if (stage === 'publish' && reviewbotWired && state.bot?.status === 'changes_requested' && state.bot.round <= MAX_BOT_ROUNDS) {
+        return { next: 'respond', decision: 'proceed', questions: [] };
     }
     const next = nextStageFor(stage, opts);
     if (!next)

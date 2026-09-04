@@ -10,7 +10,7 @@ import { BUILT_IN_MODES, resolveMode, UnknownModeError } from '../modes.js';
 import { reconcile } from '../pilot/reconcile.js';
 import { routeNext } from '../pilot/route.js';
 import { statusHint } from '../config/tickets.js';
-import { hasCapability, resolveGates, transitionAllowed } from '../registry/gates.js';
+import { hasCapability, hasSeat, resolveGates, transitionAllowed } from '../registry/gates.js';
 import { CORE_ORDER, isCoreStage, nextStageFor, stageEntry } from '../registry/stages.js';
 import { action, defineTool, fail, result } from '../registry/tools.js';
 import { CORE_STAGE_MODULES } from '../stages/index.js';
@@ -255,7 +255,7 @@ export const unitTool = defineTool({
                     return notFound(input.id, ctx);
                 const mode = modeOf(unit.state, ctx);
                 const browserUi = hasCapability(ctx.config.config, unit.state.repo, 'browser_ui');
-                const route = routeNext(unit.state, mode, browserUi);
+                const route = routeNext(unit.state, mode, browserUi, hasSeat(ctx.config.config, 'reviewbot'));
                 const from = unit.state.stage;
                 const base = { id: unit.id, from, ...route };
                 if (route.decision === 'blocked') {
@@ -264,6 +264,10 @@ export const unitTool = defineTool({
                 if (route.decision === 'done')
                     return result(`${unit.id} is done.`, envelope(true, 'done', base, [{ tool: 'digest', action: 'wrapup', why: 'render the wrap-up for the user' }]));
                 const next = route.next;
+                if (!isCoreStage(next)) {
+                    const why = `dispatch the ${next} flow for review-bot round ${(unit.state.bot?.round ?? 0) + 1}; count it with reviewbot round, then route again`;
+                    return result(`${route.decision}: ${next} (stage stays ${from}).`, envelope(true, `${route.decision} -> ${next}`, base, briefNext(unit.id, why)));
+                }
                 if (next !== from) {
                     if (route.decision === 'proceed') {
                         const gates = await gatesFor(from, unit, ctx, mode);

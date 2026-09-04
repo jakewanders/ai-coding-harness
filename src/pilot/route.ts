@@ -1,11 +1,12 @@
 import type { ModeDef } from '../modes.js';
-import { nextStageFor } from '../registry/stages.js';
+import { nextStageFor, type FlowName } from '../registry/stages.js';
 import type { Report, ReviewVerdict, StageName, UnitState } from '../store/state.js';
 
 export type Decision = 'proceed' | 'retry' | 'blocked' | 'done';
 
 export interface Route {
-  next: StageName | null;
+  /** A core stage, the standalone `respond` flow for a bot round, or null when done. */
+  next: StageName | FlowName | null;
   decision: Decision;
   verdict?: ReviewVerdict;
   questions: string[];
@@ -14,6 +15,7 @@ export interface Route {
 export const MAX_REVIEW_CYCLES = 4;
 export const MAX_COMMIT_FAILURES = 2;
 export const MAX_OTHER_FAILURES = 1;
+export const MAX_BOT_ROUNDS = 2;
 
 function reportsFor(state: UnitState, stage: StageName): Report[] {
   return (state.reports?.[stage] ?? []).filter((r) => r.cycle === state.cycle);
@@ -25,9 +27,11 @@ function afterChallenge(state: UnitState, mode: ModeDef, browserUi: boolean): St
 
 /**
  * Decide what the conductor does next from the unit's reports for the
- * current stage and cycle. Pure: never mutates the state.
+ * current stage and cycle. Pure: never mutates the state. With a wired
+ * reviewbot seat, a publish report routes to the respond flow while the bot
+ * requests changes and the round cap is not exceeded.
  */
-export function routeNext(state: UnitState, mode: ModeDef, browserUi = false): Route {
+export function routeNext(state: UnitState, mode: ModeDef, browserUi = false, reviewbotWired = false): Route {
   const stage = state.stage;
   const reports = reportsFor(state, stage);
   const latest = reports.at(-1);
@@ -59,6 +63,10 @@ export function routeNext(state: UnitState, mode: ModeDef, browserUi = false): R
       return { next: 'challenge', decision: 'proceed', verdict, questions: [] };
     }
     return { next: afterChallenge(state, mode, browserUi), decision: 'proceed', verdict, questions: [] };
+  }
+
+  if (stage === 'publish' && reviewbotWired && state.bot?.status === 'changes_requested' && state.bot.round <= MAX_BOT_ROUNDS) {
+    return { next: 'respond', decision: 'proceed', questions: [] };
   }
 
   const next = nextStageFor(stage, opts);
