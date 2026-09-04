@@ -412,7 +412,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 **Tests must assert:** body contains every criterion id; sketch body starts with the banner; demotions appear for `express` and not for `thorough`; `record` sets `pr` and `pr_recorded` gate passes; worklog subtracts an idle gap greater than 15 minutes.
 
-- [ ] Task 16
+- [x] Task 16
 
 ### Task 17: `digest` and `recall` tools
 
