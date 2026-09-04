@@ -25,6 +25,10 @@ export declare function deepMerge<T>(base: T, over: Partial<T>): T;
 export declare function userConfigPath(env: NodeJS.ProcessEnv): string;
 /** Walk up from `cwd` to the directory containing `.git`, or null. */
 export declare function findGitRoot(cwd: string): string | null;
+export declare function loadFileLayer(name: 'user' | 'repo', file: string | null): {
+    report: LayerReport;
+    config: HarnessConfig | null;
+};
 export interface LoadOptions {
     cwd: string;
     env?: NodeJS.ProcessEnv;

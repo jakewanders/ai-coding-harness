@@ -1,9 +1,16 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { z } from 'zod';
+import { inferProfile } from '../config/infer.js';
+import { findGitRoot } from '../config/load.js';
+import { validateLayer } from '../config/validate.js';
+import { parseYamlDocument, documentError } from '../config/yaml.js';
+import { provenance, renderDoctor, runDoctor } from '../system/doctor.js';
+import { syncVault } from '../system/sync.js';
+import { measureTokens, renderTokens } from '../system/tokens.js';
 import { envelope } from '../contracts/envelope.js';
 import { VERSION } from '../index.js';
-import { action, defineTool, result } from '../registry/tools.js';
+import { action, defineTool, fail, result } from '../registry/tools.js';
 export const systemTool = defineTool({
     name: 'system',
     description: 'Engine housekeeping: version, health, doctor, configuration, inference and sync.',
@@ -34,6 +41,76 @@ export const systemTool = defineTool({
                 if (missing.length)
                     lines.push(`Missing: ${missing.join(', ')} (not found on the kit search path).`);
                 return result(lines.join('\n'), envelope(missing.length === 0, `${kits.length} kit(s)`, { kits, missing }));
+            },
+        }),
+        doctor: action({
+            describe: 'Read-only report: inferred profile with evidence, config layers and errors, seats, kits, environments, vault and build health, plus a proposed .harness.yaml.',
+            schema: z.object({}),
+            handler: async (_input, ctx) => {
+                const report = runDoctor(ctx);
+                const healthy = report.errors.length === 0 && report.build.matches;
+                return result(renderDoctor(report), envelope(healthy, healthy ? 'healthy' : `${report.errors.length} config error(s)${report.build.matches ? '' : ', build stale'}`, report));
+            },
+        }),
+        config: action({
+            describe: 'merged: effective config with provenance; propose: the doctor proposal; write: save approved YAML as .harness.yaml (refuses to overwrite without overwrite: true).',
+            schema: z.object({
+                mode: z.enum(['merged', 'propose', 'write']),
+                yaml: z.string().optional().describe('Approved YAML text to write (write mode).'),
+                overwrite: z.boolean().optional().describe('Allow replacing an existing .harness.yaml.'),
+            }),
+            handler: async (input, ctx) => {
+                if (input.mode === 'merged') {
+                    const map = provenance(ctx);
+                    const lines = Object.entries(map).sort(([a], [b]) => a.localeCompare(b)).map(([k, v]) => `- ${k}: ${v}`);
+                    return result(lines.join('\n'), envelope(true, `${lines.length} setting(s)`, { config: ctx.config.config, provenance: map, errors: ctx.config.errors }));
+                }
+                if (input.mode === 'propose') {
+                    const report = runDoctor(ctx);
+                    return result(report.proposed_repo_config, envelope(true, 'proposal rendered', { yaml: report.proposed_repo_config, namespace: report.profile.namespace }));
+                }
+                if (!input.yaml)
+                    return fail('system config write: pass the approved YAML as `yaml`; use mode propose to get a draft');
+                const root = findGitRoot(ctx.cwd);
+                if (!root)
+                    return fail(`system config write: ${ctx.cwd} is not inside a git checkout`);
+                const file = path.join(root, '.harness.yaml');
+                if (fs.existsSync(file) && !input.overwrite)
+                    return fail(`system config write: ${file} exists; pass overwrite: true to replace it`);
+                const located = parseYamlDocument(input.yaml);
+                const syntax = documentError(located, file);
+                if (syntax)
+                    return fail(`system config write: ${syntax.message}${syntax.line !== null ? ` (line ${syntax.line})` : ''}`);
+                const validated = validateLayer(located.doc.toJS() ?? {}, file, located);
+                if ('error' in validated)
+                    return fail(`system config write: invalid config at ${validated.error.path || '(root)'}: ${validated.error.message}`, validated.error);
+                fs.writeFileSync(file, input.yaml);
+                return result(`Wrote ${file}.`, envelope(true, 'config written', { file, overwritten: Boolean(input.overwrite) }));
+            },
+        }),
+        infer: action({
+            describe: 'Zero-config inference of the repo profile, each guess with its evidence.',
+            schema: z.object({}),
+            handler: async (_input, ctx) => {
+                const profile = inferProfile(ctx.cwd);
+                const lines = [`namespace: ${profile.namespace}`, ...profile.guesses.map((g) => `- ${g.field}: \`${g.value}\` — ${g.evidence}`)];
+                return result(lines.join('\n'), envelope(true, `${profile.guesses.length} guess(es)`, profile));
+            },
+        }),
+        sync: action({
+            describe: "Push and pull the vault's git remote when store.remote is configured; otherwise skipped.",
+            schema: z.object({}),
+            handler: async (_input, ctx) => {
+                const r = syncVault(ctx.vault, ctx.config.config.store?.remote);
+                return result(r.detail.join('\n'), envelope(r.ok, r.summary, { vault: ctx.vault, remote: ctx.config.config.store?.remote ?? null, detail: r.detail }));
+            },
+        }),
+        tokens: action({
+            describe: 'Measure the instruction load of a full run: skill, mode file and rendered brief per core stage, plus shared prose.',
+            schema: z.object({ mode: z.string().optional().describe('Run mode to measure (default thorough).') }),
+            handler: async (input, ctx) => {
+                const report = measureTokens(ctx, input.mode ?? 'thorough');
+                return result(renderTokens(report), envelope(true, `${report.total.tokens} tokens for a ${report.mode} run`, report));
             },
         }),
     },

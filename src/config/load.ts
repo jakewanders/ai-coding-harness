@@ -65,7 +65,7 @@ export function findGitRoot(cwd: string): string | null {
   }
 }
 
-function loadFileLayer(name: 'user' | 'repo', file: string | null): { report: LayerReport; config: HarnessConfig | null } {
+export function loadFileLayer(name: 'user' | 'repo', file: string | null): { report: LayerReport; config: HarnessConfig | null } {
   if (!file || !fs.existsSync(file)) return { report: { name, file: null, ok: true }, config: null };
   let text: string;
   try {

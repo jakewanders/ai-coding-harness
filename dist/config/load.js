@@ -43,7 +43,7 @@ export function findGitRoot(cwd) {
         dir = parent;
     }
 }
-function loadFileLayer(name, file) {
+export function loadFileLayer(name, file) {
     if (!file || !fs.existsSync(file))
         return { report: { name, file: null, ok: true }, config: null };
     let text;
