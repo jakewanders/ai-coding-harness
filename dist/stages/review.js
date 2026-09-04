@@ -4,7 +4,7 @@ export const info = {
     purpose: "Review the diff column by column against the criteria and record each column as evidence for this cycle.",
     seats: ['counterweight', 'docs'],
     outputs: ["review_column evidence per column", "reviews/cycle-<n>.json"],
-    sections: ['requirement', 'plan', 'review'],
+    sections: ['requirement', 'plan', 'review', 'ledger'],
     calls: (id) => [
         `vcs diff { "id": "${id}" }`,
         `evidence record { "id": "${id}", "kind": "review_column", "payload": { "column": "criteria_forward", "findings": [] } }`,

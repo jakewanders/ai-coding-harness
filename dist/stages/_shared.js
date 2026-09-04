@@ -3,6 +3,7 @@ import path from 'node:path';
 import { inferProfile } from '../config/infer.js';
 import { parseRequirement } from '../spec/requirement.js';
 import { readIndex, searchIndex } from '../store/index.js';
+import { openEntries, readLedger } from '../store/ledger.js';
 const PLAN_CAP = 6000;
 function readIf(file) {
     return file && fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null;
@@ -83,12 +84,24 @@ function decisionsSection(ctx) {
     }
     return lines;
 }
+function ledgerSection(ctx) {
+    const repo = ctx.state?.repo ?? ctx.header.repo;
+    const entries = openEntries(readLedger(ctx.vault, repo));
+    const lines = ['## Ledger', ''];
+    if (!entries.length)
+        return [...lines, 'No carry-forward entries for this repo.'];
+    lines.push('Carry-forward entries to re-verify against this unit (`ledger recheck` each one):', '');
+    for (const e of entries)
+        lines.push(`- ${e.id} [${e.kind}] ${e.text}${e.last_checked_unit === ctx.state?.id ? ' — rechecked by this unit' : ''}`);
+    return lines;
+}
 const SECTION_RENDERERS = {
     requirement: requirementSection,
     plan: planSection,
     review: reviewSection,
     commands: commandsSection,
     decisions: decisionsSection,
+    ledger: ledgerSection,
 };
 /** Heading, purpose, stage sections, produces, call templates, follow-up. */
 export function stageBrief(info, ctx, body = []) {

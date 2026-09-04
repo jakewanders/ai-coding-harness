@@ -13,6 +13,8 @@ export interface GateContext {
   worktree: string | null;
   /** Checkout the tool was invoked from; used when the unit has no worktree. */
   cwd?: string;
+  /** Vault root, for gates that read repo-level records such as the ledger. */
+  vault?: string;
 }
 
 export interface GateOutcome {

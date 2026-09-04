@@ -29,7 +29,7 @@ export function modeFor(unit: LoadedUnit, ctx: ToolContext): ModeDef {
 }
 
 export async function gatesForUnit(unit: LoadedUnit, ctx: ToolContext, stage: StageName): Promise<ResolvedGate[]> {
-  return resolveGates(stage, { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree, cwd: ctx.cwd }, modeFor(unit, ctx));
+  return resolveGates(stage, { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree, cwd: ctx.cwd, vault: ctx.vault }, modeFor(unit, ctx));
 }
 
 function gateLine(g: ResolvedGate): string {

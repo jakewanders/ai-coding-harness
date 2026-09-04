@@ -5,8 +5,9 @@ import type { SeatName } from '../contracts/header.js';
 import type { BriefContext, BriefRenderer } from '../registry/stages.js';
 import { parseRequirement, type Requirement } from '../spec/requirement.js';
 import { readIndex, searchIndex } from '../store/index.js';
+import { openEntries, readLedger } from '../store/ledger.js';
 
-export type StageSection = 'requirement' | 'plan' | 'review' | 'commands' | 'decisions';
+export type StageSection = 'requirement' | 'plan' | 'review' | 'commands' | 'decisions' | 'ledger';
 
 export interface StageInfo {
   name: string;
@@ -96,12 +97,23 @@ function decisionsSection(ctx: BriefContext): string[] {
   return lines;
 }
 
+function ledgerSection(ctx: BriefContext): string[] {
+  const repo = ctx.state?.repo ?? ctx.header.repo;
+  const entries = openEntries(readLedger(ctx.vault, repo));
+  const lines = ['## Ledger', ''];
+  if (!entries.length) return [...lines, 'No carry-forward entries for this repo.'];
+  lines.push('Carry-forward entries to re-verify against this unit (`ledger recheck` each one):', '');
+  for (const e of entries) lines.push(`- ${e.id} [${e.kind}] ${e.text}${e.last_checked_unit === ctx.state?.id ? ' — rechecked by this unit' : ''}`);
+  return lines;
+}
+
 const SECTION_RENDERERS: Record<StageSection, (ctx: BriefContext) => string[]> = {
   requirement: requirementSection,
   plan: planSection,
   review: reviewSection,
   commands: commandsSection,
   decisions: decisionsSection,
+  ledger: ledgerSection,
 };
 
 /** Heading, purpose, stage sections, produces, call templates, follow-up. */

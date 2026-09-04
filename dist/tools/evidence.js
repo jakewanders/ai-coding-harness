@@ -29,7 +29,7 @@ export function modeFor(unit, ctx) {
     }
 }
 export async function gatesForUnit(unit, ctx, stage) {
-    return resolveGates(stage, { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree, cwd: ctx.cwd }, modeFor(unit, ctx));
+    return resolveGates(stage, { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree, cwd: ctx.cwd, vault: ctx.vault }, modeFor(unit, ctx));
 }
 function gateLine(g) {
     return `- ${g.id} [${g.severity}] ${g.status}${g.remedy ? ` — ${g.remedy}` : ''}${g.demoted_by ? ` (demoted by ${g.demoted_by})` : ''}`;

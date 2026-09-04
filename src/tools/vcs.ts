@@ -168,7 +168,7 @@ export const vcsTool = defineTool({
             if (!(e instanceof UnknownModeError)) throw e;
             mode = resolveMode('thorough', ctx.config.config);
           }
-          const gates = await resolveGates('commit', { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree, cwd: ctx.cwd }, mode);
+          const gates = await resolveGates('commit', { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree, cwd: ctx.cwd, vault: ctx.vault }, mode);
           const verdict = transitionAllowed(gates);
           if (!verdict.ok) {
             const lines = ['Commit refused: commit-stage gates are failing.', ...verdict.blocking.map((g) => `- ${g.id}: ${g.remedy ?? 'no remedy given'}`)];

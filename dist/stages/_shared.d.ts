@@ -1,6 +1,6 @@
 import type { SeatName } from '../contracts/header.js';
 import type { BriefContext, BriefRenderer } from '../registry/stages.js';
-export type StageSection = 'requirement' | 'plan' | 'review' | 'commands' | 'decisions';
+export type StageSection = 'requirement' | 'plan' | 'review' | 'commands' | 'decisions' | 'ledger';
 export interface StageInfo {
     name: string;
     purpose: string;

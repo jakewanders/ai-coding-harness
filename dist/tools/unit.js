@@ -37,7 +37,7 @@ function modeOf(state, ctx) {
     }
 }
 async function gatesFor(stage, unit, ctx, mode) {
-    return resolveGates(stage, { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree, cwd: ctx.cwd }, mode);
+    return resolveGates(stage, { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree, cwd: ctx.cwd, vault: ctx.vault }, mode);
 }
 function routing(state, ctx, mode) {
     return { skip: mode.skip_stages, browserUi: hasCapability(ctx.config.config, state.repo, 'browser_ui'), verifyAfterPublish: mode.verify_after_publish };
