@@ -31,12 +31,15 @@ session already has.
 
 ## Install
 
-In Claude Code:
+From a terminal:
 
-```text
-/plugin marketplace add jakewanders/ai-coding-harness
-/plugin install harness@ai-coding-harness
+```sh
+claude plugin marketplace add jakewanders/ai-coding-harness
+claude plugin install harness@ai-coding-harness
 ```
+
+Inside a Claude Code session, `/plugin marketplace add jakewanders/ai-coding-harness` adds
+the marketplace, and `/plugin` lets you pick `harness` and confirm the install.
 
 The marketplace is named `ai-coding-harness` (`.claude-plugin/marketplace.json`) and the
 plugin is named `harness` (`.claude-plugin/plugin.json`). The compiled `dist/` is committed,
