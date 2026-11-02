@@ -95,12 +95,12 @@ describe('unit report and route', () => {
   });
 });
 
-describe('pilot brief', () => {
+describe('conductor brief', () => {
   it('renders the dispatch template, standing-rules pointer, route call and checkpoint rules', async () => {
     const ctx = await unitCtx();
-    const r = await dispatch(unitTool, { action: 'brief', id: 'PL-1', stage: 'pilot' }, ctx);
+    const r = await dispatch(unitTool, { action: 'brief', id: 'PL-1', stage: 'conductor' }, ctx);
     expect(r.envelope.ok).toBe(true);
-    expect(r.text).toContain('# pilot');
+    expect(r.text).toContain('# conductor');
     expect(r.text).toContain('@root/skills/_shared/standing-rules.md');
     expect(r.text).toContain('@root/skills/define/SKILL.md');
     expect(r.text).toContain('"quiet": true');

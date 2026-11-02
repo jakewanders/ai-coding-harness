@@ -1,7 +1,7 @@
 import { CORE_STAGE_MODULES } from '../stages/index.js';
 import { flowStub } from '../stages/_shared.js';
 export const CORE_ORDER = ['define', 'build', 'review', 'walkthrough', 'pr', 'wrap_up'];
-export const FLOW_NAMES = ['pilot', 'batch', 'screen', 'inspect', 'respond', 'aftercare', 'setup'];
+export const FLOW_NAMES = ['conductor', 'batch', 'screen', 'inspect', 'respond', 'aftercare', 'setup'];
 /** Core stages whose brief opens with the pinned source/spec block. */
 const SPEC_BANNER_STAGES = new Set(['define', 'build', 'review', 'walkthrough']);
 /** Flows that start from a source or nothing rather than an existing unit id. */

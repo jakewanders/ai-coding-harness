@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DEFAULTS } from '../../src/config/defaults.js';
 import { resolveMode } from '../../src/modes.js';
-import { routeNext, type Route } from '../../src/pilot/route.js';
+import { routeNext, type Route } from '../../src/conductor/route.js';
 import { createState, type Report, type StageName, type UnitState } from '../../src/store/state.js';
 
 const thorough = resolveMode('thorough', DEFAULTS);

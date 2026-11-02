@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Breaking: pilot renamed to conductor
+- The orchestration flow `pilot` is now `conductor`: `unit brief { "stage": "conductor" }`,
+  `skills/conductor`, the flow name in the registry, and the source modules `src/conductor/`
+  (`cluster`, `route`). Tool actions (`unit route`, `unit report`) are unchanged.
+
 ### Breaking: convoy renamed to batch
 - The batch flow `convoy` is now `batch`: `unit brief { "stage": "batch" }`, `skills/batch`, the
   flow name in the registry, and the history line `batch siblings: ...`. `unit link` is

@@ -1,6 +1,6 @@
 ---
 name: batch
-description: "Batch several units: define each, cluster by predicted file overlap, get the grouping approved, then pilot the groups sequentially."
+description: "Batch several units: define each, cluster by predicted file overlap, get the grouping approved, then conduct the groups sequentially."
 flow: batch
 argument-hint: "<source> [id] [mode]"
 ---
@@ -20,9 +20,9 @@ unit brief { "stage": "batch" }
 
 ## Procedure
 
-1. Start each unit and run define for it through the pilot loop, stopping after define; the requirement's `Files:` line feeds the clustering.
+1. Start each unit and run define for it through the conductor loop, stopping after define; the requirement's `Files:` line feeds the clustering.
 2. Cluster by predicted file overlap as the brief describes; present the grouping and wait for approval.
-3. Link siblings with `unit link`, then pilot each approved group sequentially with @root/skills/pilot/SKILL.md.
+3. Link siblings with `unit link`, then run each approved group sequentially with @root/skills/conductor/SKILL.md.
 4. Finish with one wrap-up per unit and a batch summary.
 
 ```harness

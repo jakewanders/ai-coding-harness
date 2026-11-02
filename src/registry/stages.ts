@@ -4,7 +4,7 @@ import { CORE_STAGE_MODULES } from '../stages/index.js';
 import { flowStub } from '../stages/_shared.js';
 import type { StageName, UnitState } from '../store/state.js';
 
-export type FlowName = 'pilot' | 'batch' | 'screen' | 'inspect' | 'respond' | 'aftercare' | 'setup';
+export type FlowName = 'conductor' | 'batch' | 'screen' | 'inspect' | 'respond' | 'aftercare' | 'setup';
 
 export interface BriefContext {
   state: UnitState | null;
@@ -30,7 +30,7 @@ export interface StageEntry {
 
 export const CORE_ORDER: StageName[] = ['define', 'build', 'review', 'walkthrough', 'pr', 'wrap_up'];
 
-export const FLOW_NAMES: readonly FlowName[] = ['pilot', 'batch', 'screen', 'inspect', 'respond', 'aftercare', 'setup'];
+export const FLOW_NAMES: readonly FlowName[] = ['conductor', 'batch', 'screen', 'inspect', 'respond', 'aftercare', 'setup'];
 
 /** Core stages whose brief opens with the pinned source/spec block. */
 const SPEC_BANNER_STAGES = new Set<StageName>(['define', 'build', 'review', 'walkthrough']);

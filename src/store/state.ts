@@ -35,7 +35,7 @@ export interface UnitState {
   reports?: Record<string, Report[]>
   reviews?: Record<number, ReviewVerdict>
   bot?: { round: number; status: string; threads: Thread[] }
-  /** Batch siblings: other unit ids piloted in the same batch group. */
+  /** Batch siblings: other unit ids run in the same batch group. */
   siblings?: string[]
 }
 

@@ -7,7 +7,7 @@ import '../gates/index.js';
 import { envelope, type NextAction } from '../contracts/envelope.js';
 import { defaultBranch } from '../git/exec.js';
 import { BUILT_IN_MODES, resolveMode, UnknownModeError, type ModeDef } from '../modes.js';
-import { routeNext } from '../pilot/route.js';
+import { routeNext } from '../conductor/route.js';
 import { hasCapability, resolveGates, transitionAllowed, type ResolvedGate } from '../registry/gates.js';
 import { CORE_ORDER, isCoreStage, nextStageFor, stageEntry, type BriefContext } from '../registry/stages.js';
 import { action, defineTool, fail, result, type ToolContext, type ToolResult } from '../registry/tools.js';
@@ -139,7 +139,7 @@ export const unitTool = defineTool({
       schema: z.object({
         id: z.string().optional().describe('Unit id; defaults to the unit implied by the current branch.'),
         stage: z.string().optional().describe("Stage or flow name; defaults to the unit's current stage."),
-        quiet: z.boolean().optional().describe('Suppress the single-stage stop banner (pilot dispatches).'),
+        quiet: z.boolean().optional().describe('Suppress the single-stage stop banner (conductor dispatches).'),
       }),
       handler: async (input, ctx) => {
         const unit = resolveUnit(ctx, input.id);

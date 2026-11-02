@@ -1,18 +1,18 @@
 import { registerRenderer, type BriefRenderer } from '../registry/stages.js';
-import { OVERLAP_THRESHOLD } from '../pilot/cluster.js';
+import { OVERLAP_THRESHOLD } from '../conductor/cluster.js';
 
 export const render: BriefRenderer = () => [
   '# batch',
   '',
-  'Run several units as a batch: pre-flight each one (define only), cluster by predicted file overlap, get the grouping approved, then pilot the groups sequentially with cross-linked state.',
+  'Run several units as a batch: pre-flight each one (define only), cluster by predicted file overlap, get the grouping approved, then conduct the groups sequentially with cross-linked state.',
   '',
   '## Steps',
   '',
-  '1. Start every unit from its ticket. For each, dispatch the define stage exactly as pilot would (`unit brief` with `quiet: true`, `unit report`, `unit route`) and stop after it; ask the define subagent to end requirement.md with a `Files:` line naming the paths it expects the build to touch.',
+  '1. Start every unit from its ticket. For each, dispatch the define stage exactly as the conductor would (`unit brief` with `quiet: true`, `unit report`, `unit route`) and stop after it; ask the define subagent to end requirement.md with a `Files:` line naming the paths it expects the build to touch.',
   `2. Predict each unit's files from that Files: line and any backticked paths in requirement.md (plus plan.md when one exists). Cluster the units: two units share a group when the Jaccard overlap of their predicted files is at least ${OVERLAP_THRESHOLD}; overlap is transitive.`,
-  '3. **Approval checkpoint.** Show the proposed grouping to the user as a table (group → ids → shared files) and wait for explicit approval or edits. Do not pilot anything before approval.',
+  '3. **Approval checkpoint.** Show the proposed grouping to the user as a table (group → ids → shared files) and wait for explicit approval or edits. Do not start any group before approval.',
   '4. Link the members of each group with `unit link` so every state lists its batch siblings; briefs and PR bodies can then cross-reference them.',
-  '5. Pilot the groups sequentially: for each group, run the pilot loop for its units in order, one unit at a time, so shared files are never edited by two units at once. Between groups, refresh remote refs.',
+  '5. Conduct the groups sequentially: for each group, run the conductor loop for its units in order, one unit at a time, so shared files are never edited by two units at once. Between groups, refresh remote refs.',
   '6. Render one wrap-up per unit and a short batch summary (groups, PRs, deferred items).',
   '',
   '## Calls',
@@ -22,7 +22,7 @@ export const render: BriefRenderer = () => [
   'unit brief { "id": "<id>", "stage": "define", "quiet": true }',
   'unit route { "id": "<id>" }',
   'unit link { "id": "<id>", "related": ["<sibling id>"] }',
-  'unit brief { "id": "<id>", "stage": "pilot", "quiet": true }',
+  'unit brief { "id": "<id>", "stage": "conductor", "quiet": true }',
   'digest wrapup { "id": "<id>" }',
   '```',
   '',

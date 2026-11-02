@@ -104,7 +104,7 @@ to build, and the cycle counter increments when the next build starts. Evidence 
 per cycle, so a fix has to be re-checked and re-critiqued. After four cycles without a
 `ship`, `unit route` reports `blocked` and asks a human.
 
-Seven standalone flows sit outside this state machine: `pilot` (the conductor that
+Seven standalone flows sit outside this state machine: `conductor` (the conductor that
 dispatches one fresh subagent per stage), `batch` (run several units as a group), `screen`
 (ticket triage), `inspect` (read-only PR review), `respond` (address review comments in
 one batched commit per round), `aftercare` (triage follow-up comments on a shipped unit),
@@ -260,7 +260,7 @@ npm install && npm run build && npm test
    `.harness.yaml` only after you confirm. With no config at all the engine still works:
    commands are inferred from the manifest and lockfile.
 2. Start a unit from a ticket, a PR, a url, a file, or plain text with `unit start`, then
-   run the `pilot` skill. Pilot dispatches one fresh subagent per stage, routes with
+   run the `conductor` skill. The conductor dispatches one fresh subagent per stage, routes with
    `unit route`, and stops for you when a stage is blocked.
 3. Every stage skill opens with `unit brief`, which renders the header contract
    ([docs/brief-contract.md](docs/brief-contract.md)), the role wiring, the requirement,

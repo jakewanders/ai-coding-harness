@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { cluster, jaccard, predictFiles } from '../../src/pilot/cluster.js';
+import { cluster, jaccard, predictFiles } from '../../src/conductor/cluster.js';
 import { dispatch } from '../../src/registry/tools.js';
 import { stageEntry } from '../../src/registry/stages.js';
 import { readState } from '../../src/store/state.js';
@@ -64,7 +64,7 @@ describe('unit link', () => {
 });
 
 describe('batch brief', () => {
-  it('takes no id and lays out define+plan per id, clustering, the approval checkpoint, sequential pilots and linking', async () => {
+  it('takes no id and lays out define+plan per id, clustering, the approval checkpoint, sequential groups and linking', async () => {
     expect(stageEntry('batch')).toMatchObject({ standalone: true, takesNoId: true });
     const ctx = makeCtx({ cwd: makeRepo({ 'README.md': 'x' }) });
     const r = await dispatch(unitTool, { action: 'brief', stage: 'batch', quiet: true }, ctx);

@@ -5,7 +5,7 @@ export const render: BriefRenderer = (ctx) => {
   const stage = ctx.state?.stage ?? 'define';
 
   const lines = [
-    '# pilot',
+    '# conductor',
     '',
     'You are the conductor. You never do stage work yourself: one fresh subagent per stage, routed by the engine.',
     `Unit: ${id}${ctx.state ? ` (currently at ${stage}, cycle ${ctx.state.cycle}, mode ${ctx.state.mode})` : ' (start one first with unit start)'}.`,
@@ -55,4 +55,4 @@ export const render: BriefRenderer = (ctx) => {
   return lines.join('\n');
 };
 
-registerRenderer('pilot', render);
+registerRenderer('conductor', render);

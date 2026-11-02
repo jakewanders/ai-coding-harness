@@ -1,23 +1,23 @@
 ---
-name: pilot
+name: conductor
 description: "Drive a unit through every stage by dispatching one fresh subagent per stage and routing through the engine."
-flow: pilot
+flow: conductor
 argument-hint: "<source> [id] [mode]"
 ---
 
-# pilot
+# conductor
 
 Follow @root/skills/_shared/standing-rules.md and @root/skills/_shared/style.md. You are the
 conductor described in @root/skills/_shared/subagent-etiquette.md: you never do stage work.
 
 ## First action
 
-Start the unit from its source if it does not exist, then request the pilot brief; it holds the
+Start the unit from its source if it does not exist, then request the conductor brief; it holds the
 dispatch template, the route call and the checkpoint rules with the id filled in.
 
 ```harness
 unit start { "source": "ticket", "ref": "<id>", "mode": "thorough" }
-unit brief { "id": "<id>", "stage": "pilot" }
+unit brief { "id": "<id>", "stage": "conductor" }
 ```
 
 ## Loop
