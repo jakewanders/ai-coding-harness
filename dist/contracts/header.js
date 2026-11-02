@@ -2,11 +2,11 @@ import { stringify as stringifyYaml } from 'yaml';
 import { z } from 'zod';
 /**
  * Brief header contract. `unit brief` opens with this fenced YAML block so a
- * skill can read the unit, mode, stage, seats, gates and config problems
+ * skill can read the unit, mode, stage, roles, gates and config problems
  * before any prose. Published in docs/brief-contract.md.
  */
 export const BRIEF_CONTRACT = 'harness-brief/1';
-export const SEAT_NAMES = ['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot'];
+export const ROLE_NAMES = ['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot'];
 export const SEVERITIES = ['block', 'warn', 'off'];
 export const GATE_STATUSES = ['pass', 'fail', 'n/a'];
 export const ConfigErrorSchema = z.object({
@@ -16,7 +16,7 @@ export const ConfigErrorSchema = z.object({
     message: z.string(),
     valid_keys: z.array(z.string()).optional(),
 });
-const SeatWiringSchema = z.union([z.array(z.string()), z.literal('unwired')]);
+const RoleWiringSchema = z.union([z.array(z.string()), z.literal('unwired')]);
 export const HeaderSchema = z.object({
     contract: z.literal(BRIEF_CONTRACT),
     unit: z.string(),
@@ -26,13 +26,13 @@ export const HeaderSchema = z.object({
     worktree: z.string().nullable(),
     base_branch: z.string(),
     root: z.string(),
-    seats: z.object({
-        tracker: SeatWiringSchema,
-        codehost: SeatWiringSchema,
-        docs: SeatWiringSchema,
-        design: SeatWiringSchema,
-        chat: SeatWiringSchema,
-        reviewbot: SeatWiringSchema,
+    roles: z.object({
+        tracker: RoleWiringSchema,
+        codehost: RoleWiringSchema,
+        docs: RoleWiringSchema,
+        design: RoleWiringSchema,
+        chat: RoleWiringSchema,
+        reviewbot: RoleWiringSchema,
     }).strict(),
     capabilities: z.record(z.string(), z.unknown()),
     gates: z.array(z.object({
@@ -46,7 +46,7 @@ export const HeaderSchema = z.object({
 /** Header keys in contract order; `contract` is always first. */
 export const HEADER_KEYS = [
     'contract', 'unit', 'mode', 'stage', 'repo', 'worktree', 'base_branch', 'root',
-    'seats', 'capabilities', 'gates', 'docs', 'config_errors',
+    'roles', 'capabilities', 'gates', 'docs', 'config_errors',
 ];
 /** Fenced yaml block whose first line is `contract: harness-brief/1`. */
 export function renderHeader(h) {

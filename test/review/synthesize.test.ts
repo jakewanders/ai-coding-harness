@@ -17,7 +17,7 @@ describe('REVIEW_COLUMNS', () => {
     expect(req.adversarial).toBeNull();
   });
 
-  it('derives the required set from capabilities, seat wiring and mode', () => {
+  it('derives the required set from capabilities, role wiring and mode', () => {
     const thorough = resolveMode('thorough', DEFAULTS);
     expect(requiredColumns({ config: DEFAULTS, repo: 'local/x', mode: thorough })).toEqual(BASE);
     const ui: HarnessConfig = { ...DEFAULTS, repos: { 'local/x': { capabilities: { browser_ui: true } } } };

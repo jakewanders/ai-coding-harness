@@ -1,14 +1,14 @@
 import { type InferredProfile } from '../config/infer.js';
 import { type LoadedConfig } from '../config/load.js';
 import type { HarnessConfig } from '../config/schema.js';
-import type { ConfigError, SeatName } from '../contracts/header.js';
+import type { ConfigError, RoleName } from '../contracts/header.js';
 import type { ToolContext } from '../registry/tools.js';
 export interface DoctorReport {
     profile: InferredProfile;
     layers: LoadedConfig['layers'];
     errors: ConfigError[];
     deprecations: string[];
-    seats: Record<SeatName, string[] | 'unwired'>;
+    roles: Record<RoleName, string[] | 'unwired'>;
     kits: Array<{
         name: string;
         dir: string;

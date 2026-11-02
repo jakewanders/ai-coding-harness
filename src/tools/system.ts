@@ -6,7 +6,7 @@ import { findGitRoot } from '../config/load.js';
 import { validateLayer } from '../config/validate.js';
 import { parseYamlDocument, documentError } from '../config/yaml.js';
 import { provenance, renderDoctor, runDoctor } from '../system/doctor.js';
-import { mapToolsToSeats, unmappedTools } from '../setup/seat-heuristics.js';
+import { mapToolsToRoles, unmappedTools } from '../setup/role-heuristics.js';
 import { stringify as stringifyYaml } from 'yaml';
 import { envelope } from '../contracts/envelope.js';
 import { VERSION } from '../index.js';
@@ -14,7 +14,7 @@ import { action, defineTool, fail, result } from '../registry/tools.js';
 
 export const systemTool = defineTool({
   name: 'system',
-  description: 'Engine housekeeping: version, health, kits, doctor, configuration, inference and seat mapping.',
+  description: 'Engine housekeeping: version, health, kits, doctor, configuration, inference and role mapping.',
   actions: {
     version: action({
       describe: 'Report the engine version.',
@@ -44,7 +44,7 @@ export const systemTool = defineTool({
       },
     }),
     doctor: action({
-      describe: 'Read-only report: inferred profile with evidence, config layers and errors, seats, kits, environments, vault and build health, plus a proposed .harness.yaml.',
+      describe: 'Read-only report: inferred profile with evidence, config layers and errors, roles, kits, environments, vault and build health, plus a proposed .harness.yaml.',
       schema: z.object({}),
       handler: async (_input, ctx) => {
         const report = runDoctor(ctx);
@@ -92,22 +92,22 @@ export const systemTool = defineTool({
         return result(lines.join('\n'), envelope(true, `${profile.guesses.length} guess(es)`, profile));
       },
     }),
-    seats: action({
-      describe: "Map the session's visible tool names onto seats by name heuristics; returns the mapping, the unmapped tools and a seats YAML fragment.",
+    roles: action({
+      describe: "Map the session's visible tool names onto roles by name heuristics; returns the mapping, the unmapped tools and a roles YAML fragment.",
       schema: z.object({ tools: z.array(z.string()).describe('Every tool name visible in the session.') }),
       handler: async (input) => {
-        const seats = mapToolsToSeats(input.tools);
-        const unmapped = unmappedTools(input.tools, seats);
+        const roles = mapToolsToRoles(input.tools);
+        const unmapped = unmappedTools(input.tools, roles);
         const fragment: Record<string, Record<string, string[]>> = {};
-        if (seats.tracker.length) fragment.tracker = { fetch: seats.tracker, comment: seats.tracker, transition_hint: seats.tracker };
-        if (seats.codehost.length) fragment.codehost = { open_pr: seats.codehost, read_threads: seats.codehost, comment: seats.codehost, resolve_thread: seats.codehost, attach: seats.codehost };
-        if (seats.docs.length) fragment.docs = { search: seats.docs };
-        if (seats.design.length) fragment.design = { fetch: seats.design };
-        if (seats.chat.length) fragment.chat = { post: seats.chat };
-        if (seats.reviewbot.length) fragment.reviewbot = { status: seats.reviewbot, threads: seats.reviewbot };
-        const yaml = stringifyYaml({ seats: fragment }, { lineWidth: 0 });
-        const lines = [...Object.entries(seats).map(([seat, names]) => `- ${seat}: ${names.length ? names.join(', ') : 'unwired'}`), `unmapped: ${unmapped.length ? unmapped.join(', ') : 'none'}`, '', 'Proposed seats fragment (refine which tool does which action):', '', yaml.trimEnd()];
-        return result(lines.join('\n'), envelope(true, `${input.tools.length - unmapped.length} tool(s) mapped, ${unmapped.length} unmapped`, { seats, unmapped, yaml }));
+        if (roles.tracker.length) fragment.tracker = { fetch: roles.tracker, comment: roles.tracker, transition_hint: roles.tracker };
+        if (roles.codehost.length) fragment.codehost = { open_pr: roles.codehost, read_threads: roles.codehost, comment: roles.codehost, resolve_thread: roles.codehost, attach: roles.codehost };
+        if (roles.docs.length) fragment.docs = { search: roles.docs };
+        if (roles.design.length) fragment.design = { fetch: roles.design };
+        if (roles.chat.length) fragment.chat = { post: roles.chat };
+        if (roles.reviewbot.length) fragment.reviewbot = { status: roles.reviewbot, threads: roles.reviewbot };
+        const yaml = stringifyYaml({ roles: fragment }, { lineWidth: 0 });
+        const lines = [...Object.entries(roles).map(([role, names]) => `- ${role}: ${names.length ? names.join(', ') : 'unwired'}`), `unmapped: ${unmapped.length ? unmapped.join(', ') : 'none'}`, '', 'Proposed roles fragment (refine which tool does which action):', '', yaml.trimEnd()];
+        return result(lines.join('\n'), envelope(true, `${input.tools.length - unmapped.length} tool(s) mapped, ${unmapped.length} unmapped`, { roles, unmapped, yaml }));
       },
     }),
   },

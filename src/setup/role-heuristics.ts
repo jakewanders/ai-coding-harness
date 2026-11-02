@@ -1,12 +1,12 @@
-import { SEAT_NAMES, type SeatName } from '../contracts/header.js';
+import { ROLE_NAMES, type RoleName } from '../contracts/header.js';
 
 /**
- * Name heuristics that map a session's visible tool names onto seats. This is
+ * Name heuristics that map a session's visible tool names onto roles. This is
  * the one place product names appear in shipped code; every such line carries
  * the lint allow marker. Product matches run before generic words; a tool is
- * assigned to at most one seat, the first that matches.
+ * assigned to at most one role, the first that matches.
  */
-type Heuristic = [seat: SeatName, pattern: RegExp];
+type Heuristic = [role: RoleName, pattern: RegExp];
 
 const PRODUCTS: Heuristic[] = [
   ['tracker', /\b(jira|linear|asana|trello|youtrack|shortcut|clubhouse|monday)\b/i], // harness-lint: allow
@@ -31,9 +31,9 @@ function tokens(name: string): string {
   return name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_\-.:/]+/g, ' ').toLowerCase();
 }
 
-/** Seats → tool names, in input order; tools matching nothing are left out. */
-export function mapToolsToSeats(toolNames: string[]): Record<SeatName, string[]> {
-  const out = Object.fromEntries(SEAT_NAMES.map((s) => [s, [] as string[]])) as Record<SeatName, string[]>;
+/** Roles → tool names, in input order; tools matching nothing are left out. */
+export function mapToolsToRoles(toolNames: string[]): Record<RoleName, string[]> {
+  const out = Object.fromEntries(ROLE_NAMES.map((s) => [s, [] as string[]])) as Record<RoleName, string[]>;
   for (const name of toolNames) {
     const t = tokens(name);
     const hit = [...PRODUCTS, ...GENERIC].find(([, re]) => re.test(t));
@@ -42,8 +42,8 @@ export function mapToolsToSeats(toolNames: string[]): Record<SeatName, string[]>
   return out;
 }
 
-/** Tools that mapped to no seat. */
-export function unmappedTools(toolNames: string[], seats: Record<SeatName, string[]> = mapToolsToSeats(toolNames)): string[] {
-  const mapped = new Set(Object.values(seats).flat());
+/** Tools that mapped to no role. */
+export function unmappedTools(toolNames: string[], roles: Record<RoleName, string[]> = mapToolsToRoles(toolNames)): string[] {
+  const mapped = new Set(Object.values(roles).flat());
   return toolNames.filter((n) => !mapped.has(n));
 }

@@ -9,7 +9,7 @@ export const render: BriefRenderer = (ctx) => {
     return lines.join('\n');
   }
   lines.push(`Unit ${id} (source: ${ctx.state?.source.ref ?? 'pr'}).`, '', '## Procedure', '',
-    '1. Fetch the PR diff through the codehost seat (or `vcs diff` if the branch is checked out) and read it against its description.',
+    '1. Fetch the PR diff through the codehost role (or `vcs diff` if the branch is checked out) and read it against its description.',
     '2. Run the review columns read-only and record each as a `review_column`; that is the only evidence kind this flow records.',
     '3. Synthesize the verdict and report it to the user. Do not record impact, reach, pii or any other kind, and do not post to the PR.',
     '', '## Columns', '', ...REVIEW_COLUMNS.filter((c) => !c.requires).map((c) => `- ${c.id}: ${c.describe}`), '',

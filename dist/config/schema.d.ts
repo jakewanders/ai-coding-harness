@@ -5,8 +5,8 @@ import { z } from 'zod';
  * overrides; DEFAULTS fills the rest. Objects are strict so unknown keys are
  * reported with their valid siblings.
  */
-export { SEAT_NAMES } from '../contracts/header.js';
-export type { SeatName } from '../contracts/header.js';
+export { ROLE_NAMES } from '../contracts/header.js';
+export type { RoleName } from '../contracts/header.js';
 export declare const SeverityValue: z.ZodEnum<{
     block: "block";
     off: "off";
@@ -16,7 +16,7 @@ export declare const StoreSchema: z.ZodObject<{
     path: z.ZodOptional<z.ZodString>;
     remote: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strict>;
-export declare const SeatsSchema: z.ZodObject<{
+export declare const RolesSchema: z.ZodObject<{
     tracker: z.ZodOptional<z.ZodObject<{
         fetch: z.ZodOptional<z.ZodArray<z.ZodString>>;
         comment: z.ZodOptional<z.ZodArray<z.ZodString>>;
@@ -181,7 +181,7 @@ export declare const HarnessConfigSchema: z.ZodObject<{
         path: z.ZodOptional<z.ZodString>;
         remote: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     }, z.core.$strict>>;
-    seats: z.ZodOptional<z.ZodObject<{
+    roles: z.ZodOptional<z.ZodObject<{
         tracker: z.ZodOptional<z.ZodObject<{
             fetch: z.ZodOptional<z.ZodArray<z.ZodString>>;
             comment: z.ZodOptional<z.ZodArray<z.ZodString>>;

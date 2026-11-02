@@ -19,7 +19,7 @@ function nodeRepo(extra: Record<string, string> = {}) {
 }
 
 describe('system doctor', () => {
-  it('reports inference with evidence, layers, seats, kits, vault and build health, and proposes valid YAML', async () => {
+  it('reports inference with evidence, layers, roles, kits, vault and build health, and proposes valid YAML', async () => {
     const repo = nodeRepo();
     const ctx = makeCtx({ cwd: repo });
     const r = await dispatch(systemTool, { action: 'doctor' }, ctx);
@@ -27,7 +27,7 @@ describe('system doctor', () => {
     const data = r.envelope.data as {
       profile: { namespace: string; guesses: Array<{ field: string; value: string; evidence: string }> };
       layers: Array<{ name: string; ok: boolean }>;
-      seats: Record<string, unknown>;
+      roles: Record<string, unknown>;
       kits: unknown[];
       environments: unknown[];
       vault: { path: string; exists: boolean; git: boolean; remote: string | null };
@@ -38,7 +38,7 @@ describe('system doctor', () => {
     expect(data.profile.guesses.find((g) => g.field === 'commands.test')).toMatchObject({ value: 'npm test' });
     expect(data.profile.guesses.find((g) => g.field === 'commands.lint')!.evidence).toContain('scripts.lint');
     expect(data.layers.map((l) => l.name)).toEqual(['defaults', 'user', 'repo']);
-    expect(data.seats.tracker).toBe('unwired');
+    expect(data.roles.tracker).toBe('unwired');
     expect(data.kits).toEqual([]);
     expect(data.vault).toMatchObject({ git: false, remote: null });
     expect(data.vault.path.length).toBeGreaterThan(0);

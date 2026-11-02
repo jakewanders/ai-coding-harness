@@ -23,7 +23,7 @@ export const render = (ctx) => {
             lines.push(`- ${t.id}${t.line !== undefined ? ` line ${t.line}` : ''} (${t.author}): ${t.body}`);
         lines.push('');
     }
-    lines.push('## Round rules', '', '- Decide per thread: fix (code change), reply (explanation, no change), or defer (new ticket via `ledger add` or a `## Deferred` entry).', '- Make every fix in this round, run the check command, then land exactly one batched commit per round with `vcs commit`.', '- Draft one reply per thread; post them through the codehost seat only with the user\'s approval.', '- Resolve on the host only the threads whose fix landed in the batched commit; leave reply-only threads for the reviewer to close.', '');
+    lines.push('## Round rules', '', '- Decide per thread: fix (code change), reply (explanation, no change), or defer (new ticket via `ledger add` or a `## Deferred` entry).', '- Make every fix in this round, run the check command, then land exactly one batched commit per round with `vcs commit`.', '- Draft one reply per thread; post them through the codehost role only with the user\'s approval.', '- Resolve on the host only the threads whose fix landed in the batched commit; leave reply-only threads for the reviewer to close.', '');
     if (ctx.unitDir) {
         const draft = path.join(ctx.unitDir, 'drafts', 'replies.md');
         fs.mkdirSync(path.dirname(draft), { recursive: true });

@@ -2,7 +2,7 @@ import { stageBrief } from './_shared.js';
 export const info = {
     name: 'review',
     purpose: 'Review the diff against the criteria column by column, run the diff-audit rules and the ledger recheck, make the fresh-eyes adversarial pass, and synthesize one verdict for this cycle.',
-    seats: ['docs'],
+    roles: ['docs'],
     outputs: ['review_column evidence per column', 'reviews/cycle-<n>.json with the verdict'],
     sections: ['requirement', 'plan', 'review', 'ledger'],
     calls: (id) => [

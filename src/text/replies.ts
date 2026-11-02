@@ -25,7 +25,7 @@ function label(t: Thread): string {
 export function renderReplies(threads: Thread[], decisions: Record<string, ReplyDecision>): string {
   const open = threads.filter((t) => !t.resolved);
   if (!open.length) return '# Replies\n\nNo open threads.\n';
-  const lines = ['# Replies', '', 'Drafts only; post them through the codehost seat after the user approves.', ''];
+  const lines = ['# Replies', '', 'Drafts only; post them through the codehost role after the user approves.', ''];
   for (const [file, list] of groupThreads(open)) {
     lines.push(`## ${file}`, '');
     for (const t of list) {

@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   BRIEF_CONTRACT,
   HeaderSchema,
-  SEAT_NAMES,
+  ROLE_NAMES,
   renderHeader,
   type BriefHeader,
 } from '../../src/contracts/header.js';
@@ -23,7 +23,7 @@ function sampleHeader(): BriefHeader {
     worktree: '~/code/name-ABC-123',
     base_branch: 'main',
     root: '/abs/plugin/root',
-    seats: {
+    roles: {
       tracker: ['mcp__tracker__get_issue'],
       codehost: 'unwired',
       docs: 'unwired',
@@ -52,14 +52,14 @@ describe('HeaderSchema', () => {
     expect(() => HeaderSchema.parse({ ...sampleHeader(), contract: 'harness-brief/2' })).toThrow();
   });
 
-  it('rejects an unknown seat name and a bad gate status', () => {
+  it('rejects an unknown role name and a bad gate status', () => {
     const h = sampleHeader();
-    expect(() => HeaderSchema.parse({ ...h, seats: { ...h.seats, butler: 'unwired' } })).toThrow();
+    expect(() => HeaderSchema.parse({ ...h, roles: { ...h.roles, butler: 'unwired' } })).toThrow();
     expect(() => HeaderSchema.parse({ ...h, gates: [{ id: 'x', severity: 'block', status: 'maybe' }] })).toThrow();
   });
 
-  it('lists the six seats in spec order', () => {
-    expect(SEAT_NAMES).toEqual(['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot']);
+  it('lists the six roles in spec order', () => {
+    expect(ROLE_NAMES).toEqual(['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot']);
   });
 });
 

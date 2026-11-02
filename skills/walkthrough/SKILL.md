@@ -27,7 +27,7 @@ If the header's `contract` is not `harness-brief/1`, stop and report.
 2. Boot the app if needed, then exercise every acceptance criterion in the browser, including the edge cases the brief asks you to derive. Record `pass`, `fail` or `blocked` per criterion with what you saw.
 3. Reproduce any runtime error against the `reference` environment before treating it as a regression; list them in `runtime_errors`.
 4. Run the e2e suite through `exec run` and record `{ command, exit }`; set `e2e: null` only when none exists.
-5. Take an annotated screenshot per criterion; attach through the codehost seat when wired, otherwise keep the paths and say the attachment was skipped.
+5. Take an annotated screenshot per criterion; attach through the codehost role when wired, otherwise keep the paths and say the attachment was skipped.
 6. Out-of-scope observations go into `out_of_scope`; they never change a criterion's result.
 
 ## Calls

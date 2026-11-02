@@ -18,7 +18,7 @@ evidence exists. It never contacts external systems.
 - [Install](#install)
 - [Quick start](#quick-start-zero-config)
 - [Tools](#tools)
-- [Seats](#seats)
+- [Roles](#roles)
 - [Modes](#modes)
 - [Kits](#kits)
 - [Hooks](#hooks)
@@ -229,8 +229,8 @@ point where the gates pass; the PR url used there was a placeholder.
 | **unit** | One piece of work tracked end to end, keyed by an id (a ticket key such as `ABC-123`, a name you choose, or a generated `local-xxxxxxxx` for untracked text). Its state, requirement, plan, run logs, evidence and reviews live in the record store under `<repo namespace>/units/<id>`. |
 | **stage** | One step of a unit's lifecycle: define, build, review, walkthrough, pr, wrap_up. The unit has exactly one current stage. |
 | **cycle** | A counter starting at 0 that increments each time review sends the unit back to build. Evidence is recorded per cycle. |
-| **brief** | The server-rendered instructions a stage skill requests first (`unit brief`). It opens with a versioned YAML header (`harness-brief/1`, see [docs/brief-contract.md](docs/brief-contract.md)), then the seat wiring, config problems, the requirement and the exact tool calls with the unit id filled in. |
-| **seat** | A capability role the engine consults, such as `tracker`, `codehost`, `docs`, `design`, `chat` or `reviewbot`. Each seat lists the session tools that fill it. An unwired seat means "skip the steps that need it and say so". `system seats` proposes wiring from your session's tool names. |
+| **brief** | The server-rendered instructions a stage skill requests first (`unit brief`). It opens with a versioned YAML header (`harness-brief/1`, see [docs/brief-contract.md](docs/brief-contract.md)), then the role wiring, config problems, the requirement and the exact tool calls with the unit id filled in. |
+| **role** | A capability role the engine consults, such as `tracker`, `codehost`, `docs`, `design`, `chat` or `reviewbot`. Each role lists the session tools that fill it. An unwired role means "skip the steps that need it and say so". `system roles` proposes wiring from your session's tool names. |
 | **gate** | A check over recorded evidence that must pass before a transition, commit or push. Gates have a severity (`block`, `warn`, `off`) and return a concrete remedy when they fail. |
 | **evidence** | A typed record attached to a unit and cycle, validated against a schema. Nine kinds: `self_critique`, `defect_repro`, `screen_verdict`, `pii`, `criteria_validation`, `claims`, `waiver`, `browser_findings`, `review_column`. |
 | **column** | One independent review pass recorded as `review_column` evidence. Six column names exist (`criteria_forward`, `criteria_reverse`, `adversarial`, `diffaudit`, `ledger`, `browser`); the first five are required, `browser` is added when `browser_ui` is declared. `evidence synthesize` merges them into one verdict: `ship`, `needs_attention` or `not_ready`. |
@@ -256,14 +256,14 @@ npm install && npm run build && npm test
 ## Quick start (zero config)
 
 1. Open a repository and run the `setup` skill once. It runs `system doctor`, maps your
-   session's tools onto seats, asks about bots, kits and environments, and writes
+   session's tools onto roles, asks about bots, kits and environments, and writes
    `.harness.yaml` only after you confirm. With no config at all the engine still works:
    commands are inferred from the manifest and lockfile.
 2. Start a unit from a ticket, a PR, a url, a file, or plain text with `unit start`, then
    run the `pilot` skill. Pilot dispatches one fresh subagent per stage, routes with
    `unit route`, and stops for you when a stage is blocked.
 3. Every stage skill opens with `unit brief`, which renders the header contract
-   ([docs/brief-contract.md](docs/brief-contract.md)), the seat wiring, the requirement,
+   ([docs/brief-contract.md](docs/brief-contract.md)), the role wiring, the requirement,
    the plan and the exact tool calls with the unit id filled in.
 
 ## Tools
@@ -283,18 +283,18 @@ Twelve noun-grouped tools, each taking an `action`:
 | `ledger` | add, list, recheck and close carry-forward entries |
 | `digest` | write the unit summary, history, wrap-up |
 | `recall` | keyword search over past units |
-| `system` | version, health, kits, doctor, config, infer, seats |
+| `system` | version, health, kits, doctor, config, infer, roles |
 
 Every response ends with a versioned JSON envelope (`v`, `ok`, `summary`, `data`, `next`).
 The full action inventory is generated from the registry into
 [docs/tools.md](docs/tools.md) by `npm run gen:tools`.
 
-## Seats
+## Roles
 
 Capability roles the engine consults: `tracker`, `codehost`, `docs`, `design`, `chat`,
-and `reviewbot`. Each seat lists the tool names that fill it, for example a tracker seat
-holding `mcp__tracker__get_issue`; an unwired seat means "skip the steps that need it and
-say so". Stage briefs show the seats that stage consults. `system seats` proposes the
+and `reviewbot`. Each role lists the tool names that fill it, for example a tracker role
+holding `mcp__tracker__get_issue`; an unwired role means "skip the steps that need it and
+say so". Stage briefs show the roles that stage consults. `system roles` proposes the
 wiring from your session's tool names, and the `setup` skill writes it to config after you
 confirm.
 

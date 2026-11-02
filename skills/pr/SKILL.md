@@ -1,6 +1,6 @@
 ---
 name: pr
-description: "Ghostwrite the PR body from the record, list every mode demotion, and open the pull request through the codehost seat."
+description: "Ghostwrite the PR body from the record, list every mode demotion, and open the pull request through the codehost role."
 stage: pr
 ---
 
@@ -28,8 +28,8 @@ no extra reading.
 
 1. Record `criteria_validation` for every criterion and a `claims` audit over the factual statements the PR body will make.
 2. Render the PR body; read it as the reviewer will. Do not edit the scope ledger or waivers by hand.
-3. Open the PR through the codehost seat only with the user's approval; otherwise leave `drafts/pr-body.md` for them.
-4. Record the PR url, then apply the tracker status hint if the tracker seat is wired.
+3. Open the PR through the codehost role only with the user's approval; otherwise leave `drafts/pr-body.md` for them.
+4. Record the PR url, then apply the tracker status hint if the tracker role is wired.
 
 ## Calls
 

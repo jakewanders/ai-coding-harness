@@ -29,6 +29,29 @@ function renameKeys(obj, map, where, notes) {
 export function upgradeLegacyConfig(raw) {
     const notes = [];
     const out = { ...raw };
+    if ('seats' in out) {
+        if ('roles' in out) {
+            notes.push('"seats" is deprecated; ignoring it because "roles" is also set');
+        }
+        else {
+            out.roles = out.seats;
+            notes.push('"seats" is deprecated, use "roles"');
+        }
+        delete out.seats;
+    }
+    if (isPlainObject(out.gates)) {
+        const gates = {};
+        for (const [id, override] of Object.entries(out.gates)) {
+            if (isPlainObject(override) && typeof override.requires === 'string' && override.requires.startsWith('seat:')) {
+                notes.push(`gates.${id}.requires: "${override.requires}" is deprecated, use "role:${override.requires.slice('seat:'.length)}"`);
+                gates[id] = { ...override, requires: `role:${override.requires.slice('seat:'.length)}` };
+            }
+            else {
+                gates[id] = override;
+            }
+        }
+        out.gates = gates;
+    }
     if (Array.isArray(out.tickets)) {
         out.tickets = out.tickets.map((rule, i) => {
             if (!isPlainObject(rule) || !isPlainObject(rule.status_hints))

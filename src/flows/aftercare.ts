@@ -34,7 +34,7 @@ function draftFor(bucket: keyof Triage, t: Thread): string {
 
 /** Markdown with the three buckets and a drafted text per comment. */
 export function renderAftercare(id: string, tri: Triage): string {
-  const lines = [`# Aftercare for ${id}`, '', 'Drafts only; post through the codehost or tracker seat after the user approves.', ''];
+  const lines = [`# Aftercare for ${id}`, '', 'Drafts only; post through the codehost or tracker role after the user approves.', ''];
   const sections: Array<[keyof Triage, string, string]> = [
     ['fix_now', 'Fix now', 'Defects introduced by the shipped change: reproduce with a failing test, fix on a follow-up unit.'],
     ['new_ticket', 'New ticket', 'Requests beyond the shipped criteria: draft a ticket by hand under drafts/ and file it only after approval, then link it back.'],

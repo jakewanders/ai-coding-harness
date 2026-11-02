@@ -13,7 +13,7 @@ repo: example.test/owner/name
 worktree: ~/code/name-ABC-123
 base_branch: main
 root: /abs/plugin/root
-seats:
+roles:
   tracker: [mcp__tracker__get_issue]
   codehost: unwired
   docs: unwired
@@ -43,11 +43,11 @@ config_errors:
 | `worktree` | string or null | Home-relative path of the unit's worktree, `null` when working in place. |
 | `base_branch` | string | Branch the unit will merge into. |
 | `root` | string | Absolute plugin install root. Prose refers to it as `@root/`. |
-| `seats` | map of seat → list of tool names or `unwired` | Which session tools fill each capability seat: `tracker`, `codehost`, `docs`, `design`, `chat`, `reviewbot`. |
+| `roles` | map of role → list of tool names or `unwired` | Which session tools fill each capability role: `tracker`, `codehost`, `docs`, `design`, `chat`, `reviewbot`. |
 | `capabilities` | map | Repo profile capabilities such as `isolation` and `browser_ui`. |
 | `gates` | list of `{ id, severity, status }` | Gates for this stage. `severity` is `block`, `warn`, or `off`; `status` is `pass`, `fail`, or `n/a`. |
 | `docs` | list of absolute paths | Convention documents selected for this unit. |
 | `config_errors` | list of `{ file, path, line, message, valid_keys? }` | Problems found while loading configuration layers. Never silently dropped. |
 
-The header is followed by the seat-wiring block, any configuration problems in prose, the
+The header is followed by the role-wiring block, any configuration problems in prose, the
 source/spec block, then stage-specific material.

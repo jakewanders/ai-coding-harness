@@ -24,7 +24,7 @@ unit brief { "id": "<id>", "stage": "respond" }
 
 1. Decide per thread: fix, reply, or defer. Fixes stay inside the acceptance criteria; anything else is deferred.
 2. Make all fixes, run the check command, land exactly one batched commit for the round.
-3. Fill `drafts/replies.md`; post replies through the codehost seat only with the user's approval.
+3. Fill `drafts/replies.md`; post replies through the codehost role only with the user's approval.
 4. Resolve on the host only the threads whose fix landed.
 
 ```harness

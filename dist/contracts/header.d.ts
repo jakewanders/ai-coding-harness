@@ -1,12 +1,12 @@
 import { z } from 'zod';
 /**
  * Brief header contract. `unit brief` opens with this fenced YAML block so a
- * skill can read the unit, mode, stage, seats, gates and config problems
+ * skill can read the unit, mode, stage, roles, gates and config problems
  * before any prose. Published in docs/brief-contract.md.
  */
 export declare const BRIEF_CONTRACT = "harness-brief/1";
-export declare const SEAT_NAMES: readonly ['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot'];
-export type SeatName = (typeof SEAT_NAMES)[number];
+export declare const ROLE_NAMES: readonly ['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot'];
+export type RoleName = (typeof ROLE_NAMES)[number];
 export declare const SEVERITIES: readonly ['block', 'warn', 'off'];
 export type Severity = (typeof SEVERITIES)[number];
 export declare const GATE_STATUSES: readonly ['pass', 'fail', 'n/a'];
@@ -33,7 +33,7 @@ export interface BriefHeader {
     worktree: string | null;
     base_branch: string;
     root: string;
-    seats: Record<SeatName, string[] | 'unwired'>;
+    roles: Record<RoleName, string[] | 'unwired'>;
     capabilities: Record<string, unknown>;
     gates: HeaderGate[];
     docs: string[];

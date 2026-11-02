@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Breaking: seats renamed to roles
+- The capability seats (`tracker`, `codehost`, `docs`, `design`, `chat`, `reviewbot`) are now
+  roles. The tool action `system seats` is now `system roles` (its YAML fragment starts with
+  `roles:`), the brief header key `seats` is now `roles` (the contract string stays
+  `harness-brief/1`), the brief section is `## Roles`, the config key is `roles`, and a gate
+  requirement `seat:<name>` is now `role:<name>`. The README heading is `Roles`.
+- A config file that still says `seats:` or `requires: seat:<name>` keeps working: the old
+  spelling is upgraded in memory and shown as deprecated by `system doctor`. If both `seats` and
+  `roles` are present, `roles` wins.
+
 ### Breaking: stage ids renamed
 - Core stages are now `define`, `build`, `review`, `walkthrough`, `pr`, `wrap_up` (were `scope`,
   `build`, `review`, `verify`, `publish`, `close`). This changes the `stage` argument of `unit`

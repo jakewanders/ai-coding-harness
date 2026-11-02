@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
-import { seatWiring } from '../brief/seats.js';
+import { roleWiring } from '../brief/roles.js';
 import type { HarnessConfig } from '../config/schema.js';
-import { SEAT_NAMES, type SeatName } from '../contracts/header.js';
+import { ROLE_NAMES, type RoleName } from '../contracts/header.js';
 import type { Severity } from '../contracts/header.js';
 import type { ModeDef } from '../modes.js';
 import type { StageName, UnitState } from '../store/state.js';
@@ -71,15 +71,15 @@ export function hasCapability(config: HarnessConfig, repo: string, capability: s
   return Boolean(caps?.[capability]);
 }
 
-/** Is the seat wired with at least one tool name? */
-export function hasSeat(config: HarnessConfig, seat: string): boolean {
-  if (!(SEAT_NAMES as readonly string[]).includes(seat)) return false;
-  return seatWiring(config)[seat as SeatName] !== 'unwired';
+/** Is the role wired with at least one tool name? */
+export function hasRole(config: HarnessConfig, role: string): boolean {
+  if (!(ROLE_NAMES as readonly string[]).includes(role)) return false;
+  return roleWiring(config)[role as RoleName] !== 'unwired';
 }
 
-/** A gate requirement: a repo capability, or `seat:<name>` for a wired seat. */
+/** A gate requirement: a repo capability, or `role:<name>` for a wired role. */
 export function requirementMet(config: HarnessConfig, repo: string, requires: string): boolean {
-  return requires.startsWith('seat:') ? hasSeat(config, requires.slice('seat:'.length)) : hasCapability(config, repo, requires);
+  return requires.startsWith('role:') ? hasRole(config, requires.slice('role:'.length)) : hasCapability(config, repo, requires);
 }
 
 function runShellGate(command: string, cwd: string): GateOutcome {

@@ -23,7 +23,7 @@ If the header's `contract` is not `harness-brief/1`, stop and report.
 
 ## Procedure
 
-1. Read the source block in the brief. If it says "no pinned source", fetch the ticket through the tracker seat (or ask the user for the text) and pin it verbatim.
+1. Read the source block in the brief. If it says "no pinned source", fetch the ticket through the tracker role (or ask the user for the text) and pin it verbatim.
 2. Normalize the requirement into a title and a body in your own words; keep the tracker url.
 3. Extract numbered acceptance criteria, each testable in one sentence. Infer the unit kind (bug when a defect is described).
 4. Cross-check against linked items, the parent and prior PRs; record them as related items. Stop and ask on a contradiction.

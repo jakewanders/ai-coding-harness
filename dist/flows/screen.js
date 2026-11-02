@@ -11,7 +11,7 @@ export const render = (ctx) => {
         '',
         '## Four structured calls',
         '',
-        'Make one call per dimension per model and record each one. There is no second-opinion seat: the `second` call is',
+        'Make one call per dimension per model and record each one. There is no second-opinion role: the `second` call is',
         'a second framing by the same model, made after the primary call and arguing the opposite case first; say so in its reasons.',
         'Each call answers: is the ticket valid (buildable and worth building as written), invalid, or unclear? Give reasons.',
         '',
@@ -30,7 +30,7 @@ export const render = (ctx) => {
         '',
         '## Tracker status',
         '',
-        hint ? `Suggested status hint for a valid ticket: "${hint}" (from the ticket rule for define). Apply it only through the tracker seat and only with the user's approval.` : 'No status hint is configured for this ticket at the define boundary; report the verdict without proposing a status change.',
+        hint ? `Suggested status hint for a valid ticket: "${hint}" (from the ticket rule for define). Apply it only through the tracker role and only with the user's approval.` : 'No status hint is configured for this ticket at the define boundary; report the verdict without proposing a status change.',
         '',
         `Finish with \`unit report\` for stage screen carrying the consensus verdict in the summary; do not advance the unit.`,
     ];

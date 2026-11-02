@@ -26,7 +26,7 @@ If the header's `contract` is not `harness-brief/1`, stop and report.
 1. Write the digest: one-paragraph summary, the decisions taken, tags.
 2. Render the wrap-up and hand it to the user.
 3. Remove the worktree and delete the branch when merged.
-4. Apply the wrap_up status hint through the tracker seat only with approval.
+4. Apply the wrap_up status hint through the tracker role only with approval.
 
 ## Calls
 

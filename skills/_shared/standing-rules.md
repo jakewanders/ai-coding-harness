@@ -8,4 +8,4 @@ These five rules bound every dispatch and every stage. The conductor checks each
 2. **Cross-check.** Check the criteria against linked items, the parent, siblings and prior PRs recorded in `related.md`; stop and ask on a contradiction.
 3. **Remote refs.** Refresh remote refs before any diff or base comparison and compare against remote refs only (`vcs diff` does this for you).
 4. **No posting without approval.** Never post to a human-facing surface (tracker, code host, chat) without explicit user approval; write to `drafts/` and wait.
-5. **Seats.** When the brief shows a seat as `unwired`, skip the steps that need it and say so in your report.
+5. **Roles.** When the brief shows a role as `unwired`, skip the steps that need it and say so in your report.

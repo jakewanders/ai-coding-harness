@@ -8,7 +8,7 @@ import { stageEntry, type BriefContext } from '../registry/stages.js';
 import { homeRelative } from '../store/paths.js';
 import type { UnitState } from '../store/state.js';
 import { readSource } from '../store/units.js';
-import { buildSeatBlock, seatWiring } from './seats.js';
+import { buildRoleBlock, roleWiring } from './roles.js';
 
 export const STOP_BANNER = 'Stop after this stage and report to the user.';
 export const NO_UNIT = '(none)';
@@ -36,7 +36,7 @@ export function buildHeader(h: HeaderInputs): BriefHeader {
     worktree: h.state?.worktree ? homeRelative(h.state.worktree) : null,
     base_branch: h.state?.base_branch ?? h.baseBranch ?? 'main',
     root: h.root,
-    seats: seatWiring(h.config.config),
+    roles: roleWiring(h.config.config),
     capabilities,
     gates: h.gates.map((g) => ({ id: g.id, severity: g.severity, status: g.status })),
     docs: h.docs ?? [],
@@ -62,7 +62,7 @@ function sourceBlock(ctx: BriefContext): string[] {
   const pinned = ctx.unitDir ? readSource(ctx.unitDir) : null;
   if (pinned === null) {
     const ref = ctx.state?.source.ref;
-    lines.push(ref ? `no pinned source; fetch \`${ref}\` (${ctx.state?.source.kind}) through the tracker seat and pin it with \`spec pin\`.` : 'no pinned source.');
+    lines.push(ref ? `no pinned source; fetch \`${ref}\` (${ctx.state?.source.kind}) through the tracker role and pin it with \`spec pin\`.` : 'no pinned source.');
   } else {
     lines.push(pinned.trimEnd());
   }
@@ -93,11 +93,11 @@ export function modeBlock(ctx: BriefContext, mode: ModeDef = modeOf(ctx)): strin
   return lines;
 }
 
-/** Full brief: header, seats, config problems, mode, source, stage material, stop banner. */
+/** Full brief: header, roles, config problems, mode, source, stage material, stop banner. */
 export function renderBrief(ctx: BriefContext): string {
   const entry = stageEntry(ctx.header.stage);
   if (!entry) throw new Error(`unknown stage "${ctx.header.stage}"`);
-  const parts: string[] = [renderHeader(ctx.header), '', buildSeatBlock(ctx.config.config), ''];
+  const parts: string[] = [renderHeader(ctx.header), '', buildRoleBlock(ctx.config.config), ''];
   parts.push(...configErrorBlock(ctx.config.errors));
   parts.push(...modeBlock(ctx), '');
   parts.push(...sourceBlock(ctx));

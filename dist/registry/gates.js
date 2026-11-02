@@ -1,6 +1,6 @@
 import { spawnSync } from 'node:child_process';
-import { seatWiring } from '../brief/seats.js';
-import { SEAT_NAMES } from '../contracts/header.js';
+import { roleWiring } from '../brief/roles.js';
+import { ROLE_NAMES } from '../contracts/header.js';
 export const SEVERITY_RANK = { block: 2, warn: 1, off: 0 };
 export function defineGate(def) {
     return def;
@@ -21,15 +21,15 @@ export function hasCapability(config, repo, capability) {
     const caps = config.repos?.[repo]?.capabilities;
     return Boolean(caps?.[capability]);
 }
-/** Is the seat wired with at least one tool name? */
-export function hasSeat(config, seat) {
-    if (!SEAT_NAMES.includes(seat))
+/** Is the role wired with at least one tool name? */
+export function hasRole(config, role) {
+    if (!ROLE_NAMES.includes(role))
         return false;
-    return seatWiring(config)[seat] !== 'unwired';
+    return roleWiring(config)[role] !== 'unwired';
 }
-/** A gate requirement: a repo capability, or `seat:<name>` for a wired seat. */
+/** A gate requirement: a repo capability, or `role:<name>` for a wired role. */
 export function requirementMet(config, repo, requires) {
-    return requires.startsWith('seat:') ? hasSeat(config, requires.slice('seat:'.length)) : hasCapability(config, repo, requires);
+    return requires.startsWith('role:') ? hasRole(config, requires.slice('role:'.length)) : hasCapability(config, repo, requires);
 }
 function runShellGate(command, cwd) {
     const r = spawnSync('sh', ['-c', command], {

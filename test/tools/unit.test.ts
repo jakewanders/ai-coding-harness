@@ -94,7 +94,7 @@ describe('unit status and list', () => {
 });
 
 describe('unit brief', () => {
-  it('opens with a valid header, seat block, source block, stage material and the stop banner', async () => {
+  it('opens with a valid header, role block, source block, stage material and the stop banner', async () => {
     const ctx = ctxInRepo();
     await dispatch(unitTool, { action: 'start', source: 'text', id: 'ABC-1', text: 'Pinned requirement text.' }, ctx);
     const r = await dispatch(unitTool, { action: 'brief', id: 'ABC-1' }, ctx);
@@ -102,7 +102,7 @@ describe('unit brief', () => {
     expect(r.text.startsWith('```yaml\ncontract: harness-brief/1\n')).toBe(true);
     const header = HeaderSchema.parse(headerOf(r.text));
     expect(header).toMatchObject({ unit: 'ABC-1', stage: 'define', mode: 'thorough', repo: namespaceFor(ctx.cwd), root: ctx.root });
-    expect(header.seats.tracker).toBe('unwired');
+    expect(header.roles.tracker).toBe('unwired');
     expect(r.text).toContain('unwired — skip steps that need it and say so');
     expect(r.text).toContain('Pinned requirement text.');
     expect(r.text).toContain('# define');

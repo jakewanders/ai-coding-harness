@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { inferProfile } from '../config/infer.js';
-import type { SeatName } from '../contracts/header.js';
+import type { RoleName } from '../contracts/header.js';
 import type { BriefContext, BriefRenderer } from '../registry/stages.js';
 import { parseRequirement, type Requirement } from '../spec/requirement.js';
 import { readIndex, searchIndex } from '../store/index.js';
@@ -12,7 +12,7 @@ export type StageSection = 'requirement' | 'plan' | 'review' | 'commands' | 'dec
 export interface StageInfo {
   name: string;
   purpose: string;
-  seats: SeatName[];
+  roles: RoleName[];
   outputs: string[];
   sections: StageSection[];
   /** Call templates with the unit id filled in. */

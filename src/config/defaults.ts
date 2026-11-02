@@ -4,7 +4,7 @@ import type { HarnessConfig } from './schema.js';
 export const DEFAULTS: HarnessConfig = {
   schema: 1,
   store: { path: '~/.harness/vault', remote: null },
-  seats: {
+  roles: {
     tracker: { fetch: [], comment: [], transition_hint: [], create: [] },
     codehost: { open_pr: [], read_threads: [], comment: [], resolve_thread: [], attach: [] },
     docs: { search: [] },

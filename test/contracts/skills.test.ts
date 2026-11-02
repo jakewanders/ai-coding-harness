@@ -85,7 +85,7 @@ describe('skills', () => {
     }
   });
 
-  it('standing-rules holds the four blueprint rules plus the seat rule', () => {
+  it('standing-rules holds the four blueprint rules plus the role rule', () => {
     const text = fs.readFileSync(path.join(sharedDir, 'standing-rules.md'), 'utf8');
     const rules = text.split('\n').filter((l) => /^\d+\.\s/.test(l));
     expect(rules).toHaveLength(5);

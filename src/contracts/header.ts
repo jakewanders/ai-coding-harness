@@ -3,14 +3,14 @@ import { z } from 'zod';
 
 /**
  * Brief header contract. `unit brief` opens with this fenced YAML block so a
- * skill can read the unit, mode, stage, seats, gates and config problems
+ * skill can read the unit, mode, stage, roles, gates and config problems
  * before any prose. Published in docs/brief-contract.md.
  */
 
 export const BRIEF_CONTRACT = 'harness-brief/1';
 
-export const SEAT_NAMES = ['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot'] as const;
-export type SeatName = (typeof SEAT_NAMES)[number];
+export const ROLE_NAMES = ['tracker', 'codehost', 'docs', 'design', 'chat', 'reviewbot'] as const;
+export type RoleName = (typeof ROLE_NAMES)[number];
 
 export const SEVERITIES = ['block', 'warn', 'off'] as const;
 export type Severity = (typeof SEVERITIES)[number];
@@ -49,14 +49,14 @@ export interface BriefHeader {
   worktree: string | null;
   base_branch: string;
   root: string;
-  seats: Record<SeatName, string[] | 'unwired'>;
+  roles: Record<RoleName, string[] | 'unwired'>;
   capabilities: Record<string, unknown>;
   gates: HeaderGate[];
   docs: string[];
   config_errors: ConfigError[];
 }
 
-const SeatWiringSchema = z.union([z.array(z.string()), z.literal('unwired')]);
+const RoleWiringSchema = z.union([z.array(z.string()), z.literal('unwired')]);
 
 export const HeaderSchema: z.ZodType<BriefHeader> = z.object({
   contract: z.literal(BRIEF_CONTRACT),
@@ -67,13 +67,13 @@ export const HeaderSchema: z.ZodType<BriefHeader> = z.object({
   worktree: z.string().nullable(),
   base_branch: z.string(),
   root: z.string(),
-  seats: z.object({
-    tracker: SeatWiringSchema,
-    codehost: SeatWiringSchema,
-    docs: SeatWiringSchema,
-    design: SeatWiringSchema,
-    chat: SeatWiringSchema,
-    reviewbot: SeatWiringSchema,
+  roles: z.object({
+    tracker: RoleWiringSchema,
+    codehost: RoleWiringSchema,
+    docs: RoleWiringSchema,
+    design: RoleWiringSchema,
+    chat: RoleWiringSchema,
+    reviewbot: RoleWiringSchema,
   }).strict(),
   capabilities: z.record(z.string(), z.unknown()),
   gates: z.array(
@@ -90,7 +90,7 @@ export const HeaderSchema: z.ZodType<BriefHeader> = z.object({
 /** Header keys in contract order; `contract` is always first. */
 export const HEADER_KEYS: ReadonlyArray<keyof BriefHeader> = [
   'contract', 'unit', 'mode', 'stage', 'repo', 'worktree', 'base_branch', 'root',
-  'seats', 'capabilities', 'gates', 'docs', 'config_errors',
+  'roles', 'capabilities', 'gates', 'docs', 'config_errors',
 ];
 
 /** Fenced yaml block whose first line is `contract: harness-brief/1`. */

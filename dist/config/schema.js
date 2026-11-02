@@ -5,7 +5,7 @@ import { z } from 'zod';
  * overrides; DEFAULTS fills the rest. Objects are strict so unknown keys are
  * reported with their valid siblings.
  */
-export { SEAT_NAMES } from '../contracts/header.js';
+export { ROLE_NAMES } from '../contracts/header.js';
 const str = z.string();
 const strList = z.array(z.string());
 export const SeverityValue = z.enum(['block', 'warn', 'off']);
@@ -13,7 +13,7 @@ export const StoreSchema = z.object({
     path: str.optional(),
     remote: str.nullable().optional(),
 }).strict();
-export const SeatsSchema = z.object({
+export const RolesSchema = z.object({
     tracker: z.object({ fetch: strList.optional(), comment: strList.optional(), transition_hint: strList.optional(), create: strList.optional() }).strict().optional(),
     codehost: z.object({
         open_pr: strList.optional(), read_threads: strList.optional(), comment: strList.optional(),
@@ -87,7 +87,7 @@ export const DiffauditRuleSchema = z.object({
 export const HarnessConfigSchema = z.object({
     schema: z.literal(1).optional(),
     store: StoreSchema.optional(),
-    seats: SeatsSchema.optional(),
+    roles: RolesSchema.optional(),
     repos: z.record(str, RepoSchema).optional(),
     environments: z.array(EnvironmentSchema).optional(),
     tickets: z.array(TicketSchema).optional(),

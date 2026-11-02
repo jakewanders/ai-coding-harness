@@ -1,4 +1,4 @@
-import { SEAT_NAMES } from '../contracts/header.js';
+import { ROLE_NAMES } from '../contracts/header.js';
 const PRODUCTS = [
     ['tracker', /\b(jira|linear|asana|trello|youtrack|shortcut|clubhouse|monday)\b/i], // harness-lint: allow
     ['codehost', /\b(github|gitlab|bitbucket|gitea|codeberg|azure ?repos)\b/i], // harness-lint: allow
@@ -19,9 +19,9 @@ const GENERIC = [
 function tokens(name) {
     return name.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/[_\-.:/]+/g, ' ').toLowerCase();
 }
-/** Seats → tool names, in input order; tools matching nothing are left out. */
-export function mapToolsToSeats(toolNames) {
-    const out = Object.fromEntries(SEAT_NAMES.map((s) => [s, []]));
+/** Roles → tool names, in input order; tools matching nothing are left out. */
+export function mapToolsToRoles(toolNames) {
+    const out = Object.fromEntries(ROLE_NAMES.map((s) => [s, []]));
     for (const name of toolNames) {
         const t = tokens(name);
         const hit = [...PRODUCTS, ...GENERIC].find(([, re]) => re.test(t));
@@ -30,8 +30,8 @@ export function mapToolsToSeats(toolNames) {
     }
     return out;
 }
-/** Tools that mapped to no seat. */
-export function unmappedTools(toolNames, seats = mapToolsToSeats(toolNames)) {
-    const mapped = new Set(Object.values(seats).flat());
+/** Tools that mapped to no role. */
+export function unmappedTools(toolNames, roles = mapToolsToRoles(toolNames)) {
+    const mapped = new Set(Object.values(roles).flat());
     return toolNames.filter((n) => !mapped.has(n));
 }

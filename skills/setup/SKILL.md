@@ -1,6 +1,6 @@
 ---
 name: setup
-description: "First-run setup conversation: doctor, seat mapping from visible tools, questions about bots, second-opinion model, kits and environments, then write the approved repo config."
+description: "First-run setup conversation: doctor, role mapping from visible tools, questions about bots, second-opinion model, kits and environments, then write the approved repo config."
 flow: setup
 argument-hint: "<source> [id] [mode]"
 ---
@@ -20,14 +20,14 @@ unit brief { "stage": "setup" }
 ## Procedure
 
 1. `system doctor` and explain the report in plain words.
-2. `system seats` with every visible tool name; confirm the mapping with the user.
+2. `system roles` with every visible tool name; confirm the mapping with the user.
 3. Ask about the review bot, kits and environments.
 4. Show the proposal from `system config` in propose mode and revise it with the user.
 5. Write it with `system config` in write mode only after the user confirms.
 
 ```harness
 system doctor { }
-system seats { "tools": ["<every visible tool name>"] }
+system roles { "tools": ["<every visible tool name>"] }
 system config { "mode": "propose" }
 system config { "mode": "write", "yaml": "<approved yaml>" }
 ```

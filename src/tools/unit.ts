@@ -135,7 +135,7 @@ export const unitTool = defineTool({
     }),
 
     brief: action({
-      describe: 'Render the brief for a stage: header, seats, config problems, source, then stage material.',
+      describe: 'Render the brief for a stage: header, roles, config problems, source, then stage material.',
       schema: z.object({
         id: z.string().optional().describe('Unit id; defaults to the unit implied by the current branch.'),
         stage: z.string().optional().describe("Stage or flow name; defaults to the unit's current stage."),

@@ -8,8 +8,8 @@ import { stageBrief } from './_shared.js';
 export const info = {
     name: 'walkthrough',
     purpose: 'Validate the change in a browser against the acceptance criteria when the repo declares browser_ui.',
-    seats: ['codehost'],
-    outputs: ['browser_findings evidence with a result per criterion', 'annotated screenshots attached to the PR when the codehost seat allows'],
+    roles: ['codehost'],
+    outputs: ['browser_findings evidence with a result per criterion', 'annotated screenshots attached to the PR when the codehost role allows'],
     sections: ['commands'],
     calls: (id) => [
         `exec run { "id": "${id}", "name": "boot" }`,
@@ -50,7 +50,7 @@ function walkthroughBody(ctx) {
     lines.push(reference ? `- reference: ${reference.name} at ${reference.url ?? '(no url)'} — reproduce runtime errors here before calling them regressions.` : '- reference: none configured; runtime errors cannot be cross-checked against a reference environment.');
     const e2e = e2eCommand(ctx);
     lines.push('', '## End-to-end suite', '', e2e ? `Run the project's e2e suite through exec run (\`${e2e}\`) and record its exit in browser_findings.e2e.` : 'No e2e command configured or inferable; set e2e: null in browser_findings and say so.');
-    lines.push('', '## Screenshots', '', 'Take an annotated screenshot per criterion. Attach them to the PR through the codehost seat\'s attach tools when that seat is wired; otherwise keep the paths in browser_findings.criteria[].screenshots and say the attachment was skipped.');
+    lines.push('', '## Screenshots', '', 'Take an annotated screenshot per criterion. Attach them to the PR through the codehost role\'s attach tools when that role is wired; otherwise keep the paths in browser_findings.criteria[].screenshots and say the attachment was skipped.');
     lines.push('', '## Scope', '', 'No roaming regression sweeps. Anything you notice outside the criteria goes into browser_findings.out_of_scope; it is recorded but cannot affect the verdict. Only the per-criterion results decide the walkthrough_done gate.');
     return lines;
 }

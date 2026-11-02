@@ -19,5 +19,5 @@ export interface HeaderInputs {
 export declare function buildHeader(h: HeaderInputs): BriefHeader;
 /** `## Mode`: name, demotions, skipped stages, ordering notes, banner, and the stage's mode notes when shipped. */
 export declare function modeBlock(ctx: BriefContext, mode?: ModeDef): string[];
-/** Full brief: header, seats, config problems, mode, source, stage material, stop banner. */
+/** Full brief: header, roles, config problems, mode, source, stage material, stop banner. */
 export declare function renderBrief(ctx: BriefContext): string;

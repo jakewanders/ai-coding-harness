@@ -44,9 +44,9 @@ export declare function allGates(): GateDef[];
 export declare const CUSTOM_GATE_TIMEOUT_MS = 60000;
 /** Does the unit's repo profile declare `capability` truthy? */
 export declare function hasCapability(config: HarnessConfig, repo: string, capability: string): boolean;
-/** Is the seat wired with at least one tool name? */
-export declare function hasSeat(config: HarnessConfig, seat: string): boolean;
-/** A gate requirement: a repo capability, or `seat:<name>` for a wired seat. */
+/** Is the role wired with at least one tool name? */
+export declare function hasRole(config: HarnessConfig, role: string): boolean;
+/** A gate requirement: a repo capability, or `role:<name>` for a wired role. */
 export declare function requirementMet(config: HarnessConfig, repo: string, requires: string): boolean;
 /**
  * Resolve the gates guarding `stage`: apply `requires`, config overrides,

@@ -2,7 +2,7 @@ import { stageBrief } from './_shared.js';
 export const info = {
     name: 'build',
     purpose: 'Plan against the acceptance criteria, implement test-first in the unit worktree with the check command green, record the self-critique and personal-data audit, and commit through the gates.',
-    seats: ['docs'],
+    roles: ['docs'],
     outputs: ['plan.md (Steps, Tests, Risks, Deferred)', 'code changes in the worktree', 'run logs under runs/', 'self_critique and pii evidence', 'commits.json entry'],
     sections: ['requirement', 'plan', 'commands', 'ledger'],
     calls: (id) => [

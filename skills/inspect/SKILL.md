@@ -21,7 +21,7 @@ unit brief { "id": "pr-<number>", "stage": "inspect" }
 
 ## Procedure
 
-1. Read the diff and the PR description. Fetch through the codehost seat, or `vcs diff` when the branch is checked out.
+1. Read the diff and the PR description. Fetch through the codehost role, or `vcs diff` when the branch is checked out.
 2. Record each review column as `review_column`; record nothing else.
 3. Synthesize and report the verdict with the top findings. Never post to the PR from this flow.
 

@@ -1,12 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { stringify as stringifyYaml } from 'yaml';
-import { seatWiring } from '../brief/seats.js';
+import { roleWiring } from '../brief/roles.js';
 import { DEFAULTS } from '../config/defaults.js';
 import { inferProfile, type InferredProfile } from '../config/infer.js';
 import { findGitRoot, loadFileLayer, userConfigPath, type LoadedConfig } from '../config/load.js';
 import type { HarnessConfig } from '../config/schema.js';
-import type { ConfigError, SeatName } from '../contracts/header.js';
+import type { ConfigError, RoleName } from '../contracts/header.js';
 import { remoteUrl } from '../git/exec.js';
 import { VERSION } from '../index.js';
 import type { ToolContext } from '../registry/tools.js';
@@ -17,7 +17,7 @@ export interface DoctorReport {
   layers: LoadedConfig['layers'];
   errors: ConfigError[];
   deprecations: string[];
-  seats: Record<SeatName, string[] | 'unwired'>;
+  roles: Record<RoleName, string[] | 'unwired'>;
   kits: Array<{ name: string; dir: string; docs: number; rules: number }>;
   environments: NonNullable<HarnessConfig['environments']>;
   vault: { path: string; exists: boolean; git: boolean; remote: string | null };
@@ -59,7 +59,7 @@ export function runDoctor(ctx: ToolContext): DoctorReport {
     layers: ctx.config.layers,
     errors: ctx.config.errors,
     deprecations: ctx.config.deprecations ?? [],
-    seats: seatWiring(ctx.config.config),
+    roles: roleWiring(ctx.config.config),
     kits: ctx.config.kits.map((k) => ({ name: k.name, dir: k.dir, docs: k.docs.length, rules: k.rules.length })),
     environments: ctx.config.config.environments ?? [],
     vault: { path: homeRelative(ctx.vault), exists: fs.existsSync(ctx.vault), git: vaultGit, remote: vaultGit ? remoteUrl(ctx.vault) : null },
@@ -74,7 +74,7 @@ export function renderDoctor(r: DoctorReport): string {
   lines.push('', '## Config layers', '', ...r.layers.map((l) => `- ${l.name}: ${l.file ?? '(none)'} ${l.ok ? 'ok' : 'SKIPPED'}`));
   if (r.errors.length) lines.push('', 'Problems:', ...r.errors.map((e) => `- ${e.file}${e.line !== null ? `:${e.line}` : ''} ${e.path ? `at ${e.path}: ` : ''}${e.message}`));
   if (r.deprecations.length) lines.push('', 'Deprecated (still accepted, please update the file):', ...r.deprecations.map((d) => `- ${d}`));
-  lines.push('', '## Seats', '', ...Object.entries(r.seats).map(([seat, w]) => `- ${seat}: ${w === 'unwired' ? 'unwired' : w.join(', ')}`));
+  lines.push('', '## Roles', '', ...Object.entries(r.roles).map(([role, w]) => `- ${role}: ${w === 'unwired' ? 'unwired' : w.join(', ')}`));
   lines.push('', '## Kits', '', ...(r.kits.length ? r.kits.map((k) => `- ${k.name}: ${k.docs} doc(s), ${k.rules} rule(s)`) : ['- none']));
   lines.push('', '## Environments', '', ...(r.environments.length ? r.environments.map((e) => `- ${e.name} (${e.role ?? 'no role'}): ${e.url ?? 'no url'}`) : ['- none']));
   lines.push('', '## Vault', '', `- path: ${r.vault.path}`, `- exists: ${r.vault.exists}, git: ${r.vault.git}, remote: ${r.vault.remote ?? 'none'}`);

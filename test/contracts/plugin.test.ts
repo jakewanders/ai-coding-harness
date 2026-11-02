@@ -50,7 +50,7 @@ describe('README.md', () => {
   it('mentions every tool name and the main sections', () => {
     const readme = fs.readFileSync(path.join(repoRoot, 'README.md'), 'utf8');
     for (const t of allTools()) expect(readme, t.name).toMatch(new RegExp(`\\b${t.name}\\b`));
-    for (const heading of ['Install', 'Quick start', 'Seats', 'Modes', 'Kits', 'Hooks', 'Configuration']) expect(readme).toMatch(new RegExp(`^##+ .*${heading}`, 'im'));
+    for (const heading of ['Install', 'Quick start', 'Roles', 'Modes', 'Kits', 'Hooks', 'Configuration']) expect(readme).toMatch(new RegExp(`^##+ .*${heading}`, 'im'));
     expect(readme).toContain('docs/tools.md');
   });
 });
