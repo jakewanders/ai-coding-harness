@@ -43,7 +43,7 @@ export function routeNext(state: UnitState, mode: ModeDef, browserUi = false): R
     return { next: stage, decision: 'blocked', questions: [`${stage} failed ${failures} times; last: ${latest.summary}`] };
   }
 
-  if (stage === 'close') return { next: null, decision: 'done', questions: [] };
+  if (stage === 'wrap_up') return { next: null, decision: 'done', questions: [] };
 
   if (stage === 'review') {
     const verdict = latest.verdict ?? state.reviews?.[state.cycle];
@@ -52,7 +52,7 @@ export function routeNext(state: UnitState, mode: ModeDef, browserUi = false): R
       if (state.cycle < MAX_REVIEW_CYCLES) return { next: 'build', decision: 'retry', verdict, questions: [] };
       return { next: stage, decision: 'blocked', verdict, questions: [`review verdict is ${verdict} after ${state.cycle} cycles; a human should decide how to proceed`] };
     }
-    return { next: nextStageFor('review', opts) ?? 'publish', decision: 'proceed', verdict, questions: [] };
+    return { next: nextStageFor('review', opts) ?? 'pr', decision: 'proceed', verdict, questions: [] };
   }
 
   const next = nextStageFor(stage, opts);

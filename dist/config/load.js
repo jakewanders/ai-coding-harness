@@ -61,7 +61,7 @@ export function loadFileLayer(name, file) {
     const validated = validateLayer(located.doc.toJS() ?? {}, file, located);
     if ('error' in validated)
         return { report: { name, file, ok: false, error: validated.error }, config: null };
-    return { report: { name, file, ok: true }, config: validated.config };
+    return { report: { name, file, ok: true, ...(validated.deprecations ? { deprecations: validated.deprecations } : {}) }, config: validated.config };
 }
 function mergeLayers(defaults, kitFragments, user, repo) {
     const layers = [{ name: 'defaults', file: null, ok: true }];
@@ -74,7 +74,7 @@ function mergeLayers(defaults, kitFragments, user, repo) {
             errors.push(validated.error);
         }
         else {
-            layers.push({ name: 'kit', file, ok: true });
+            layers.push({ name: 'kit', file, ok: true, ...(validated.deprecations ? { deprecations: validated.deprecations } : {}) });
             config = deepMerge(config, validated.config);
         }
     }
@@ -110,5 +110,6 @@ export function loadConfig(opts) {
     for (const name of missing) {
         errors.push({ file: repo.report.file ?? user.report.file ?? 'config', path: 'kits', line: null, message: `kit "${name}" not found on the kit search path (HARNESS_KIT_PATHS, ~/.harness/kits, plugin cache, ../ai-coding-harness-kits/kits)` });
     }
-    return { config: merged.config, layers: merged.layers, errors, kits: discovery };
+    const deprecations = merged.layers.flatMap((l) => l.deprecations ?? []);
+    return { config: merged.config, layers: merged.layers, errors, kits: discovery, ...(deprecations.length ? { deprecations } : {}) };
 }

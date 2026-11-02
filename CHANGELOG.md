@@ -1,5 +1,22 @@
 # Changelog
 
+## Unreleased
+
+### Breaking: stage ids renamed
+- Core stages are now `define`, `build`, `review`, `walkthrough`, `pr`, `wrap_up` (were `scope`,
+  `build`, `review`, `verify`, `publish`, `close`). This changes the `stage` argument of `unit`
+  actions, the stage skills (`skills/define`, `skills/walkthrough`, `skills/pr`,
+  `skills/wrap_up`), the hook guard id `publish_gate` (now `pr_gate`) and the stage names in
+  gate registrations. Gate ids are unchanged (`walkthrough_done`, `pr_recorded`, ...), as are the
+  `digest wrapup` action and the `ledger close` action.
+- Config: the mode flag `verify_after_publish` is now `walkthrough_after_pr`, and ticket
+  `status_hints` keys and `custom_gates[].stage` use the new stage ids. The old spellings are
+  still accepted and upgraded in memory; `system doctor` lists each one as deprecated. Files are
+  never rewritten.
+- Persisted state: the unit state schema is now 2. On read, `state.json` files at schema 0 or 1
+  are migrated and rewritten: `stage`, `timers[].stage` and the keys and `stage` fields of
+  `reports` are mapped from the old stage ids to the new ones.
+
 ## 0.2.0 — 2026-09-04 (lean)
 
 A middle ground between the full 0.1.0 pipeline and an unstructured session. The core

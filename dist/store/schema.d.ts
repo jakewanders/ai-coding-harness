@@ -1,6 +1,6 @@
 import { z } from 'zod';
-export declare const STATE_SCHEMA = 1;
-export declare const STAGE_NAMES: readonly ['scope', 'build', 'review', 'verify', 'publish', 'close'];
+export declare const STATE_SCHEMA = 2;
+export declare const STAGE_NAMES: readonly ['define', 'build', 'review', 'walkthrough', 'pr', 'wrap_up'];
 export declare const UNIT_KINDS: readonly ['feature', 'bug', 'chore', 'unknown'];
 export declare const SOURCE_KINDS: readonly ['ticket', 'pr', 'url', 'file', 'conversation', 'text'];
 export declare const REVIEW_VERDICTS: readonly ['ship', 'needs_attention', 'not_ready'];
@@ -47,11 +47,11 @@ export declare const PrRecordSchema: z.ZodObject<{
 export declare const TimerRecordSchema: z.ZodObject<{
     stage: z.ZodEnum<{
         build: "build";
-        close: "close";
-        publish: "publish";
+        define: "define";
+        pr: "pr";
         review: "review";
-        scope: "scope";
-        verify: "verify";
+        walkthrough: "walkthrough";
+        wrap_up: "wrap_up";
     }>;
     started_at: z.ZodString;
     ended_at: z.ZodNullable<z.ZodString>;
@@ -92,7 +92,7 @@ export declare const ReportSchema: z.ZodObject<{
     at: z.ZodString;
 }, z.core.$strip>;
 export declare const UnitStateSchema: z.ZodObject<{
-    schema: z.ZodLiteral<1>;
+    schema: z.ZodLiteral<2>;
     id: z.ZodString;
     repo: z.ZodString;
     tracked: z.ZodBoolean;
@@ -111,11 +111,11 @@ export declare const UnitStateSchema: z.ZodObject<{
     mode: z.ZodString;
     stage: z.ZodEnum<{
         build: "build";
-        close: "close";
-        publish: "publish";
+        define: "define";
+        pr: "pr";
         review: "review";
-        scope: "scope";
-        verify: "verify";
+        walkthrough: "walkthrough";
+        wrap_up: "wrap_up";
     }>;
     cycle: z.ZodNumber;
     kind: z.ZodEnum<{
@@ -177,11 +177,11 @@ export declare const UnitStateSchema: z.ZodObject<{
     timers: z.ZodArray<z.ZodObject<{
         stage: z.ZodEnum<{
             build: "build";
-            close: "close";
-            publish: "publish";
+            define: "define";
+            pr: "pr";
             review: "review";
-            scope: "scope";
-            verify: "verify";
+            walkthrough: "walkthrough";
+            wrap_up: "wrap_up";
         }>;
         started_at: z.ZodString;
         ended_at: z.ZodNullable<z.ZodString>;

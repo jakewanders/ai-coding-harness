@@ -41,7 +41,7 @@ describe('consensus', () => {
 
 describe('screen brief', () => {
   it('lists the four structured verdict calls, the second-model route, the consensus step and the status hint', async () => {
-    const repo = makeRepo({ 'README.md': 'x', '.harness.yaml': 'schema: 1\ntickets:\n  - pattern: "^SC-\\\\d+$"\n    status_hints:\n      scope: "In Analysis"\n' });
+    const repo = makeRepo({ 'README.md': 'x', '.harness.yaml': 'schema: 1\ntickets:\n  - pattern: "^SC-\\\\d+$"\n    status_hints:\n      define: "In Analysis"\n' });
     const ctx = makeCtx({ cwd: repo });
     await dispatch(unitTool, { action: 'start', source: 'ticket', ref: 'SC-1' }, ctx);
     const r = await dispatch(unitTool, { action: 'brief', id: 'SC-1', stage: 'screen', quiet: true }, ctx);

@@ -55,7 +55,7 @@ describe('walkthrough_done gate', () => {
   const mode = resolveMode('thorough', DEFAULTS);
   const withUi: HarnessConfig = { ...DEFAULTS, repos: { 'local/x': { capabilities: { browser_ui: true } } } };
   function state(evidence: EvidenceRecord[] = []): UnitState {
-    return { ...createState({ id: 'VF-1', repo: 'local/x', tracked: true, source: { kind: 'ticket', ref: 'VF-1', pinned: true }, mode: 'thorough', base_branch: 'main' }), stage: 'publish', evidence };
+    return { ...createState({ id: 'VF-1', repo: 'local/x', tracked: true, source: { kind: 'ticket', ref: 'VF-1', pinned: true }, mode: 'thorough', base_branch: 'main' }), stage: 'pr', evidence };
   }
   const findings = (results: Array<'pass' | 'fail' | 'blocked'>, out_of_scope: string[] = []): EvidenceRecord => ({
     kind: 'browser_findings', cycle: 0, recorded_at: '2026-09-04T00:00:00.000Z',
@@ -63,7 +63,7 @@ describe('walkthrough_done gate', () => {
   });
   async function gate(config: HarnessConfig, s: UnitState) {
     const ctx: GateContext = { state: s, config, unitDir: makeTmpDir('harness-vf'), worktree: null };
-    return (await resolveGates('publish', ctx, mode)).find((g) => g.id === 'walkthrough_done')!;
+    return (await resolveGates('pr', ctx, mode)).find((g) => g.id === 'walkthrough_done')!;
   }
 
   it('is n/a without browser_ui, fails without a record or with a failing criterion, passes when all pass', async () => {
@@ -83,7 +83,7 @@ describe('walkthrough_done gate', () => {
   });
 });
 
-describe('verify brief', () => {
+describe('walkthrough brief', () => {
   it('lists criteria with edge-case prompts, environments by role, e2e command, screenshot and scope rules, never credential values', async () => {
     const yaml = [
       'schema: 1',
@@ -110,8 +110,8 @@ describe('verify brief', () => {
     await dispatch(specTool, { action: 'record', id: 'VF-2', title: 'Export button', body: 'Add export.' }, ctx);
     await dispatch(specTool, { action: 'criteria', id: 'VF-2', set: ['Button visible on the orders page', 'CSV downloads with all rows'] }, ctx);
     const dir = unitDirFor(ctx, 'VF-2');
-    writeState(dir, { ...readState(dir), stage: 'verify' });
-    const r = await dispatch(unitTool, { action: 'brief', id: 'VF-2', stage: 'verify', quiet: true }, ctx);
+    writeState(dir, { ...readState(dir), stage: 'walkthrough' });
+    const r = await dispatch(unitTool, { action: 'brief', id: 'VF-2', stage: 'walkthrough', quiet: true }, ctx);
     expect(r.envelope.ok).toBe(true);
     expect(r.text).toContain('AC-1: Button visible on the orders page');
     expect(r.text).toContain('AC-2: CSV downloads with all rows');
@@ -136,7 +136,7 @@ describe('verify brief', () => {
   it('says so when no environment or e2e command is configured', async () => {
     const ctx = makeCtx({ cwd: makeRepo({ 'README.md': 'x' }) });
     await dispatch(unitTool, { action: 'start', source: 'ticket', ref: 'VF-3' }, ctx);
-    const r = await dispatch(unitTool, { action: 'brief', id: 'VF-3', stage: 'verify', quiet: true }, ctx);
+    const r = await dispatch(unitTool, { action: 'brief', id: 'VF-3', stage: 'walkthrough', quiet: true }, ctx);
     expect(r.text).toMatch(/no environment with role sut/i);
     expect(r.text).toMatch(/no e2e command/i);
   });

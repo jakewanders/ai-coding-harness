@@ -6,13 +6,13 @@ interface CriterionResult { id: string; result: 'pass' | 'fail' | 'blocked' }
 
 export const walkthroughDone = registerGate(defineGate({
   id: 'walkthrough_done',
-  stage: 'publish',
+  stage: 'pr',
   description: 'A browser_findings record for this cycle marks every acceptance criterion as pass.',
   severity: 'block',
   requires: 'browser_ui',
   check: (ctx) => {
     const latest = recordsThisCycle(ctx, 'browser_findings').at(-1);
-    if (!latest) return { pass: false, remedy: `${EVIDENCE_KINDS.browser_findings.remedy}; run the verify stage` };
+    if (!latest) return { pass: false, remedy: `${EVIDENCE_KINDS.browser_findings.remedy}; run the walkthrough stage` };
     const criteria = ((latest.payload as { criteria?: CriterionResult[] })?.criteria ?? []);
     if (!criteria.length) return { pass: false, remedy: 'browser_findings lists no criteria; exercise every acceptance criterion in the browser and record each result' };
     const notPassing = criteria.filter((c) => c.result !== 'pass');

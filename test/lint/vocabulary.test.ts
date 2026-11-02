@@ -49,11 +49,11 @@ describe('scanFiles', () => {
 describe('collectShipped', () => {
   it('lists shipped files and excludes dist, node_modules, docs and test', () => {
     const root = makeTmpDir('harness-shipped');
-    for (const d of ['src/deep', 'skills/scope', 'hooks', 'examples/kits/x', 'dist', 'node_modules/p', 'docs', 'test', 'src/node_modules/q']) {
+    for (const d of ['src/deep', 'skills/define', 'hooks', 'examples/kits/x', 'dist', 'node_modules/p', 'docs', 'test', 'src/node_modules/q']) {
       fs.mkdirSync(path.join(root, d), { recursive: true });
     }
     const files = {
-      'src/a.ts': 1, 'src/deep/b.ts': 1, 'skills/scope/SKILL.md': 1, 'hooks/guard.mjs': 1,
+      'src/a.ts': 1, 'src/deep/b.ts': 1, 'skills/define/SKILL.md': 1, 'hooks/guard.mjs': 1,
       'examples/kits/x/kit.yaml': 1, 'README.md': 1,
       'dist/a.js': 0, 'node_modules/p/index.js': 0, 'docs/blueprint.md': 0, 'test/a.test.ts': 0,
       'src/node_modules/q/index.js': 0, 'package.json': 0,

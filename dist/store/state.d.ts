@@ -2,7 +2,7 @@ import type { EvidenceKind } from '../evidence/kinds.js';
 import { STATE_SCHEMA } from './schema.js';
 export { STATE_SCHEMA };
 export { appendHistory } from './history.js';
-export type StageName = 'scope' | 'build' | 'review' | 'verify' | 'publish' | 'close';
+export type StageName = 'define' | 'build' | 'review' | 'walkthrough' | 'pr' | 'wrap_up';
 export type UnitKind = 'feature' | 'bug' | 'chore' | 'unknown';
 export type SourceKind = 'ticket' | 'pr' | 'url' | 'file' | 'conversation' | 'text';
 export type ReviewVerdict = 'ship' | 'needs_attention' | 'not_ready';
@@ -61,7 +61,7 @@ export interface Report {
     at: string;
 }
 export interface UnitState {
-    schema: 1;
+    schema: 2;
     id: string;
     repo: string;
     tracked: boolean;

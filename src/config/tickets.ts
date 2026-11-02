@@ -1,7 +1,7 @@
 import type { HarnessConfig, TicketConfig } from './schema.js';
 
 export type TicketRule = TicketConfig;
-export type StatusBoundary = 'scope' | 'build' | 'publish' | 'close';
+export type StatusBoundary = 'define' | 'build' | 'pr' | 'wrap_up';
 
 function compile(pattern: string): RegExp | null {
   try {

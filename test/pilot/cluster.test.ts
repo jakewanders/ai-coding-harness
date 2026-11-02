@@ -64,13 +64,13 @@ describe('unit link', () => {
 });
 
 describe('convoy brief', () => {
-  it('takes no id and lays out scope+plan per id, clustering, the approval checkpoint, sequential pilots and linking', async () => {
+  it('takes no id and lays out define+plan per id, clustering, the approval checkpoint, sequential pilots and linking', async () => {
     expect(stageEntry('convoy')).toMatchObject({ standalone: true, takesNoId: true });
     const ctx = makeCtx({ cwd: makeRepo({ 'README.md': 'x' }) });
     const r = await dispatch(unitTool, { action: 'brief', stage: 'convoy', quiet: true }, ctx);
     expect(r.envelope.ok).toBe(true);
     expect(r.text).toContain('# convoy');
-    expect(r.text).toMatch(/scope only/i);
+    expect(r.text).toMatch(/define only/i);
     expect(r.text).toContain('Files:');
     expect(r.text).toMatch(/cluster/i);
     expect(r.text).toMatch(/approv/i);

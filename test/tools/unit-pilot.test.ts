@@ -32,27 +32,27 @@ describe('unit report and route', () => {
   it('persists reports per stage and cycle, and route reads them', async () => {
     const ctx = await unitCtx();
     const first = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
-    expect(first.envelope.data).toMatchObject({ next: 'scope', decision: 'proceed' });
-    expect(readState(unitDirFor(ctx, 'PL-1')).stage).toBe('scope');
-    const r = await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'scope', outcome: 'done', summary: 'criteria recorded', artifacts: { requirement: '~/x/requirement.md' } }, ctx);
+    expect(first.envelope.data).toMatchObject({ next: 'define', decision: 'proceed' });
+    expect(readState(unitDirFor(ctx, 'PL-1')).stage).toBe('define');
+    const r = await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'define', outcome: 'done', summary: 'criteria recorded', artifacts: { requirement: '~/x/requirement.md' } }, ctx);
     expect(r.envelope.ok).toBe(true);
     const state = readState(unitDirFor(ctx, 'PL-1'));
-    expect(state.reports!.scope).toHaveLength(1);
-    expect(state.reports!.scope![0]).toMatchObject({ stage: 'scope', cycle: 0, outcome: 'done', summary: 'criteria recorded', at: '2026-09-04T12:00:00.000Z' });
+    expect(state.reports!.define).toHaveLength(1);
+    expect(state.reports!.define![0]).toMatchObject({ stage: 'define', cycle: 0, outcome: 'done', summary: 'criteria recorded', at: '2026-09-04T12:00:00.000Z' });
     const route = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
     expect(route.envelope.ok).toBe(true);
-    expect(route.envelope.data).toMatchObject({ next: 'build', decision: 'proceed', from: 'scope' });
+    expect(route.envelope.data).toMatchObject({ next: 'build', decision: 'proceed', from: 'define' });
     expect(readState(unitDirFor(ctx, 'PL-1')).stage).toBe('build');
     expect(route.envelope.next[0]).toMatchObject({ tool: 'unit', action: 'brief' });
   });
 
   it('returns blocked with the report questions and does not move', async () => {
     const ctx = await unitCtx();
-    await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'scope', outcome: 'blocked', summary: 'ambiguous', questions: ['Which locale?'] }, ctx);
+    await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'define', outcome: 'blocked', summary: 'ambiguous', questions: ['Which locale?'] }, ctx);
     const route = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
     expect(route.envelope.ok).toBe(false);
     expect(route.envelope.data).toMatchObject({ decision: 'blocked', questions: ['Which locale?'] });
-    expect(readState(unitDirFor(ctx, 'PL-1')).stage).toBe('scope');
+    expect(readState(unitDirFor(ctx, 'PL-1')).stage).toBe('define');
     const answered = await dispatch(unitTool, { action: 'answer', id: 'PL-1', answers: { 'Which locale?': 'en-US only' } }, ctx);
     expect(answered.envelope.ok).toBe(true);
     expect(readState(unitDirFor(ctx, 'PL-1')).answers).toEqual({ 'Which locale?': 'en-US only' });
@@ -73,7 +73,7 @@ describe('unit report and route', () => {
     expect(readState(dir).stage).toBe('review');
   });
 
-  it('retries to build on a needs_attention verdict and proceeds to publish on ship', async () => {
+  it('retries to build on a needs_attention verdict and proceeds to pr on ship', async () => {
     const ctx = await unitCtx();
     const dir = unitDirFor(ctx, 'PL-1');
     writeState(dir, { ...readState(dir), stage: 'review' });
@@ -84,13 +84,13 @@ describe('unit report and route', () => {
     writeState(dir, { ...readState(dir), stage: 'review' });
     await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'review', outcome: 'done', summary: 'clean', verdict: 'ship' }, ctx);
     const onward = await dispatch(unitTool, { action: 'route', id: 'PL-1' }, ctx);
-    expect(onward.envelope.data).toMatchObject({ decision: 'proceed', next: 'publish' });
-    expect(readState(dir).stage).toBe('publish');
+    expect(onward.envelope.data).toMatchObject({ decision: 'proceed', next: 'pr' });
+    expect(readState(dir).stage).toBe('pr');
   });
 
   it('rejects a report for a stage other than the current one', async () => {
     const ctx = await unitCtx();
-    const r = await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'publish', outcome: 'done', summary: 'x' }, ctx);
+    const r = await dispatch(unitTool, { action: 'report', id: 'PL-1', stage: 'pr', outcome: 'done', summary: 'x' }, ctx);
     expect(r.envelope.ok).toBe(false);
   });
 });
@@ -102,7 +102,7 @@ describe('pilot brief', () => {
     expect(r.envelope.ok).toBe(true);
     expect(r.text).toContain('# pilot');
     expect(r.text).toContain('@root/skills/_shared/standing-rules.md');
-    expect(r.text).toContain('@root/skills/scope/SKILL.md');
+    expect(r.text).toContain('@root/skills/define/SKILL.md');
     expect(r.text).toContain('"quiet": true');
     expect(r.text).toContain('unit report');
     expect(r.text).toContain('unit route');

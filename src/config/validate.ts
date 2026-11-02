@@ -1,5 +1,6 @@
 import type { z } from 'zod';
 import type { ConfigError } from '../contracts/header.js';
+import { upgradeLegacyConfig } from './legacy.js';
 import { HarnessConfigSchema, type HarnessConfig } from './schema.js';
 import { lineOfPath, type LocatedDocument } from './yaml.js';
 
@@ -73,7 +74,7 @@ function issueToError(issue: z.core.$ZodIssue, file: string, located: LocatedDoc
 }
 
 /** Validate one layer's raw value. Returns the typed config or a single ConfigError. */
-export function validateLayer(raw: unknown, file: string, located: LocatedDocument | null): { config: HarnessConfig } | { error: ConfigError } {
+export function validateLayer(raw: unknown, file: string, located: LocatedDocument | null): { config: HarnessConfig; deprecations?: string[] } | { error: ConfigError } {
   if (!isPlainObject(raw)) {
     return { error: { file, path: '', line: located ? lineOfPath(located, []) : null, message: 'config must be a mapping' } };
   }
@@ -87,11 +88,12 @@ export function validateLayer(raw: unknown, file: string, located: LocatedDocume
       },
     };
   }
-  const result = HarnessConfigSchema.safeParse(raw);
+  const upgraded = upgradeLegacyConfig(raw);
+  const result = HarnessConfigSchema.safeParse(upgraded.raw);
   if (!result.success) {
     const issue = result.error.issues[0]!;
     return { error: issueToError(issue, file, located) };
   }
-  return { config: result.data };
+  return upgraded.notes.length ? { config: result.data, deprecations: upgraded.notes.map((n) => `${file}: ${n}`) } : { config: result.data };
 }
 

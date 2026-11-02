@@ -1,9 +1,9 @@
 import { CORE_STAGE_MODULES } from '../stages/index.js';
 import { flowStub } from '../stages/_shared.js';
-export const CORE_ORDER = ['scope', 'build', 'review', 'verify', 'publish', 'close'];
+export const CORE_ORDER = ['define', 'build', 'review', 'walkthrough', 'pr', 'wrap_up'];
 export const FLOW_NAMES = ['pilot', 'convoy', 'screen', 'inspect', 'respond', 'aftercare', 'setup'];
 /** Core stages whose brief opens with the pinned source/spec block. */
-const SPEC_BANNER_STAGES = new Set(['scope', 'build', 'review', 'verify']);
+const SPEC_BANNER_STAGES = new Set(['define', 'build', 'review', 'walkthrough']);
 /** Flows that start from a source or nothing rather than an existing unit id. */
 const NO_ID_FLOWS = new Set(['inspect', 'convoy', 'setup']);
 const flowRenderers = new Map();
@@ -38,10 +38,10 @@ export function isCoreStage(name) {
 }
 /**
  * Default next core stage: the next entry of CORE_ORDER, jumping over skipped
- * stages and over verify when the repo has no browser_ui. Null after close.
+ * stages and over walkthrough when the repo has no browser_ui. Null after wrap_up.
  */
 export function nextStageFor(current, opts) {
-    if (current === 'close')
+    if (current === 'wrap_up')
         return null;
     let i = CORE_ORDER.indexOf(current);
     while (i + 1 < CORE_ORDER.length) {
@@ -49,7 +49,7 @@ export function nextStageFor(current, opts) {
         i += 1;
         if (opts.skip.includes(candidate))
             continue;
-        if (candidate === 'verify' && !opts.browserUi)
+        if (candidate === 'walkthrough' && !opts.browserUi)
             continue;
         return candidate;
     }

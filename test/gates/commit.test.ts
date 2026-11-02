@@ -31,16 +31,16 @@ async function gate(id: string, state: UnitState, config: HarnessConfig = DEFAUL
 }
 
 describe('registered gates', () => {
-  it('includes the commit and close gates with their default severities', () => {
+  it('includes the commit and wrap_up gates with their default severities', () => {
     const ids = Object.fromEntries(allGates().map((g) => [g.id, g]));
     expect(ids.check_command_green).toMatchObject({ stage: 'build', severity: 'block' });
     expect(ids.self_critique_recorded).toMatchObject({ stage: 'build', severity: 'block' });
     expect(ids.defect_repro_before_fix).toMatchObject({ stage: 'build', severity: 'block' });
     expect(ids.pii_audit_clean).toMatchObject({ stage: 'build', severity: 'block' });
-    expect(ids.pr_recorded).toMatchObject({ stage: 'close', severity: 'block' });
+    expect(ids.pr_recorded).toMatchObject({ stage: 'wrap_up', severity: 'block' });
     expect(ids.review_verdict_ship).toMatchObject({ stage: 'review', severity: 'block' });
     expect(ids.ledger_reverified).toMatchObject({ stage: 'review', severity: 'warn' });
-    expect(ids.walkthrough_done).toMatchObject({ stage: 'publish', severity: 'block', requires: 'browser_ui' });
+    expect(ids.walkthrough_done).toMatchObject({ stage: 'pr', severity: 'block', requires: 'browser_ui' });
     expect(Object.keys(ids).sort()).toEqual([
       'check_command_green', 'claims_audited', 'criteria_validated', 'defect_repro_before_fix', 'ledger_reverified',
       'pii_audit_clean', 'pr_recorded', 'review_verdict_ship', 'self_critique_recorded', 'walkthrough_done',
@@ -104,8 +104,8 @@ describe('pii_audit_clean', () => {
 
 describe('pr_recorded', () => {
   it('passes only when state.pr is set', async () => {
-    expect(await gate('pr_recorded', base({ stage: 'close' }))).toMatchObject({ status: 'fail' });
+    expect(await gate('pr_recorded', base({ stage: 'wrap_up' }))).toMatchObject({ status: 'fail' });
     const pr = { url: 'https://example.test/pr/1', number: 1, base: 'main', head: 'G-1', opened_at: at, threads: [] };
-    expect(await gate('pr_recorded', base({ stage: 'close', pr }))).toMatchObject({ status: 'pass' });
+    expect(await gate('pr_recorded', base({ stage: 'wrap_up', pr }))).toMatchObject({ status: 'pass' });
   });
 });

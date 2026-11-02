@@ -9,6 +9,8 @@ export interface LayerReport {
     file: string | null;
     ok: boolean;
     error?: ConfigError;
+    /** Deprecated keys upgraded in memory while loading this layer. */
+    deprecations?: string[];
 }
 export interface LoadedConfig {
     config: HarnessConfig;
@@ -16,6 +18,8 @@ export interface LoadedConfig {
     errors: ConfigError[];
     /** Kits discovered from the merged `kits` list (empty when none). */
     kits: Kit[];
+    /** Deprecated keys upgraded in memory, one note each. */
+    deprecations?: string[];
 }
 export declare const USER_CONFIG_RELATIVE: string;
 export declare const REPO_CONFIG_FILE = ".harness.yaml";

@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 `harness` is a coding-agent plugin that keeps a unit of work (a ticket, a PR, a file, plain
-text) honest as it moves from scope through build, review, verify, publish and close. It is
+text) honest as it moves from define through build, review, walkthrough, pr and wrap_up. It is
 a stdio MCP server plus stage skills and safety hooks. The server keeps the records, writes
 the prose for the PR and handoffs, and refuses stage transitions until the required
 evidence exists. It never contacts external systems.
@@ -50,7 +50,7 @@ remembering to be careful:
   later stage or session reads the same facts.
 - **Gates.** Each stage transition is checked against recorded evidence. `vcs commit`
   refuses until a green check run, a self-critique and a personal-data audit exist for the
-  current cycle. Leaving review needs a `ship` verdict; leaving publish needs every
+  current cycle. Leaving review needs a `ship` verdict; leaving pr needs every
   criterion proven and the PR claims audited. Every refusal names the exact call that
   fixes it.
 - **Ghostwriting.** The server returns the finished text of the brief, PR body and handoff
@@ -60,25 +60,25 @@ remembering to be careful:
 
 ## Stage flow
 
-Six core stages. `verify` runs only when the repo declares the `browser_ui` capability.
+Six core stages. `walkthrough` runs only when the repo declares the `browser_ui` capability.
 
 ```mermaid
 flowchart LR
-    scope["scope<br/>pin source, number<br/>acceptance criteria"]
+    define["define<br/>pin source, number<br/>acceptance criteria"]
     build["build<br/>plan, implement,<br/>check, self-critique,<br/>personal-data audit"]
     review["review<br/>5 required columns,<br/>synthesize verdict"]
-    verify["verify<br/>browser walkthrough<br/>(browser_ui only)"]
-    publish["publish<br/>criteria validated,<br/>claims audited, PR body"]
-    close["close<br/>digest, ledger,<br/>cleanup"]
+    walkthrough["walkthrough<br/>browser walkthrough<br/>(browser_ui only)"]
+    pr["pr<br/>criteria validated,<br/>claims audited, PR body"]
+    wrap_up["wrap_up<br/>digest, ledger,<br/>cleanup"]
 
-    scope --> build
+    define --> build
     build -- "vcs commit<br/>(commit gates)" --> review
-    review -- "verdict ship" --> verify
-    review -. "verdict ship,<br/>no browser_ui" .-> publish
-    verify --> publish
+    review -- "verdict ship" --> walkthrough
+    review -. "verdict ship,<br/>no browser_ui" .-> pr
+    walkthrough --> pr
     review -- "needs_attention / not_ready<br/>cycle + 1, max 4" --> build
-    publish -- "publish gates" --> close
-    close -- "pr_recorded" --> done(["done"])
+    pr -- "pr gates" --> wrap_up
+    wrap_up -- "pr_recorded" --> done(["done"])
 ```
 
 Gates, by the point where they bite (ids are the real gate ids from `src/gates/`):
@@ -91,10 +91,10 @@ Gates, by the point where they bite (ids are the real gate ids from `src/gates/`
 | | `defect_repro_before_fix` | the unit is a bug and has no `defect_repro` with red output (or waiver) |
 | Leaving review | `review_verdict_ship` | the cycle's synthesized verdict is not `ship` |
 | | `ledger_reverified` | warns only: open ledger entries not rechecked |
-| Leaving publish, and push or PR creation | `criteria_validated` | any acceptance criterion is missing or `unproven` |
+| Leaving pr, and push or PR creation | `criteria_validated` | any acceptance criterion is missing or `unproven` |
 | | `claims_audited` | no `claims` evidence this cycle |
 | | `walkthrough_done` | only with `browser_ui`: some criterion is not `pass` in `browser_findings` |
-| Finishing close | `pr_recorded` | no `pullreq record` on the unit |
+| Finishing wrap_up | `pr_recorded` | no `pullreq record` on the unit |
 
 Ten gates in total. Severity is `block`, `warn` or `off`; config can soften a gate and run
 modes can demote it, but a demotion is always listed in the PR body.
@@ -121,12 +121,12 @@ envelope; temp paths are shortened to `<tmp>`. Nothing is edited or invented.
 
 The unit asks for a one-line change: the greeting should end with `!`.
 
-**1. Scope.** Start the unit, record the requirement, number the criteria, move on.
+**1. Define.** Start the unit, record the requirement, number the criteria, move on.
 
 ```text
 unit start   { "action": "start", "source": "text", "id": "DEMO-1",
                "text": "Greeting should end with an exclamation mark." }
-  -> Started DEMO-1 · scope · cycle 0 · thorough · no branch.
+  -> Started DEMO-1 · define · cycle 0 · thorough · no branch.
 
 spec criteria { "action": "criteria", "id": "DEMO-1",
                 "set": ["greet(\"a\") returns \"hello a!\"", "Existing callers need no change"] }
@@ -134,7 +134,7 @@ spec criteria { "action": "criteria", "id": "DEMO-1",
      - AC-2: Existing callers need no change
 
 unit advance { "action": "advance", "id": "DEMO-1", "to": "build" }
-  -> DEMO-1: scope -> build.
+  -> DEMO-1: define -> build.
 ```
 
 **2. Build, first attempt.** `vcs worktree` creates `<tmp>/demo-DEMO-1` on branch
@@ -193,33 +193,33 @@ vcs { "action": "commit", "id": "DEMO-1", "message": "DEMO-1: cover greet with a
      (envelope data: "stage": "review", "cycle": 1)
 ```
 
-**5. Review passes, then publish gates.** All five columns recorded empty this time:
+**5. Review passes, then pr gates.** All five columns recorded empty this time:
 
 ```text
 evidence { "action": "synthesize", "id": "DEMO-1" }
   -> Cycle 1: ship (blocker 0, major 0, minor 0, note 0).
 unit { "action": "route", "id": "DEMO-1" }       (after unit report with verdict ship)
-  -> proceed: publish (verdict ship).
+  -> proceed: pr (verdict ship).
 
-unit { "action": "advance", "id": "DEMO-1", "to": "close" }
-  -> Cannot leave publish: 2 blocking gate(s).
+unit { "action": "advance", "id": "DEMO-1", "to": "wrap_up" }
+  -> Cannot leave pr: 2 blocking gate(s).
      - criteria_validated: record criteria_validation with { results: [{ criterion: AC-n, status: proven|unproven|not_applicable, proof }] }
      - claims_audited: record claims with { claims: [{ text, status: verified|unverified|false, evidence }] }; analyze claims extracts them from the PR body
 ```
 
-The demo repo has no `browser_ui` capability, so `verify` was skipped and
+The demo repo has no `browser_ui` capability, so `walkthrough` was skipped and
 `walkthrough_done` reported `n/a`. After recording `criteria_validation` (both criteria
 `proven`), `claims`, and the PR with `pullreq record`, `evidence gates` shows:
 
 ```text
-Gates for publish (DEMO-1, cycle 1):
+Gates for pr (DEMO-1, cycle 1):
 - walkthrough_done [block] n/a
 - criteria_validated [block] pass
 - claims_audited [block] pass
 ```
 
 In a real session the agent would call `pullreq body` for the ghostwritten PR text, open
-the PR with its own code-host tools, and `unit advance` to close. The example stops at the
+the PR with its own code-host tools, and `unit advance` to wrap_up. The example stops at the
 point where the gates pass; the PR url used there was a placeholder.
 
 ## Glossary
@@ -227,7 +227,7 @@ point where the gates pass; the PR url used there was a placeholder.
 | Term | Meaning |
 |---|---|
 | **unit** | One piece of work tracked end to end, keyed by an id (a ticket key such as `ABC-123`, a name you choose, or a generated `local-xxxxxxxx` for untracked text). Its state, requirement, plan, run logs, evidence and reviews live in the record store under `<repo namespace>/units/<id>`. |
-| **stage** | One step of a unit's lifecycle: scope, build, review, verify, publish, close. The unit has exactly one current stage. |
+| **stage** | One step of a unit's lifecycle: define, build, review, walkthrough, pr, wrap_up. The unit has exactly one current stage. |
 | **cycle** | A counter starting at 0 that increments each time review sends the unit back to build. Evidence is recorded per cycle. |
 | **brief** | The server-rendered instructions a stage skill requests first (`unit brief`). It opens with a versioned YAML header (`harness-brief/1`, see [docs/brief-contract.md](docs/brief-contract.md)), then the seat wiring, config problems, the requirement and the exact tool calls with the unit id filled in. |
 | **seat** | A capability role the engine consults, such as `tracker`, `codehost`, `docs`, `design`, `chat` or `reviewbot`. Each seat lists the session tools that fill it. An unwired seat means "skip the steps that need it and say so". `system seats` proposes wiring from your session's tool names. |
@@ -236,8 +236,8 @@ point where the gates pass; the PR url used there was a placeholder.
 | **column** | One independent review pass recorded as `review_column` evidence. Six column names exist (`criteria_forward`, `criteria_reverse`, `adversarial`, `diffaudit`, `ledger`, `browser`); the first five are required, `browser` is added when `browser_ui` is declared. `evidence synthesize` merges them into one verdict: `ship`, `needs_attention` or `not_ready`. |
 | **ledger** | A per-repo list of standing asks and past landings that outlive a single unit. Review rechecks open entries against each new diff so deferred work is not forgotten. |
 | **kit** | A directory with a `kit.yaml` that adds opinions without code: a config fragment, convention docs selected by repo tags or capabilities, and diff-audit rules. See [Kits](#kits). |
-| **convoy** | A batch flow for several units: scope each, group them by predicted file overlap, get the grouping approved, then run the groups one after another. Units in a group are linked as siblings with `unit link`. |
-| **mode** | A named run preset: `thorough` (everything) or `sketch` (scope and build only). See [Modes](#modes). |
+| **convoy** | A batch flow for several units: define each, group them by predicted file overlap, get the grouping approved, then run the groups one after another. Units in a group are linked as siblings with `unit link`. |
+| **mode** | A named run preset: `thorough` (everything) or `sketch` (define and build only). See [Modes](#modes). |
 | **waiver** | A `waiver` evidence record with a written rationale that satisfies one named gate. The rationale travels into the PR. |
 
 ## Install
@@ -300,8 +300,8 @@ confirm.
 
 ## Modes
 
-`thorough` runs everything. `sketch` runs one subagent from scope through build, skips
-review and verify, and opens the PR body with a banner stating nothing reviewed the diff.
+`thorough` runs everything. `sketch` runs one subagent from define through build, skips
+review and walkthrough, and opens the PR body with a banner stating nothing reviewed the diff.
 Custom modes extend these in config; every demotion is listed in the PR body under a
 "Not proven" section.
 
@@ -317,7 +317,7 @@ example.
 
 `hooks/guard.mjs` binds to the host's Bash and Stop events. It blocks verification bypass
 flags, pushes to protected branches, staged credentials and oversized files, commits that
-fail the unit's build gates, and pushes or PR creation that fail the publish gates; it
+fail the unit's build gates, and pushes or PR creation that fail the pr gates; it
 warns on personal data heading to a sink and prints the unit status on stop. The unit is
 found from the current branch name; with no match the hooks stay silent. On an unbuilt
 checkout it blocks `git commit`, `git push` and PR creation with build instructions and

@@ -6,7 +6,7 @@ export interface ModeDef {
     extends: string | null;
     demote: Record<string, Severity>;
     merge_dispatches: boolean;
-    verify_after_publish: boolean;
+    walkthrough_after_pr: boolean;
     skip_stages: StageName[];
     banner: string | null;
 }
@@ -14,8 +14,8 @@ export declare class UnknownModeError extends Error {
     readonly mode: string;
     constructor(mode: string);
 }
-export declare const SKETCH_BANNER = "Nothing reviewed this diff: sketch mode skipped review and verify.";
-/** Built-in run modes: thorough runs everything; sketch runs scope through build only. */
+export declare const SKETCH_BANNER = "Nothing reviewed this diff: sketch mode skipped review and walkthrough.";
+/** Built-in run modes: thorough runs everything; sketch runs define through build only. */
 export declare const BUILT_IN_MODES: Record<'thorough' | 'sketch', ModeDef>;
 /**
  * Resolve a mode by name: built-ins first, layered with any `config.modes`

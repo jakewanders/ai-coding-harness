@@ -15,7 +15,7 @@ export function createState(init, now = () => new Date()) {
         tracked: init.tracked,
         source: { ...init.source },
         mode: init.mode,
-        stage: 'scope',
+        stage: 'define',
         cycle: 0,
         kind: 'unknown',
         worktree: null,

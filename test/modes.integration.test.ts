@@ -44,7 +44,7 @@ describe('run modes end to end', () => {
     expect(brief.text).toContain('review_verdict_ship → off');
     expect(brief.text).toContain('walkthrough_done → off');
     expect(brief.text).toContain('@root/skills/build/modes/sketch.md');
-    expect(brief.text).not.toMatch(/verify runs after publish/i);
+    expect(brief.text).not.toMatch(/walkthrough runs after the PR stage/i);
   });
 
   it('the sketch build brief says nothing will review the diff and lists skipped stages', async () => {
@@ -52,7 +52,7 @@ describe('run modes end to end', () => {
     await dispatch(unitTool, { action: 'start', source: 'ticket', ref: 'MD-5', mode: 'sketch' }, ctx);
     const brief = await dispatch(unitTool, { action: 'brief', id: 'MD-5', stage: 'build', quiet: true }, ctx);
     expect(brief.text).toMatch(/nothing reviewed/i);
-    expect(brief.text).toMatch(/skipped stages: review, (challenge, )?verify/i);
+    expect(brief.text).toMatch(/skipped stages: review, (challenge, )?walkthrough/i);
     expect(brief.text).toContain('@root/skills/build/modes/sketch.md');
     const thorough = makeCtx({ cwd: makeRepo({ 'README.md': 'x' }) });
     await dispatch(unitTool, { action: 'start', source: 'ticket', ref: 'MD-6' }, thorough);

@@ -9,7 +9,7 @@ interface ValidationResult { criterion: string; status: string; proof: string }
 
 export const criteriaValidated = registerGate(defineGate({
   id: 'criteria_validated',
-  stage: 'publish',
+  stage: 'pr',
   description: 'The latest criteria_validation record covers every acceptance criterion with a status other than unproven.',
   severity: 'block',
   check: (ctx) => {
@@ -32,7 +32,7 @@ export const criteriaValidated = registerGate(defineGate({
 
 export const claimsAudited = registerGate(defineGate({
   id: 'claims_audited',
-  stage: 'publish',
+  stage: 'pr',
   description: 'A claims record exists for this cycle.',
   severity: 'block',
   check: (ctx) => (recordsThisCycle(ctx, 'claims').length ? { pass: true } : { pass: false, remedy: `${EVIDENCE_KINDS.claims.remedy}; analyze claims extracts them from the PR body` }),

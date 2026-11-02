@@ -13,7 +13,7 @@ function requirementSection(ctx) {
     const req = md === null ? null : parseRequirement(md);
     const lines = ['## Requirement', ''];
     if (!req)
-        return [...lines, 'Not recorded yet; scope records it with `spec record` and `spec criteria`.'];
+        return [...lines, 'Not recorded yet; define records it with `spec record` and `spec criteria`.'];
     lines.push(`**${req.title}**${req.url ? ` (${req.url})` : ''}`, '');
     if (req.body)
         lines.push(req.body, '');

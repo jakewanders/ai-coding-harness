@@ -1,6 +1,6 @@
 import type { HarnessConfig, TicketConfig } from './schema.js';
 export type TicketRule = TicketConfig;
-export type StatusBoundary = 'scope' | 'build' | 'publish' | 'close';
+export type StatusBoundary = 'define' | 'build' | 'pr' | 'wrap_up';
 /** First ticket rule whose pattern matches `id`; invalid patterns are skipped. */
 export declare function matchTicket(id: string, config: HarnessConfig): TicketRule | null;
 /** The rule's url template with every `{id}` filled, or null. */

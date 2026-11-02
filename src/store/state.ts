@@ -8,7 +8,7 @@ import { STATE_SCHEMA, UnitStateSchema } from './schema.js';
 export { STATE_SCHEMA };
 export { appendHistory } from './history.js';
 
-export type StageName = 'scope' | 'build' | 'review' | 'verify' | 'publish' | 'close';
+export type StageName = 'define' | 'build' | 'review' | 'walkthrough' | 'pr' | 'wrap_up';
 export type UnitKind = 'feature' | 'bug' | 'chore' | 'unknown';
 export type SourceKind = 'ticket' | 'pr' | 'url' | 'file' | 'conversation' | 'text';
 export type ReviewVerdict = 'ship' | 'needs_attention' | 'not_ready';
@@ -25,7 +25,7 @@ export interface Report {
 }
 
 export interface UnitState {
-  schema: 1; id: string; repo: string; tracked: boolean
+  schema: 2; id: string; repo: string; tracked: boolean
   source: { kind: SourceKind; ref: string | null; pinned: boolean }
   mode: string; stage: StageName; cycle: number; kind: UnitKind
   worktree: string | null; branch: string | null; base_branch: string
@@ -53,7 +53,7 @@ export function createState(
     tracked: init.tracked,
     source: { ...init.source },
     mode: init.mode,
-    stage: 'scope',
+    stage: 'define',
     cycle: 0,
     kind: 'unknown',
     worktree: null,

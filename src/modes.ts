@@ -8,7 +8,7 @@ export interface ModeDef {
   extends: string | null;
   demote: Record<string, Severity>;
   merge_dispatches: boolean;
-  verify_after_publish: boolean;
+  walkthrough_after_pr: boolean;
   skip_stages: StageName[];
   banner: string | null;
 }
@@ -20,20 +20,20 @@ export class UnknownModeError extends Error {
   }
 }
 
-export const SKETCH_BANNER = 'Nothing reviewed this diff: sketch mode skipped review and verify.';
+export const SKETCH_BANNER = 'Nothing reviewed this diff: sketch mode skipped review and walkthrough.';
 
-/** Built-in run modes: thorough runs everything; sketch runs scope through build only. */
+/** Built-in run modes: thorough runs everything; sketch runs define through build only. */
 export const BUILT_IN_MODES: Record<'thorough' | 'sketch', ModeDef> = {
   thorough: {
-    name: 'thorough', extends: null, demote: {}, merge_dispatches: false, verify_after_publish: false, skip_stages: [], banner: null,
+    name: 'thorough', extends: null, demote: {}, merge_dispatches: false, walkthrough_after_pr: false, skip_stages: [], banner: null,
   },
   sketch: {
     name: 'sketch',
     extends: 'thorough',
     demote: { review_verdict_ship: 'off', ledger_reverified: 'off', walkthrough_done: 'off' },
     merge_dispatches: false,
-    verify_after_publish: false,
-    skip_stages: ['review', 'verify'],
+    walkthrough_after_pr: false,
+    skip_stages: ['review', 'walkthrough'],
     banner: SKETCH_BANNER,
   },
 };
@@ -65,7 +65,7 @@ export function resolveMode(name: string, config: HarnessConfig, seen: string[] 
     ...base,
     demote: { ...base.demote, ...(custom.demote ?? {}) },
     merge_dispatches: custom.merge_dispatches ?? base.merge_dispatches,
-    verify_after_publish: custom.verify_after_publish ?? base.verify_after_publish,
+    walkthrough_after_pr: custom.walkthrough_after_pr ?? base.walkthrough_after_pr,
   };
 }
 

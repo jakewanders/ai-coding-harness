@@ -99,13 +99,13 @@ export const unitTool = defineTool({
           { id, repo: ns, tracked: Boolean(input.id) || input.source === 'ticket', source: { kind: input.source, ref: input.ref ?? null, pinned: pinned !== null }, mode: modeName, base_branch: base },
           ctx.now,
         );
-        state.timers.push({ stage: 'scope', started_at: ctx.now().toISOString(), ended_at: null, idle_gaps_ms: 0 });
+        state.timers.push({ stage: 'define', started_at: ctx.now().toISOString(), ended_at: null, idle_gaps_ms: 0 });
         if (pinned !== null) fs.writeFileSync(path.join(dir, 'source.md'), pinned);
         writeState(dir, state, ctx.now);
         appendHistory(dir, `unit started from ${input.source}${input.ref ? ` ${input.ref}` : ''} in mode ${modeName}`, ctx.now);
 
         const data = { id, repo: ns, tracked: state.tracked, stage: state.stage, mode: modeName, pinned: pinned !== null, dir };
-        return result(`Started ${statusLine(state)}.`, envelope(true, `unit ${id} started`, data, briefNext(id, 'unit created at scope')));
+        return result(`Started ${statusLine(state)}.`, envelope(true, `unit ${id} started`, data, briefNext(id, 'unit created at define')));
       },
     }),
 
@@ -174,7 +174,7 @@ export const unitTool = defineTool({
         const { state } = unit;
         const mode = modeOf(state, ctx);
         if (input.to !== undefined && !isCoreStage(input.to)) return fail(`unit advance: unknown target stage "${input.to}"; core stages: ${CORE_ORDER.join(', ')}`);
-        if (state.stage === 'close') return fail(`unit ${state.id} is already closed`);
+        if (state.stage === 'wrap_up') return fail(`unit ${state.id} is already closed`);
 
         const to = (input.to as StageName | undefined) ?? nextStageFor(state.stage, routing(state, ctx, mode));
         if (!to) return fail(`unit ${state.id}: no stage after ${state.stage}`);

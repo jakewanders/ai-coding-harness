@@ -28,12 +28,12 @@ export interface StageEntry {
   specBanner: boolean;
 }
 
-export const CORE_ORDER: StageName[] = ['scope', 'build', 'review', 'verify', 'publish', 'close'];
+export const CORE_ORDER: StageName[] = ['define', 'build', 'review', 'walkthrough', 'pr', 'wrap_up'];
 
 export const FLOW_NAMES: readonly FlowName[] = ['pilot', 'convoy', 'screen', 'inspect', 'respond', 'aftercare', 'setup'];
 
 /** Core stages whose brief opens with the pinned source/spec block. */
-const SPEC_BANNER_STAGES = new Set<StageName>(['scope', 'build', 'review', 'verify']);
+const SPEC_BANNER_STAGES = new Set<StageName>(['define', 'build', 'review', 'walkthrough']);
 
 /** Flows that start from a source or nothing rather than an existing unit id. */
 const NO_ID_FLOWS = new Set<FlowName>(['inspect', 'convoy', 'setup']);
@@ -81,16 +81,16 @@ export interface RoutingOptions {
 
 /**
  * Default next core stage: the next entry of CORE_ORDER, jumping over skipped
- * stages and over verify when the repo has no browser_ui. Null after close.
+ * stages and over walkthrough when the repo has no browser_ui. Null after wrap_up.
  */
 export function nextStageFor(current: StageName, opts: RoutingOptions): StageName | null {
-  if (current === 'close') return null;
+  if (current === 'wrap_up') return null;
   let i = CORE_ORDER.indexOf(current);
   while (i + 1 < CORE_ORDER.length) {
     const candidate = CORE_ORDER[i + 1]!;
     i += 1;
     if (opts.skip.includes(candidate)) continue;
-    if (candidate === 'verify' && !opts.browserUi) continue;
+    if (candidate === 'walkthrough' && !opts.browserUi) continue;
     return candidate;
   }
   return null;

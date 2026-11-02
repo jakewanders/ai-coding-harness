@@ -15,7 +15,7 @@ const thorough: ModeDef = resolveMode('thorough', DEFAULTS);
 
 const passing: GateDef = defineGate({ id: 'fake_pass', stage: 'build', description: 'always passes', severity: 'block', check: () => ({ pass: true }) });
 const failing: GateDef = defineGate({ id: 'fake_fail', stage: 'build', description: 'always fails', severity: 'block', check: () => ({ pass: false, remedy: 'do the thing' }) });
-const needsBrowser: GateDef = defineGate({ id: 'fake_browser', stage: 'publish', description: 'needs browser_ui', severity: 'block', requires: 'browser_ui', check: () => ({ pass: false, remedy: 'walk through' }) });
+const needsBrowser: GateDef = defineGate({ id: 'fake_browser', stage: 'pr', description: 'needs browser_ui', severity: 'block', requires: 'browser_ui', check: () => ({ pass: false, remedy: 'walk through' }) });
 const warning: GateDef = defineGate({ id: 'fake_warn', stage: 'build', description: 'warns', severity: 'warn', check: async () => ({ pass: false, remedy: 'consider it' }) });
 
 describe('resolveGates', () => {
@@ -27,10 +27,10 @@ describe('resolveGates', () => {
   });
 
   it('marks a gate n/a when its required capability is absent, pass/fail when present', async () => {
-    const absent = await resolveGates('publish', ctx(), thorough, [needsBrowser]);
+    const absent = await resolveGates('pr', ctx(), thorough, [needsBrowser]);
     expect(absent[0]).toMatchObject({ id: 'fake_browser', status: 'n/a' });
     const withCap: HarnessConfig = { ...DEFAULTS, repos: { 'local/x': { capabilities: { browser_ui: true } } } };
-    const present = await resolveGates('publish', ctx(withCap), thorough, [needsBrowser]);
+    const present = await resolveGates('pr', ctx(withCap), thorough, [needsBrowser]);
     expect(present[0]).toMatchObject({ id: 'fake_browser', status: 'fail', severity: 'block' });
   });
 

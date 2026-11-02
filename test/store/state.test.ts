@@ -23,10 +23,10 @@ function init() {
 }
 
 describe('createState', () => {
-  it('starts at scope, cycle 0, challenge not passed, with empty collections', () => {
+  it('starts at define, cycle 0, challenge not passed, with empty collections', () => {
     const s = createState(init());
     expect(s.schema).toBe(STATE_SCHEMA);
-    expect(s.stage).toBe('scope');
+    expect(s.stage).toBe('define');
     expect(s.cycle).toBe(0);
     expect(s.challenge_passed).toBe(false);
     expect(s.kind).toBe('unknown');

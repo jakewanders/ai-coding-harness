@@ -8,7 +8,7 @@ import { parseRequirement } from '../spec/requirement.js';
 import { stageBrief, type StageInfo } from './_shared.js';
 
 export const info: StageInfo = {
-  name: 'verify',
+  name: 'walkthrough',
   purpose: 'Validate the change in a browser against the acceptance criteria when the repo declares browser_ui.',
   seats: ['codehost'],
   outputs: ['browser_findings evidence with a result per criterion', 'annotated screenshots attached to the PR when the codehost seat allows'],
@@ -35,7 +35,7 @@ function walkthroughBody(ctx: BriefContext): string[] {
   const criteria = reqFile && fs.existsSync(reqFile) ? parseRequirement(fs.readFileSync(reqFile, 'utf8')).criteria : [];
 
   lines.push('## Walkthrough', '');
-  if (!criteria.length) lines.push('No acceptance criteria recorded; verify cannot proceed without them (spec criteria).');
+  if (!criteria.length) lines.push('No acceptance criteria recorded; walkthrough cannot proceed without them (spec criteria).');
   for (const c of criteria) {
     lines.push(`- ${c.id}: ${c.text}`, `  - Edge cases: derive at least two from this criterion (empty state, boundary value, permission denied, slow network, repeat action) and exercise each one.`);
   }

@@ -7,7 +7,7 @@ import { makeTmpDir } from '../helpers/tmp.js';
 
 function emptyContext(): BriefContext {
   const header: BriefHeader = {
-    contract: BRIEF_CONTRACT, unit: 'local-00000000', mode: 'thorough', stage: 'scope', repo: 'local/x',
+    contract: BRIEF_CONTRACT, unit: 'local-00000000', mode: 'thorough', stage: 'define', repo: 'local/x',
     worktree: null, base_branch: 'main', root: '/root',
     seats: { tracker: 'unwired', codehost: 'unwired', docs: 'unwired', design: 'unwired', chat: 'unwired', reviewbot: 'unwired' },
     capabilities: {}, gates: [], docs: [], config_errors: [],
@@ -17,7 +17,7 @@ function emptyContext(): BriefContext {
 
 describe('STAGES', () => {
   it('holds the six core stages in order plus the standalone flows', () => {
-    expect(CORE_ORDER).toEqual(['scope', 'build', 'review', 'verify', 'publish', 'close']);
+    expect(CORE_ORDER).toEqual(['define', 'build', 'review', 'walkthrough', 'pr', 'wrap_up']);
     expect([...FLOW_NAMES]).toEqual(['pilot', 'convoy', 'screen', 'inspect', 'respond', 'aftercare', 'setup']);
     expect(STAGES).toHaveLength(13);
     expect(STAGES.slice(0, 6).map((s) => s.name)).toEqual(CORE_ORDER);
@@ -48,13 +48,13 @@ describe('STAGES', () => {
 describe('nextStageFor', () => {
   const t = (c: StageName, skip: StageName[], ui: boolean) => nextStageFor(c, { skip, browserUi: ui });
   it('routes the lean pipeline', () => {
-    expect(t('scope', [], false)).toBe('build');
+    expect(t('define', [], false)).toBe('build');
     expect(t('build', [], false)).toBe('review');
-    expect(t('review', [], false)).toBe('publish');
-    expect(t('review', [], true)).toBe('verify');
-    expect(t('verify', [], true)).toBe('publish');
-    expect(t('publish', [], false)).toBe('close');
-    expect(t('close', [], false)).toBeNull();
-    expect(t('build', ['review', 'verify'], true)).toBe('publish');
+    expect(t('review', [], false)).toBe('pr');
+    expect(t('review', [], true)).toBe('walkthrough');
+    expect(t('walkthrough', [], true)).toBe('pr');
+    expect(t('pr', [], false)).toBe('wrap_up');
+    expect(t('wrap_up', [], false)).toBeNull();
+    expect(t('build', ['review', 'walkthrough'], true)).toBe('pr');
   });
 });

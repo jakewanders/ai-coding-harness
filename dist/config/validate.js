@@ -1,3 +1,4 @@
+import { upgradeLegacyConfig } from './legacy.js';
 import { HarnessConfigSchema } from './schema.js';
 import { lineOfPath } from './yaml.js';
 export const MIGRATION_NOTE = 'run `system config` to migrate';
@@ -81,10 +82,11 @@ export function validateLayer(raw, file, located) {
             },
         };
     }
-    const result = HarnessConfigSchema.safeParse(raw);
+    const upgraded = upgradeLegacyConfig(raw);
+    const result = HarnessConfigSchema.safeParse(upgraded.raw);
     if (!result.success) {
         const issue = result.error.issues[0];
         return { error: issueToError(issue, file, located) };
     }
-    return { config: result.data };
+    return upgraded.notes.length ? { config: result.data, deprecations: upgraded.notes.map((n) => `${file}: ${n}`) } : { config: result.data };
 }

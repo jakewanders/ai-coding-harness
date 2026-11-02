@@ -1,10 +1,10 @@
 ---
-name: verify
+name: walkthrough
 description: "Validate the change in a real browser against every acceptance criterion when the repo declares browser_ui."
-stage: verify
+stage: walkthrough
 ---
 
-# verify
+# walkthrough
 
 Follow @root/skills/_shared/standing-rules.md, @root/skills/_shared/scope-rules.md and
 @root/skills/_shared/style.md throughout. Severity levels are defined in
@@ -16,7 +16,7 @@ Follow @root/skills/_shared/standing-rules.md, @root/skills/_shared/scope-rules.
 Request the brief. Its Walkthrough section lists every criterion, the environments by role, the e2e command, and the screenshot and scope rules.
 
 ```harness
-unit brief { "id": "<id>", "stage": "verify" }
+unit brief { "id": "<id>", "stage": "walkthrough" }
 ```
 
 If the header's `contract` is not `harness-brief/1`, stop and report.

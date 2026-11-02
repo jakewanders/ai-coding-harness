@@ -34,6 +34,6 @@ export interface RoutingOptions {
 }
 /**
  * Default next core stage: the next entry of CORE_ORDER, jumping over skipped
- * stages and over verify when the repo has no browser_ui. Null after close.
+ * stages and over walkthrough when the repo has no browser_ui. Null after wrap_up.
  */
 export declare function nextStageFor(current: StageName, opts: RoutingOptions): StageName | null;

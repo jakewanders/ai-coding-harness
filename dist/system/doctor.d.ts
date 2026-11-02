@@ -7,6 +7,7 @@ export interface DoctorReport {
     profile: InferredProfile;
     layers: LoadedConfig['layers'];
     errors: ConfigError[];
+    deprecations: string[];
     seats: Record<SeatName, string[] | 'unwired'>;
     kits: Array<{
         name: string;

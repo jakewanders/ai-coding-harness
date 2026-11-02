@@ -10,7 +10,7 @@ const config: HarnessConfig = {
       pattern: '^ABC-\\d+$',
       repo: 'example.test/o/n',
       url: 'https://tracker.example.test/browse/{id}',
-      status_hints: { scope: 'In Analysis', build: 'In Progress', publish: 'In Review' },
+      status_hints: { define: 'In Analysis', build: 'In Progress', pr: 'In Review' },
     },
     { pattern: '^XY\\d-\\d+$', repo: 'example.test/o/other' },
     { pattern: '(invalid', repo: 'broken' },
@@ -47,10 +47,10 @@ describe('ticketUrl', () => {
 
 describe('statusHint', () => {
   it('returns the hint for a boundary and null when missing or unmatched', () => {
-    expect(statusHint('ABC-12', 'scope', config)).toBe('In Analysis');
+    expect(statusHint('ABC-12', 'define', config)).toBe('In Analysis');
     expect(statusHint('ABC-12', 'build', config)).toBe('In Progress');
-    expect(statusHint('ABC-12', 'close', config)).toBeNull();
-    expect(statusHint('XY9-1', 'scope', config)).toBeNull();
-    expect(statusHint('ZZZ-1', 'scope', config)).toBeNull();
+    expect(statusHint('ABC-12', 'wrap_up', config)).toBeNull();
+    expect(statusHint('XY9-1', 'define', config)).toBeNull();
+    expect(statusHint('ZZZ-1', 'define', config)).toBeNull();
   });
 });

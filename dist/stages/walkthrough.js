@@ -6,7 +6,7 @@ import { inferProfile } from '../config/infer.js';
 import { parseRequirement } from '../spec/requirement.js';
 import { stageBrief } from './_shared.js';
 export const info = {
-    name: 'verify',
+    name: 'walkthrough',
     purpose: 'Validate the change in a browser against the acceptance criteria when the repo declares browser_ui.',
     seats: ['codehost'],
     outputs: ['browser_findings evidence with a result per criterion', 'annotated screenshots attached to the PR when the codehost seat allows'],
@@ -32,7 +32,7 @@ function walkthroughBody(ctx) {
     const criteria = reqFile && fs.existsSync(reqFile) ? parseRequirement(fs.readFileSync(reqFile, 'utf8')).criteria : [];
     lines.push('## Walkthrough', '');
     if (!criteria.length)
-        lines.push('No acceptance criteria recorded; verify cannot proceed without them (spec criteria).');
+        lines.push('No acceptance criteria recorded; walkthrough cannot proceed without them (spec criteria).');
     for (const c of criteria) {
         lines.push(`- ${c.id}: ${c.text}`, `  - Edge cases: derive at least two from this criterion (empty state, boundary value, permission denied, slow network, repeat action) and exercise each one.`);
     }

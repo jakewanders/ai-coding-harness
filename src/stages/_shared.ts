@@ -29,7 +29,7 @@ function requirementSection(ctx: BriefContext): string[] {
   const md = readIf(ctx.unitDir ? path.join(ctx.unitDir, 'requirement.md') : null);
   const req: Requirement | null = md === null ? null : parseRequirement(md);
   const lines = ['## Requirement', ''];
-  if (!req) return [...lines, 'Not recorded yet; scope records it with `spec record` and `spec criteria`.'];
+  if (!req) return [...lines, 'Not recorded yet; define records it with `spec record` and `spec criteria`.'];
   lines.push(`**${req.title}**${req.url ? ` (${req.url})` : ''}`, '');
   if (req.body) lines.push(req.body, '');
   lines.push('Acceptance criteria:', '');

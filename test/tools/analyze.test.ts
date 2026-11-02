@@ -65,7 +65,7 @@ describe('analyze claims', () => {
   it('extracts claims from the given text, records them, and flips claims_audited', async () => {
     const ctx = await unitCtx();
     const dir = unitDirFor(ctx, 'AN-1');
-    writeState(dir, { ...readState(dir), stage: 'publish' });
+    writeState(dir, { ...readState(dir), stage: 'pr' });
     expect(await gate(ctx, 'AN-1', 'claims_audited')).toBe('fail');
     const r = await dispatch(analyzeTool, { action: 'claims', id: 'AN-1', text: 'This always retries. We moved a file.' }, ctx);
     expect(r.envelope.ok).toBe(true);
@@ -104,7 +104,7 @@ describe('analyze criteria_map and criteria_validated', () => {
   it('maps criteria to hunks, records validation, and the gate requires every criterion proven', async () => {
     const ctx = await unitCtx();
     const dir = unitDirFor(ctx, 'AN-1');
-    writeState(dir, { ...readState(dir), stage: 'publish' });
+    writeState(dir, { ...readState(dir), stage: 'pr' });
     expect(await gate(ctx, 'AN-1', 'criteria_validated')).toBe('fail');
     const r = await dispatch(analyzeTool, { action: 'criteria_map', id: 'AN-1', diff: NEW_EXPORT_DIFF + PII_DIFF }, ctx);
     expect(r.envelope.ok).toBe(false);

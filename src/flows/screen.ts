@@ -4,7 +4,7 @@ import { SCREEN_SLOTS } from '../review/consensus.js';
 
 export const render: BriefRenderer = (ctx) => {
   const id = ctx.state?.id ?? '<id>';
-  const hint = ctx.state ? statusHint(ctx.state.id, 'scope', ctx.config.config) : null;
+  const hint = ctx.state ? statusHint(ctx.state.id, 'define', ctx.config.config) : null;
   const lines = [
     '# screen',
     '',
@@ -31,7 +31,7 @@ export const render: BriefRenderer = (ctx) => {
     '',
     '## Tracker status',
     '',
-    hint ? `Suggested status hint for a valid ticket: "${hint}" (from the ticket rule for scope). Apply it only through the tracker seat and only with the user's approval.` : 'No status hint is configured for this ticket at the scope boundary; report the verdict without proposing a status change.',
+    hint ? `Suggested status hint for a valid ticket: "${hint}" (from the ticket rule for define). Apply it only through the tracker seat and only with the user's approval.` : 'No status hint is configured for this ticket at the define boundary; report the verdict without proposing a status change.',
     '',
     `Finish with \`unit report\` for stage screen carrying the consensus verdict in the summary; do not advance the unit.`,
   ];

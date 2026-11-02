@@ -1,10 +1,10 @@
 ---
-name: scope
+name: define
 description: "Requirement research: pin the source, normalize it into numbered acceptance criteria, record related items."
-stage: scope
+stage: define
 ---
 
-# scope
+# define
 
 Follow @root/skills/_shared/standing-rules.md, @root/skills/_shared/scope-rules.md and
 @root/skills/_shared/style.md throughout. Severity levels are defined in
@@ -16,7 +16,7 @@ Follow @root/skills/_shared/standing-rules.md, @root/skills/_shared/scope-rules.
 Request the brief. Everything below assumes you have read its header and stage material.
 
 ```harness
-unit brief { "id": "<id>", "stage": "scope" }
+unit brief { "id": "<id>", "stage": "define" }
 ```
 
 If the header's `contract` is not `harness-brief/1`, stop and report.

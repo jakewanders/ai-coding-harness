@@ -67,8 +67,8 @@ describe('digest wrapup', () => {
     const s = readState(dir);
     writeState(dir, {
       ...s,
-      stage: 'publish',
-      timers: [t('scope', '2026-09-04T09:00:00.000Z', '2026-09-04T09:30:00.000Z'), t('build', '2026-09-04T09:30:00.000Z', '2026-09-04T11:00:00.000Z'), t('review', '2026-09-04T11:00:00.000Z', '2026-09-04T11:10:00.000Z'), t('publish', '2026-09-04T11:10:00.000Z', null)],
+      stage: 'pr',
+      timers: [t('define', '2026-09-04T09:00:00.000Z', '2026-09-04T09:30:00.000Z'), t('build', '2026-09-04T09:30:00.000Z', '2026-09-04T11:00:00.000Z'), t('review', '2026-09-04T11:00:00.000Z', '2026-09-04T11:10:00.000Z'), t('pr', '2026-09-04T11:10:00.000Z', null)],
       commits: [{ sha: 'abc1234def', message: 'DG-1: export', at: '2026-09-04T11:05:00.000Z', cycle: 0 }],
     });
     await dispatch(pullreqTool, { action: 'record', id: 'DG-1', url: 'https://example.test/o/n/pull/9', number: 9, base: 'main', head: 'DG-1' }, ctx);
@@ -77,14 +77,14 @@ describe('digest wrapup', () => {
     const r = await dispatch(digestTool, { action: 'wrapup', id: 'DG-1' }, ctx);
     expect(r.envelope.ok).toBe(true);
     expect(r.text).toContain('https://example.test/o/n/pull/9');
-    for (const stage of ['scope', 'build', 'review', 'publish']) expect(r.text).toMatch(new RegExp(`\\| ${stage} \\|`));
+    for (const stage of ['define', 'build', 'review', 'pr']) expect(r.text).toMatch(new RegExp(`\\| ${stage} \\|`));
     expect(r.text).toContain('abc1234');
     expect(r.text).toContain('AC-1');
     expect(r.text).toContain('AC-2');
     expect(r.text).toContain('Excel export');
     expect(r.text).toContain('comment-1.md');
     expect(r.text).toContain('## Not proven');
-    expect((r.envelope.data as { stages: Array<{ stage: string }> }).stages.map((x) => x.stage)).toEqual(['scope', 'build', 'review', 'publish']);
+    expect((r.envelope.data as { stages: Array<{ stage: string }> }).stages.map((x) => x.stage)).toEqual(['define', 'build', 'review', 'pr']);
   });
 
   it('says no PR and no drafts when there are none', async () => {

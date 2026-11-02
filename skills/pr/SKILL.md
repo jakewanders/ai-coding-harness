@@ -1,10 +1,10 @@
 ---
-name: publish
+name: pr
 description: "Ghostwrite the PR body from the record, list every mode demotion, and open the pull request through the codehost seat."
-stage: publish
+stage: pr
 ---
 
-# publish
+# pr
 
 Follow @root/skills/_shared/standing-rules.md, @root/skills/_shared/scope-rules.md and
 @root/skills/_shared/style.md throughout. Severity levels are defined in
@@ -16,12 +16,12 @@ Follow @root/skills/_shared/standing-rules.md, @root/skills/_shared/scope-rules.
 Request the brief. Everything below assumes you have read its header and stage material.
 
 ```harness
-unit brief { "id": "<id>", "stage": "publish" }
+unit brief { "id": "<id>", "stage": "pr" }
 ```
 
 If the header's `contract` is not `harness-brief/1`, stop and report.
 
-If the header mode is `sketch`, also read @root/skills/publish/modes/sketch.md. Other modes need
+If the header mode is `sketch`, also read @root/skills/pr/modes/sketch.md. Other modes need
 no extra reading.
 
 ## Procedure

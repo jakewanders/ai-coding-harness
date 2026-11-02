@@ -57,7 +57,7 @@ describe('migrate', () => {
 });
 
 describe('readState migration', () => {
-  it('reads a schema-0 file, returns schema 1, and rewrites the file', () => {
+  it('reads a schema-0 file, returns the current schema, and rewrites the file', () => {
     const dir = makeTmpDir('harness-migrate');
     fs.writeFileSync(path.join(dir, 'state.json'), JSON.stringify(schema0));
     const s = readState(dir);
@@ -67,5 +67,41 @@ describe('readState migration', () => {
     expect(rewritten.schema).toBe(STATE_SCHEMA);
     expect(rewritten.stage).toBe('build');
     expect(rewritten.phaseName).toBeUndefined(); // harness-lint: allow
+  });
+});
+
+describe('schema 1 to 2 stage rename', () => {
+  const timer = (stage: string, ended: string | null) => ({ stage, started_at: '2025-01-01T00:00:00.000Z', ended_at: ended, idle_gaps_ms: 0 });
+  const report = (stage: string) => ({ stage, cycle: 0, outcome: 'done', summary: 's', questions: [], artifacts: {}, at: '2025-01-01T00:00:00.000Z' });
+  const v1 = {
+    ...migrate(schema0),
+    schema: 1,
+    stage: 'verify',
+    timers: [timer('scope', '2025-01-01T01:00:00.000Z'), timer('build', '2025-01-01T02:00:00.000Z'), timer('publish', '2025-01-01T03:00:00.000Z'), timer('close', null)],
+    reports: { scope: [report('scope')], publish: [report('publish')], close: [report('close')], verify: [report('verify')], build: [report('build')] },
+  };
+
+  it('maps old stage ids in stage, timers and reports', () => {
+    const s = migrate(v1);
+    expect(s.schema).toBe(2);
+    expect(s.stage).toBe('walkthrough');
+    expect(s.timers.map((t) => t.stage)).toEqual(['define', 'build', 'pr', 'wrap_up']);
+    expect(Object.keys(s.reports!).sort()).toEqual(['build', 'define', 'pr', 'walkthrough', 'wrap_up']);
+    expect(s.reports!.define![0]!.stage).toBe('define');
+    expect(s.reports!.wrap_up![0]!.stage).toBe('wrap_up');
+  });
+
+  it.each([['scope', 'define'], ['verify', 'walkthrough'], ['publish', 'pr'], ['close', 'wrap_up']])('maps stage %s to %s', (old, now) => {
+    expect(migrate({ ...v1, stage: old }).stage).toBe(now);
+  });
+
+  it('rewrites a schema-1 state.json on read', () => {
+    const dir = makeTmpDir('harness-migrate');
+    fs.writeFileSync(path.join(dir, 'state.json'), JSON.stringify({ ...v1, stage: 'publish' }));
+    expect(readState(dir).stage).toBe('pr');
+    const rewritten = JSON.parse(fs.readFileSync(path.join(dir, 'state.json'), 'utf8'));
+    expect(rewritten.schema).toBe(2);
+    expect(rewritten.stage).toBe('pr');
+    expect(rewritten.timers.map((t: { stage: string }) => t.stage)).toEqual(['define', 'build', 'pr', 'wrap_up']);
   });
 });

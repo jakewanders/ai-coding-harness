@@ -161,7 +161,7 @@ export declare const ModeSchema: z.ZodObject<{
         warn: "warn";
     }>>>;
     merge_dispatches: z.ZodOptional<z.ZodBoolean>;
-    verify_after_publish: z.ZodOptional<z.ZodBoolean>;
+    walkthrough_after_pr: z.ZodOptional<z.ZodBoolean>;
 }, z.core.$strict>;
 export declare const DiffauditRuleSchema: z.ZodObject<{
     id: z.ZodString;
@@ -295,7 +295,7 @@ export declare const HarnessConfigSchema: z.ZodObject<{
             warn: "warn";
         }>>>;
         merge_dispatches: z.ZodOptional<z.ZodBoolean>;
-        verify_after_publish: z.ZodOptional<z.ZodBoolean>;
+        walkthrough_after_pr: z.ZodOptional<z.ZodBoolean>;
     }, z.core.$strict>>>;
     kits: z.ZodOptional<z.ZodArray<z.ZodString>>;
     protected_branches: z.ZodOptional<z.ZodArray<z.ZodString>>;

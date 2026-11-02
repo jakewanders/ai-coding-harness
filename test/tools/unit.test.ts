@@ -31,13 +31,13 @@ describe('unit start', () => {
     const data = r.envelope.data as { id: string; tracked: boolean; stage: string };
     expect(data.id).toMatch(/^local-[0-9a-f]{8}$/);
     expect(data.tracked).toBe(false);
-    expect(data.stage).toBe('scope');
+    expect(data.stage).toBe('define');
     const dir = unitDirFor(ctx, data.id);
     expect(fs.readFileSync(path.join(dir, 'source.md'), 'utf8')).toBe('Fix the login redirect loop.');
     const state = readState(dir);
     expect(state.source).toEqual({ kind: 'text', ref: null, pinned: true });
     expect(state.timers).toHaveLength(1);
-    expect(state.timers[0]).toMatchObject({ stage: 'scope', ended_at: null });
+    expect(state.timers[0]).toMatchObject({ stage: 'define', ended_at: null });
     expect(r.envelope.next).toEqual([{ tool: 'unit', action: 'brief', why: expect.stringContaining(data.id) }]);
     expect(fs.existsSync(path.join(dir, 'history.md'))).toBe(true);
   });
@@ -84,7 +84,7 @@ describe('unit status and list', () => {
     await dispatch(unitTool, { action: 'start', source: 'text', id: 'ABC-1', text: 'a', mode: 'sketch' }, ctx);
     await dispatch(unitTool, { action: 'start', source: 'text', id: 'ABC-2', text: 'b' }, ctx);
     const status = await dispatch(unitTool, { action: 'status', id: 'ABC-1' }, ctx);
-    expect(status.text.split('\n')[0]).toBe('ABC-1 · scope · cycle 0 · sketch · no branch');
+    expect(status.text.split('\n')[0]).toBe('ABC-1 · define · cycle 0 · sketch · no branch');
     const list = await dispatch(unitTool, { action: 'list' }, ctx);
     const units = (list.envelope.data as { units: Array<{ id: string }> }).units;
     expect(units.map((u) => u.id).sort()).toEqual(['ABC-1', 'ABC-2']);
@@ -101,11 +101,11 @@ describe('unit brief', () => {
     expect(r.envelope.ok).toBe(true);
     expect(r.text.startsWith('```yaml\ncontract: harness-brief/1\n')).toBe(true);
     const header = HeaderSchema.parse(headerOf(r.text));
-    expect(header).toMatchObject({ unit: 'ABC-1', stage: 'scope', mode: 'thorough', repo: namespaceFor(ctx.cwd), root: ctx.root });
+    expect(header).toMatchObject({ unit: 'ABC-1', stage: 'define', mode: 'thorough', repo: namespaceFor(ctx.cwd), root: ctx.root });
     expect(header.seats.tracker).toBe('unwired');
     expect(r.text).toContain('unwired — skip steps that need it and say so');
     expect(r.text).toContain('Pinned requirement text.');
-    expect(r.text).toContain('# scope');
+    expect(r.text).toContain('# define');
     expect(r.text).toContain('Stop after this stage and report to the user.');
   });
 
@@ -145,18 +145,18 @@ describe('unit brief', () => {
 });
 
 describe('unit advance', () => {
-  it('moves scope to build when no gates apply and records timers and history', async () => {
+  it('moves define to build when no gates apply and records timers and history', async () => {
     const ctx = ctxInRepo();
     await dispatch(unitTool, { action: 'start', source: 'text', id: 'ABC-1', text: 'a' }, ctx);
     const r = await dispatch(unitTool, { action: 'advance', id: 'ABC-1' }, ctx);
     expect(r.envelope.ok).toBe(true);
-    expect(r.envelope.data).toMatchObject({ from: 'scope', to: 'build', cycle: 0 });
+    expect(r.envelope.data).toMatchObject({ from: 'define', to: 'build', cycle: 0 });
     const state = readState(unitDirFor(ctx, 'ABC-1'));
     expect(state.stage).toBe('build');
-    expect(state.timers.map((t) => t.stage)).toEqual(['scope', 'build']);
+    expect(state.timers.map((t) => t.stage)).toEqual(['define', 'build']);
     expect(state.timers[0]!.ended_at).not.toBeNull();
     expect(state.timers[1]!.ended_at).toBeNull();
-    expect(fs.readFileSync(path.join(unitDirFor(ctx, 'ABC-1'), 'history.md'), 'utf8')).toMatch(/scope.*build/);
+    expect(fs.readFileSync(path.join(unitDirFor(ctx, 'ABC-1'), 'history.md'), 'utf8')).toMatch(/define.*build/);
     expect(r.envelope.next[0]).toMatchObject({ tool: 'unit', action: 'brief' });
   });
 
@@ -183,7 +183,7 @@ describe('unit advance', () => {
     expect((await dispatch(unitTool, { action: 'advance', id: 'ABC-1', to: 'build' }, ctx)).envelope.ok).toBe(true);
     satisfyBuildGates(unitDirFor(ctx, 'ABC-1'));
     const r = await dispatch(unitTool, { action: 'advance', id: 'ABC-1' }, ctx);
-    expect(r.envelope.data).toMatchObject({ from: 'build', to: 'publish' });
+    expect(r.envelope.data).toMatchObject({ from: 'build', to: 'pr' });
     await dispatch(unitTool, { action: 'start', source: 'text', id: 'ABC-2', text: 'b' }, ctx);
     expect((await dispatch(unitTool, { action: 'advance', id: 'ABC-2', to: 'build' }, ctx)).envelope.ok).toBe(true);
     satisfyBuildGates(unitDirFor(ctx, 'ABC-2'));

@@ -148,12 +148,12 @@ const commitGate: Guard = async (ctx) => {
   return { id: 'commit_gate', outcome: 'block', message: [`build gates failing for ${ctx.unit.id}:`, ...gateLines(verdict.blocking)].join('\n') };
 };
 
-const publishGate: Guard = async (ctx) => {
-  if (!(GIT_PUSH.test(ctx.command) || PR_CREATE.test(ctx.command)) || !ctx.unit) return { id: 'publish_gate', outcome: 'silent' };
-  const gates = await gatesFor(ctx, 'publish');
+const prGate: Guard = async (ctx) => {
+  if (!(GIT_PUSH.test(ctx.command) || PR_CREATE.test(ctx.command)) || !ctx.unit) return { id: 'pr_gate', outcome: 'silent' };
+  const gates = await gatesFor(ctx, 'pr');
   const verdict = transitionAllowed(gates);
-  if (verdict.ok) return { id: 'publish_gate', outcome: 'pass' };
-  return { id: 'publish_gate', outcome: 'block', message: [`publish gates failing for ${ctx.unit.id}:`, ...gateLines(verdict.blocking)].join('\n') };
+  if (verdict.ok) return { id: 'pr_gate', outcome: 'pass' };
+  return { id: 'pr_gate', outcome: 'block', message: [`pr gates failing for ${ctx.unit.id}:`, ...gateLines(verdict.blocking)].join('\n') };
 };
 
 const transitionPreview: Guard = async (ctx) => {
@@ -165,7 +165,7 @@ const transitionPreview: Guard = async (ctx) => {
   return { id: 'transition_preview', outcome: 'warn', message: [`${ctx.unit.id}: leaving ${stage}${next ? ` for ${next}` : ''} depends on:`, ...(gates.length ? gateLines(gates) : ['- no gates'])].join('\n') };
 };
 
-const GUARDS: Guard[] = [noBypassFlags, protectedBranch, credentialScan, oversizeFile, piiSinkWarn, commitGate, publishGate, transitionPreview];
+const GUARDS: Guard[] = [noBypassFlags, protectedBranch, credentialScan, oversizeFile, piiSinkWarn, commitGate, prGate, transitionPreview];
 
 function buildCtx(payload: HookPayload, deps: GuardDeps): Ctx {
   const root = gitRoot(payload.cwd);

@@ -79,19 +79,19 @@ describe('ledger_reverified gate', () => {
 });
 
 describe('briefs', () => {
-  it('scope and review briefs list the open ledger entries', async () => {
+  it('define and review briefs list the open ledger entries', async () => {
     const ctx = await ctxWithUnits();
     await dispatch(ledgerTool, { action: 'add', kind: 'ask', text: 'Keep the export CSV header stable', id: 'LG-1' }, ctx);
     await dispatch(ledgerTool, { action: 'add', kind: 'landing', text: 'Closed thing' }, ctx);
     await dispatch(ledgerTool, { action: 'close', entry: 'L-2', reason: 'done' }, ctx);
-    for (const stage of ['scope', 'review']) {
+    for (const stage of ['define', 'review']) {
       const r = await dispatch(unitTool, { action: 'brief', id: 'LG-2', stage, quiet: true }, ctx);
       expect(r.text, stage).toContain('## Ledger');
       expect(r.text, stage).toContain('Keep the export CSV header stable');
       expect(r.text, stage).not.toContain('Closed thing');
     }
-    const publish = await dispatch(unitTool, { action: 'brief', id: 'LG-2', stage: 'publish', quiet: true }, ctx);
-    expect(publish.text).not.toContain('## Ledger');
+    const prBrief = await dispatch(unitTool, { action: 'brief', id: 'LG-2', stage: 'pr', quiet: true }, ctx);
+    expect(prBrief.text).not.toContain('## Ledger');
     expect(fs.existsSync(path.join(unitDirFor(ctx, 'LG-2'), 'state.json'))).toBe(true);
   });
 });

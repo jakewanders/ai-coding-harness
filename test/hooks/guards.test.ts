@@ -126,7 +126,7 @@ describe('pii_sink_warn', () => {
   });
 });
 
-describe('commit_gate and publish_gate', () => {
+describe('commit_gate and pr_gate', () => {
   it('blocks a commit on a unit branch with failing commit gates and is silent without a unit', async () => {
     const { repo, ctx, dir } = await repoWithUnit();
     stage(repo, 'feature.txt', 'new\n');
@@ -144,12 +144,12 @@ describe('commit_gate and publish_gate', () => {
     expect(silent.guards.find((g) => g.id === 'commit_gate')?.outcome).toBe('silent');
   });
 
-  it('blocks a push or PR creation while publish gates fail', async () => {
+  it('blocks a push or PR creation while pr gates fail', async () => {
     const { repo, ctx, dir } = await repoWithUnit();
-    writeState(dir, { ...readState(dir), stage: 'publish' });
+    writeState(dir, { ...readState(dir), stage: 'pr' });
     for (const cmd of ['git push origin ABC-1-x', 'gh pr create --fill', 'glab merge-request create']) {
       const r = await runPreBash({ event: 'pre-bash', command: cmd, cwd: repo }, deps({ vault: ctx.vault }));
-      expect(r.guards.find((g) => g.id === 'publish_gate')?.outcome, cmd).toBe('block');
+      expect(r.guards.find((g) => g.id === 'pr_gate')?.outcome, cmd).toBe('block');
       expect(r.messages.join('\n'), cmd).toMatch(/challenge_passed|criteria_validated|claims_audited/);
     }
   });

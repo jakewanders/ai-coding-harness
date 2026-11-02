@@ -2,7 +2,7 @@ import { CORE_ORDER, registerRenderer, type BriefRenderer } from '../registry/st
 
 export const render: BriefRenderer = (ctx) => {
   const id = ctx.state?.id ?? '<id>';
-  const stage = ctx.state?.stage ?? 'scope';
+  const stage = ctx.state?.stage ?? 'define';
 
   const lines = [
     '# pilot',
@@ -50,7 +50,7 @@ export const render: BriefRenderer = (ctx) => {
     '- A commit failure is retried by the engine at most twice, then it becomes a checkpoint for the user.',
     '- Check every report against the standing rules (scope, cross-check, remote refs, no posting without approval); re-dispatch the stage on a breach.',
     '- Never post to a tracker, code host or chat yourself; subagents draft, the user approves.',
-    '- After publish, if the reviewbot seat is wired, pull the bot threads into state with `pullreq threads`, dispatch the respond flow once, then close; further bot rounds are the human\'s call.',
+    '- After the pr stage, if the reviewbot seat is wired, pull the bot threads into state with `pullreq threads`, dispatch the respond flow once, then close; further bot rounds are the human\'s call.',
   ];
   return lines.join('\n');
 };

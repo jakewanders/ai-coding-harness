@@ -17,6 +17,8 @@ export interface LayerReport {
   file: string | null;
   ok: boolean;
   error?: ConfigError;
+  /** Deprecated keys upgraded in memory while loading this layer. */
+  deprecations?: string[];
 }
 
 export interface LoadedConfig {
@@ -25,6 +27,8 @@ export interface LoadedConfig {
   errors: ConfigError[];
   /** Kits discovered from the merged `kits` list (empty when none). */
   kits: Kit[];
+  /** Deprecated keys upgraded in memory, one note each. */
+  deprecations?: string[];
 }
 
 export const USER_CONFIG_RELATIVE = path.join('.harness', 'config.yaml');
@@ -79,7 +83,7 @@ export function loadFileLayer(name: 'user' | 'repo', file: string | null): { rep
   if (syntax) return { report: { name, file, ok: false, error: syntax }, config: null };
   const validated = validateLayer(located.doc.toJS() ?? {}, file, located);
   if ('error' in validated) return { report: { name, file, ok: false, error: validated.error }, config: null };
-  return { report: { name, file, ok: true }, config: validated.config };
+  return { report: { name, file, ok: true, ...(validated.deprecations ? { deprecations: validated.deprecations } : {}) }, config: validated.config };
 }
 
 export interface LoadOptions {
@@ -100,7 +104,7 @@ function mergeLayers(defaults: HarnessConfig, kitFragments: Array<{ fragment: Pa
       layers.push({ name: 'kit', file, ok: false, error: validated.error });
       errors.push(validated.error);
     } else {
-      layers.push({ name: 'kit', file, ok: true });
+      layers.push({ name: 'kit', file, ok: true, ...(validated.deprecations ? { deprecations: validated.deprecations } : {}) });
       config = deepMerge(config, validated.config);
     }
   }
@@ -138,5 +142,6 @@ export function loadConfig(opts: LoadOptions): LoadedConfig {
   for (const name of missing) {
     errors.push({ file: repo.report.file ?? user.report.file ?? 'config', path: 'kits', line: null, message: `kit "${name}" not found on the kit search path (HARNESS_KIT_PATHS, ~/.harness/kits, plugin cache, ../ai-coding-harness-kits/kits)` });
   }
-  return { config: merged.config, layers: merged.layers, errors, kits: discovery };
+  const deprecations = merged.layers.flatMap((l) => l.deprecations ?? []);
+  return { config: merged.config, layers: merged.layers, errors, kits: discovery, ...(deprecations.length ? { deprecations } : {}) };
 }

@@ -105,7 +105,7 @@ describe('evidence gates and check', () => {
     expect(toolGates.map((g) => [g.id, g.severity, g.status])).toEqual(direct.map((g) => [g.id, g.severity, g.status]));
     expect(toolGates.find((g) => g.id === 'self_critique_recorded')!.status).toBe('pass');
     expect(toolGates.find((g) => g.id === 'defect_repro_before_fix')!.status).toBe('fail');
-    const explicit = await dispatch(evidenceTool, { action: 'gates', id: 'EVI-1', stage: 'close' }, ctx);
+    const explicit = await dispatch(evidenceTool, { action: 'gates', id: 'EVI-1', stage: 'wrap_up' }, ctx);
     expect((explicit.envelope.data as { gates: Array<{ id: string }> }).gates.map((g) => g.id)).toEqual(['pr_recorded']);
     const one = await dispatch(evidenceTool, { action: 'check', id: 'EVI-1', gate: 'pii_audit_clean' }, ctx);
     expect(one.envelope.ok).toBe(false);

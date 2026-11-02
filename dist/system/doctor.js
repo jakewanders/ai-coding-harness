@@ -43,6 +43,7 @@ export function runDoctor(ctx) {
         profile,
         layers: ctx.config.layers,
         errors: ctx.config.errors,
+        deprecations: ctx.config.deprecations ?? [],
         seats: seatWiring(ctx.config.config),
         kits: ctx.config.kits.map((k) => ({ name: k.name, dir: k.dir, docs: k.docs.length, rules: k.rules.length })),
         environments: ctx.config.config.environments ?? [],
@@ -57,6 +58,8 @@ export function renderDoctor(r) {
     lines.push('', '## Config layers', '', ...r.layers.map((l) => `- ${l.name}: ${l.file ?? '(none)'} ${l.ok ? 'ok' : 'SKIPPED'}`));
     if (r.errors.length)
         lines.push('', 'Problems:', ...r.errors.map((e) => `- ${e.file}${e.line !== null ? `:${e.line}` : ''} ${e.path ? `at ${e.path}: ` : ''}${e.message}`));
+    if (r.deprecations.length)
+        lines.push('', 'Deprecated (still accepted, please update the file):', ...r.deprecations.map((d) => `- ${d}`));
     lines.push('', '## Seats', '', ...Object.entries(r.seats).map(([seat, w]) => `- ${seat}: ${w === 'unwired' ? 'unwired' : w.join(', ')}`));
     lines.push('', '## Kits', '', ...(r.kits.length ? r.kits.map((k) => `- ${k.name}: ${k.docs} doc(s), ${k.rules} rule(s)`) : ['- none']));
     lines.push('', '## Environments', '', ...(r.environments.length ? r.environments.map((e) => `- ${e.name} (${e.role ?? 'no role'}): ${e.url ?? 'no url'}`) : ['- none']));

@@ -75,7 +75,7 @@ export const ModeSchema = z.object({
     extends: str.nullable().optional(),
     demote: z.record(str, SeverityValue).optional(),
     merge_dispatches: z.boolean().optional(),
-    verify_after_publish: z.boolean().optional(),
+    walkthrough_after_pr: z.boolean().optional(),
 }).strict();
 export const DiffauditRuleSchema = z.object({
     id: str,

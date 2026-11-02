@@ -19,7 +19,7 @@ describe('parseFrontmatter / extractors', () => {
   });
 
   it('extracts @root references and fenced harness call templates', () => {
-    const text = 'Read `@root/skills/_shared/style.md` and @root/skills/_shared/severity.md.\n\n```harness\nunit brief { "id": "<id>", "stage": "scope" }\nspec record { "id": "<id>" }\n```\n\n```json\n{"not": "a call"}\n```\n';
+    const text = 'Read `@root/skills/_shared/style.md` and @root/skills/_shared/severity.md.\n\n```harness\nunit brief { "id": "<id>", "stage": "define" }\nspec record { "id": "<id>" }\n```\n\n```json\n{"not": "a call"}\n```\n';
     expect(extractRootRefs(text)).toEqual(['skills/_shared/style.md', 'skills/_shared/severity.md']);
     expect(extractToolCalls(text)).toEqual([{ tool: 'unit', action: 'brief' }, { tool: 'spec', action: 'record' }]);
   });
@@ -107,7 +107,7 @@ describe('skills', () => {
       .filter((e) => e.isDirectory() && fs.existsSync(path.join(skillsDir, e.name, 'modes')))
       .map((e) => e.name)
       .sort();
-    expect(withModes).toEqual(['build', 'publish', 'review']);
+    expect(withModes).toEqual(['build', 'pr', 'review']);
     for (const stage of withModes) {
       const files = fs.readdirSync(path.join(skillsDir, stage, 'modes')).sort();
       expect(files, stage).toEqual(['sketch.md']);

@@ -87,7 +87,7 @@ export function modeBlock(ctx: BriefContext, mode: ModeDef = modeOf(ctx)): strin
   if (demotions.length) lines.push('', 'Gate demotions in this mode (every one is listed in the PR body):', ...demotions.map((d) => `- ${d.gate} → ${d.to}`));
   if (mode.skip_stages.length) lines.push('', `Skipped stages: ${mode.skip_stages.join(', ')}.`);
   if (mode.merge_dispatches) lines.push('', 'Specialist review columns are merged into one dispatch.');
-  if (mode.verify_after_publish) lines.push('', 'Verify runs after publish in this mode.');
+  if (mode.walkthrough_after_pr) lines.push('', 'The walkthrough runs after the PR stage in this mode.');
   const notes = path.join(ctx.root, 'skills', ctx.header.stage, 'modes', `${mode.name}.md`);
   if (fs.existsSync(notes)) lines.push('', `Mode notes for this stage: @root/skills/${ctx.header.stage}/modes/${mode.name}.md — read them before starting.`);
   return lines;

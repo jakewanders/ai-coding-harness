@@ -1,10 +1,10 @@
 ---
-name: close
+name: wrap_up
 description: "Archive the unit: clean up the worktree, update the ledger, write the digest, and mark the ticket per the status hint."
-stage: close
+stage: wrap_up
 ---
 
-# close
+# wrap_up
 
 Follow @root/skills/_shared/standing-rules.md, @root/skills/_shared/scope-rules.md and
 @root/skills/_shared/style.md throughout. Severity levels are defined in
@@ -16,7 +16,7 @@ Follow @root/skills/_shared/standing-rules.md, @root/skills/_shared/scope-rules.
 Request the brief. Everything below assumes you have read its header and stage material.
 
 ```harness
-unit brief { "id": "<id>", "stage": "close" }
+unit brief { "id": "<id>", "stage": "wrap_up" }
 ```
 
 If the header's `contract` is not `harness-brief/1`, stop and report.
@@ -26,7 +26,7 @@ If the header's `contract` is not `harness-brief/1`, stop and report.
 1. Write the digest: one-paragraph summary, the decisions taken, tags.
 2. Render the wrap-up and hand it to the user.
 3. Remove the worktree and delete the branch when merged.
-4. Apply the close status hint through the tracker seat only with approval.
+4. Apply the wrap_up status hint through the tracker seat only with approval.
 
 ## Calls
 
@@ -39,4 +39,4 @@ unit advance { "id": "<id>" }
 
 ## Done when
 
-The digest exists, the worktree is gone, and the unit is at close.
+The digest exists, the worktree is gone, and the unit is at wrap_up.

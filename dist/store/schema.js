@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { EVIDENCE_KIND_NAMES } from '../evidence/kinds.js';
-export const STATE_SCHEMA = 1;
-export const STAGE_NAMES = ['scope', 'build', 'review', 'verify', 'publish', 'close'];
+export const STATE_SCHEMA = 2;
+export const STAGE_NAMES = ['define', 'build', 'review', 'walkthrough', 'pr', 'wrap_up'];
 export const UNIT_KINDS = ['feature', 'bug', 'chore', 'unknown'];
 export const SOURCE_KINDS = ['ticket', 'pr', 'url', 'file', 'conversation', 'text'];
 export const REVIEW_VERDICTS = ['ship', 'needs_attention', 'not_ready'];

@@ -5,17 +5,17 @@
   "skills": [
     "./skills/aftercare/SKILL.md",
     "./skills/build/SKILL.md",
-    "./skills/close/SKILL.md",
     "./skills/convoy/SKILL.md",
+    "./skills/define/SKILL.md",
     "./skills/inspect/SKILL.md",
     "./skills/pilot/SKILL.md",
-    "./skills/publish/SKILL.md",
+    "./skills/pr/SKILL.md",
     "./skills/respond/SKILL.md",
     "./skills/review/SKILL.md",
-    "./skills/scope/SKILL.md",
     "./skills/screen/SKILL.md",
     "./skills/setup/SKILL.md",
-    "./skills/verify/SKILL.md"
+    "./skills/walkthrough/SKILL.md",
+    "./skills/wrap_up/SKILL.md"
   ],
   "hooks": "./hooks/hooks.json",
   "mcpServers": {

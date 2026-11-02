@@ -86,27 +86,27 @@ describe('worklog', () => {
 
   it('sums minutes per stage, subtracting recorded idle gaps', () => {
     const timers = [
-      t('scope', '2026-09-04T09:00:00.000Z', '2026-09-04T09:30:00.000Z'),
+      t('define', '2026-09-04T09:00:00.000Z', '2026-09-04T09:30:00.000Z'),
       t('build', '2026-09-04T09:30:00.000Z', '2026-09-04T10:30:00.000Z', 20 * 60_000),
       t('review', '2026-09-04T10:30:00.000Z', '2026-09-04T12:00:00.000Z', 10 * 60_000),
-      t('scope', '2026-09-04T12:00:00.000Z', '2026-09-04T12:10:00.000Z'),
+      t('define', '2026-09-04T12:00:00.000Z', '2026-09-04T12:10:00.000Z'),
     ];
     const w = suggestWorklog(timers);
-    expect(w.stages).toEqual([{ stage: 'scope', minutes: 40 }, { stage: 'build', minutes: 40 }, { stage: 'review', minutes: 80 }]);
+    expect(w.stages).toEqual([{ stage: 'define', minutes: 40 }, { stage: 'build', minutes: 40 }, { stage: 'review', minutes: 80 }]);
     expect(w.total_minutes).toBe(160);
     expect(w.idle_minutes).toBe(30);
   });
 
   it('only subtracts gaps between timers that exceed the threshold and counts open timers up to now', () => {
     const timers = [
-      t('scope', '2026-09-04T09:00:00.000Z', '2026-09-04T09:30:00.000Z'),
+      t('define', '2026-09-04T09:00:00.000Z', '2026-09-04T09:30:00.000Z'),
       t('build', '2026-09-04T10:00:00.000Z', '2026-09-04T10:30:00.000Z'),
       t('review', '2026-09-04T10:40:00.000Z', null),
     ];
     const now = new Date('2026-09-04T11:00:00.000Z');
     const w = suggestWorklog(timers, 15 * 60_000, now);
-    expect(w.stages).toEqual([{ stage: 'scope', minutes: 30 }, { stage: 'build', minutes: 30 }, { stage: 'review', minutes: 20 }]);
+    expect(w.stages).toEqual([{ stage: 'define', minutes: 30 }, { stage: 'build', minutes: 30 }, { stage: 'review', minutes: 20 }]);
     expect(w.idle_minutes).toBe(30);
-    expect(w.gaps).toEqual([{ after: 'scope', before: 'build', minutes: 30 }]);
+    expect(w.gaps).toEqual([{ after: 'define', before: 'build', minutes: 30 }]);
   });
 });

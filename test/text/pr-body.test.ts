@@ -80,7 +80,7 @@ describe('renderPrBody', () => {
     const body = renderPrBody(state({ mode: 'sketch' }), requirement, resolveMode('sketch', DEFAULTS));
     expect(body.split('\n')[0]).toMatch(/nothing reviewed/i);
     expect(body).toContain('## Not proven');
-    expect(body).toMatch(/review, (challenge, )?verify/);
+    expect(body).toMatch(/review, (challenge, )?walkthrough/);
   });
 
   it('copes with no requirement and no evidence', () => {

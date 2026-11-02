@@ -8,6 +8,7 @@ export declare function validKeysAt(root: z.ZodTypeAny, segments: Array<string |
 /** Validate one layer's raw value. Returns the typed config or a single ConfigError. */
 export declare function validateLayer(raw: unknown, file: string, located: LocatedDocument | null): {
     config: HarnessConfig;
+    deprecations?: string[];
 } | {
     error: ConfigError;
 };
