@@ -103,9 +103,11 @@ describe('pii_audit_clean', () => {
 });
 
 describe('pr_recorded', () => {
-  it('passes only when state.pr is set', async () => {
+  it('passes when state.pr is set or the gate is waived', async () => {
     expect(await gate('pr_recorded', base({ stage: 'wrap_up' }))).toMatchObject({ status: 'fail' });
     const pr = { url: 'https://example.test/pr/1', number: 1, base: 'main', head: 'G-1', opened_at: at, threads: [] };
     expect(await gate('pr_recorded', base({ stage: 'wrap_up', pr }))).toMatchObject({ status: 'pass' });
+    expect(await gate('pr_recorded', base({ stage: 'wrap_up', evidence: [ev('waiver', { gate: 'pr_recorded', rationale: 'PR left as a draft for the user' })] }))).toMatchObject({ status: 'pass' });
+    expect(await gate('pr_recorded', base({ stage: 'wrap_up', evidence: [ev('waiver', { gate: 'pii_audit_clean', rationale: 'other gate' })] }))).toMatchObject({ status: 'fail' });
   });
 });

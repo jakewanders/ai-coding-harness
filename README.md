@@ -106,7 +106,7 @@ flowchart LR
     review -. "ship, no browser_ui" .-> pr
     walkthrough --> pr
     review -- "needs_attention or not_ready<br/>fix, then re-review (max 4 cycles)" --> build
-    pr -- "pr gates" --> wrap_up
+    pr -- "pr gates + PR recorded" --> wrap_up
     wrap_up --> done(["done"])
 ```
 
@@ -239,9 +239,10 @@ Gates for pr (SMK-1, cycle 1):
 - claims_audited [block] pass
 ```
 
-`git push origin HEAD` is then allowed (exit 0) and `unit advance` moves the unit to
-wrap_up. The PR url recorded with `pullreq record` was the placeholder
-`https://example.test/pr/1`; a real session opens the PR with its own code-host tools.
+`git push origin HEAD` is then allowed (exit 0), but `unit advance` is still refused by
+`pr_recorded` until the PR is recorded with `pullreq record`. After that it moves the unit
+to wrap_up. The recorded url was the placeholder `https://example.test/pr/1`; a real
+session opens the PR with its own code-host tools.
 
 </details>
 
@@ -313,7 +314,7 @@ Ten gates, by the point where they bite (ids are the real gate ids in `src/gates
 | Leaving pr, and push or PR creation | `criteria_validated` | any acceptance criterion is missing or `unproven` |
 | | `claims_audited` | no `claims` evidence this cycle |
 | | `walkthrough_done` | only with `browser_ui`: some criterion is not `pass` in `browser_findings` |
-| Closing wrap_up | `pr_recorded` | no `pullreq record` on the unit (shown by `evidence gates`) |
+| Entering wrap_up | `pr_recorded` | no `pullreq record` on the unit and no waiver (for when the PR was deliberately not opened) |
 
 Severity is `block`, `warn` or `off`. Config can soften a gate and run modes can demote it,
 but a demotion is always listed in the PR body.

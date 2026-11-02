@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+### Fixed: `pr_recorded` is now enforced
+- The `pr_recorded` gate was registered on `wrap_up`, the terminal stage, which is never left,
+  so nothing enforced it and a unit could close with no recorded pull request. Gates on the
+  terminal stage are now entry gates: `unit advance` and `unit route` refuse to move a unit
+  from `pr` to `wrap_up` until `pullreq record` has run.
+- The gate accepts a `waiver` (`{ gate: "pr_recorded", rationale }`) for the case where the
+  user chose not to open the PR. The `pr` skill says so.
+- Fixed in the same pass: `.claude-plugin/plugin.json` listed `SKILL.md` files; the plugin
+  spec wants skill directories (`claude plugin validate .` now passes).
+
 ### Breaking: pilot renamed to conductor
 - The orchestration flow `pilot` is now `conductor`: `unit brief { "stage": "conductor" }`,
   `skills/conductor`, the flow name in the registry, and the source modules `src/conductor/`

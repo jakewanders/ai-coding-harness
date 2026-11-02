@@ -38,6 +38,17 @@ function modeOf(state: UnitState, ctx: ToolContext): ModeDef {
   }
 }
 
+/**
+ * Gates that apply to a move `from` -> `to`: the exit gates of `from`, plus the
+ * gates registered on the terminal stage when entering it. wrap_up can never be
+ * left, so its gates (pr_recorded) are entry gates.
+ */
+async function gatesForMove(from: StageName, to: StageName, unit: LoadedUnit, ctx: ToolContext, mode: ModeDef): Promise<ResolvedGate[]> {
+  const exit = await gatesFor(from, unit, ctx, mode);
+  const terminal = CORE_ORDER[CORE_ORDER.length - 1]!;
+  return to === terminal && from !== terminal ? [...exit, ...(await gatesFor(terminal, unit, ctx, mode))] : exit;
+}
+
 async function gatesFor(stage: StageName, unit: LoadedUnit, ctx: ToolContext, mode: ModeDef): Promise<ResolvedGate[]> {
   return resolveGates(stage, { state: unit.state, config: ctx.config.config, unitDir: unit.dir, worktree: unit.state.worktree, cwd: ctx.cwd, vault: ctx.vault }, mode);
 }
@@ -180,7 +191,7 @@ export const unitTool = defineTool({
         if (!to) return fail(`unit ${state.id}: no stage after ${state.stage}`);
         // Going back to build from review is a retry, not a promotion: no gates.
         const correction = to === 'build' && state.stage === 'review';
-        const gates = correction ? [] : await gatesFor(state.stage, unit, ctx, mode);
+        const gates = correction ? [] : await gatesForMove(state.stage, to, unit, ctx, mode);
         const verdict = transitionAllowed(gates);
         if (!verdict.ok) {
           const lines = [`Cannot leave ${state.stage}: ${verdict.blocking.length} blocking gate(s).`, ...verdict.blocking.map((g) => `- ${g.id}: ${g.remedy ?? 'no remedy given'}`)];
@@ -241,7 +252,7 @@ export const unitTool = defineTool({
         const next = route.next!;
         if (next !== from) {
           if (route.decision === 'proceed') {
-            const gates = await gatesFor(from, unit, ctx, mode);
+            const gates = await gatesForMove(from, next, unit, ctx, mode);
             const verdict = transitionAllowed(gates);
             if (!verdict.ok) {
               const questions = verdict.blocking.map((g) => `${g.id}: ${g.remedy ?? 'gate failing'}`);

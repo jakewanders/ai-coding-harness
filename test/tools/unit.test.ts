@@ -200,6 +200,58 @@ describe('unit advance', () => {
 });
 
 /** Give a unit the evidence and green run the real build gates require in its current cycle. */
+describe('unit advance into wrap_up', () => {
+  const at = '2026-09-04T00:00:00.000Z';
+  const prGatesGreen = [
+    { kind: 'criteria_validation' as const, cycle: 0, recorded_at: at, payload: { results: [{ criterion: 'AC-1', status: 'proven', proof: 'test' }] } },
+    { kind: 'claims' as const, cycle: 0, recorded_at: at, payload: { claims: [] } },
+  ];
+
+  async function unitAtPr(id: string) {
+    const ctx = ctxInRepo();
+    await dispatch(unitTool, { action: 'start', source: 'text', id, text: 'a' }, ctx);
+    const dir = unitDirFor(ctx, id);
+    writeState(dir, { ...readState(dir), stage: 'pr', evidence: prGatesGreen });
+    return { ctx, dir };
+  }
+
+  it('refuses while no pull request is recorded, and names the remedy', async () => {
+    const { ctx, dir } = await unitAtPr('CL-1');
+    const r = await dispatch(unitTool, { action: 'advance', id: 'CL-1' }, ctx);
+    expect(r.envelope.ok).toBe(false);
+    expect((r.envelope.data as { blocking: Array<{ id: string }> }).blocking.map((g) => g.id)).toEqual(['pr_recorded']);
+    expect(r.text).toContain('pullreq record');
+    expect(readState(dir).stage).toBe('pr');
+  });
+
+  it('advances once the pull request is recorded', async () => {
+    const { ctx, dir } = await unitAtPr('CL-2');
+    writeState(dir, { ...readState(dir), pr: { url: 'https://example.test/pr/1', number: 1, base: 'main', head: 'CL-2', opened_at: at, threads: [] } });
+    const r = await dispatch(unitTool, { action: 'advance', id: 'CL-2' }, ctx);
+    expect(r.envelope.ok).toBe(true);
+    expect(readState(dir).stage).toBe('wrap_up');
+  });
+
+  it('advances with a waiver for pr_recorded (the user declined to open the PR)', async () => {
+    const { ctx, dir } = await unitAtPr('CL-3');
+    const s = readState(dir);
+    writeState(dir, { ...s, evidence: [...s.evidence, { kind: 'waiver', cycle: 0, recorded_at: at, payload: { gate: 'pr_recorded', rationale: 'PR left as drafts/pr-body.md for the user' } }] });
+    const r = await dispatch(unitTool, { action: 'advance', id: 'CL-3' }, ctx);
+    expect(r.envelope.ok).toBe(true);
+    expect(readState(dir).stage).toBe('wrap_up');
+  });
+
+  it('the conductor route also stops at the missing pull request', async () => {
+    const { ctx, dir } = await unitAtPr('CL-4');
+    const s = readState(dir);
+    await dispatch(unitTool, { action: 'report', id: 'CL-4', stage: 'pr', outcome: 'done', summary: 'x' }, ctx);
+    const r = await dispatch(unitTool, { action: 'route', id: 'CL-4' }, ctx);
+    expect(r.envelope.ok).toBe(false);
+    expect(readState(dir).stage).toBe('pr');
+    expect(s.pr).toBeNull();
+  });
+});
+
 function satisfyBuildGates(dir: string) {
   const s: UnitState = readState(dir);
   const at = '2026-09-04T00:00:00.000Z';
