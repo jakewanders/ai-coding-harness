@@ -7,8 +7,8 @@ blueprint defines *behavior*; this document defines *names, layouts, contracts, 
 build order*. When the two seem to disagree, the blueprint's constraints in its sections
 2, 4, 5, 8 and the loud-failure rule win, and this spec must be corrected.
 
-Clean-room rule: this project is built from the blueprint and this spec only. The sibling
-directories `../dev-mcp-2`, `../dev-mcp-orchestrator`, and `../dev-workflow-packs` are
+Clean-room rule: this project is built from the blueprint and this spec only. The author's
+earlier private prototypes (sibling directories) are
 never opened, searched, or copied from. Their vocabulary (`phase`, `orchestrate`,
 `dev-workflow`, `dev-mcp`) is on the jargon deny-list so accidental reuse fails CI.
 

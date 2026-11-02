@@ -64,7 +64,7 @@ tools 13 core 10 flows 10 stages 20
 === vocabulary lint
 zero hits (test/lint/vocabulary.test.ts, part of the suite)
 === blockers
-grep -c '^- \[!\]' docs/BUILD_PLAN.md -> 0; docs/BLOCKERS.md has no entries
+grep -c '^- \[!\]' docs/history/BUILD_PLAN.md -> 0; docs/history/BLOCKERS.md has no entries
 === git status --porcelain (after the log commit)
 (empty)
 ```

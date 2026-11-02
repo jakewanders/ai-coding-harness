@@ -1,12 +1,12 @@
 # Harness Build Plan
 
 > **For agentic workers:** this plan is executed by the ralph loop described in
-> `docs/MASTER_PROMPT.md`. Each task below is one loop iteration. Tasks use checkbox
+> `docs/history/MASTER_PROMPT.md`. Each task below is one loop iteration. Tasks use checkbox
 > syntax: `- [ ]` open, `- [x]` done, `- [!]` blocked (entry required in
-> `docs/BLOCKERS.md`). Every task follows the same cycle: write the failing tests listed
+> `docs/history/BLOCKERS.md`). Every task follows the same cycle: write the failing tests listed
 > under **Tests must assert**, run them and see them fail, implement the minimum that
 > satisfies **Interfaces**, run the full suite plus typecheck plus build, commit with the
-> message `step NN: <title>`, tick the box, append one line to `docs/BUILD_LOG.md`.
+> message `step NN: <title>`, tick the box, append one line to `docs/history/BUILD_LOG.md`.
 
 **Goal:** Build `harness`, the tracker-driven development lifecycle engine from
 `docs/blueprint.md`, as a Claude Code plugin with an MCP server, skills, safety hooks, one
@@ -27,10 +27,10 @@ prefixed `B` for the blueprint.
 
 ## Global Constraints
 
-- Clean room: never open `../dev-mcp-2`, `../dev-mcp-orchestrator`, `../dev-workflow-packs`.
+- Clean room: never open the author's earlier private prototypes (sibling directories).
 - Never `git push`. Never edit `docs/blueprint.md`.
 - Runtime dependencies are exactly `@modelcontextprotocol/sdk`, `zod`, `yaml`. Adding one
-  needs a justification line in `docs/BUILD_LOG.md`.
+  needs a justification line in `docs/history/BUILD_LOG.md`.
 - Tests are hermetic: no network, temp vault and fixture config via `HARNESS_VAULT` and
   `HARNESS_CONFIG`, never the real home directory, never dependent on the cwd being a git
   checkout.
@@ -160,7 +160,7 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 ### Task 1: Project scaffold and hermetic test harness
 
 **Files:** Create `package.json`, `tsconfig.json`, `vitest.config.ts`, `test/setup.ts`,
-`test/helpers/tmp.ts`, `test/smoke.test.ts`, `src/index.ts` (exports `VERSION`), `README.md` (title and one-paragraph purpose only), `docs/BUILD_LOG.md`, `docs/BLOCKERS.md`.
+`test/helpers/tmp.ts`, `test/smoke.test.ts`, `src/index.ts` (exports `VERSION`), `README.md` (title and one-paragraph purpose only), `docs/history/BUILD_LOG.md`, `docs/history/BLOCKERS.md`.
 
 **Interfaces:**
 - `package.json` scripts: `build` (`tsc -p tsconfig.json`), `typecheck` (`tsc --noEmit`), `test` (`vitest run`), `check:dist` (Task 35 fills it; for now `node -e "process.exit(0)"`), `gen:tools` (Task 9 fills it).
@@ -659,15 +659,15 @@ export const EVIDENCE_KINDS: Record<EvidenceKind, { schema: z.ZodTypeAny; remedy
 
 ### Task 37: Final audit and release readiness
 
-**Files:** Create `CHANGELOG.md`, `docs/BUILD_LOG.md` closing summary; edit `README.md` if anything is missing.
+**Files:** Create `CHANGELOG.md`, `docs/history/BUILD_LOG.md` closing summary; edit `README.md` if anything is missing.
 
 **Checklist (all must be true, verified by running, output pasted into the build log):**
 - `npm run typecheck`, `npm test`, `npm run build`, `npm run check:dist`, `npm run gen:tools` then `git status --porcelain` empty.
 - Vocabulary lint zero. Every stage renders on empty config. Skills contract green. Plugin contract green.
 - `docs/tools.md`, `docs/brief-contract.md`, `docs/token-budget.md` current.
-- `docs/BLOCKERS.md` reviewed: every `[!]` task retried once more; remaining entries carry a reason and a suggested path.
+- `docs/history/BLOCKERS.md` reviewed: every `[!]` task retried once more; remaining entries carry a reason and a suggested path.
 - `CHANGELOG.md` has a `0.1.0` section summarizing tools, stages, flows, gates, hooks, kits.
 - `git tag v0.1.0` created locally. Nothing pushed.
-- Final line appended to `docs/BUILD_LOG.md`: `BUILD COMPLETE <date> · tests <n> · tools 13 · stages 10 · flows 10 · gates <n> · tokens <total>`.
+- Final line appended to `docs/history/BUILD_LOG.md`: `BUILD COMPLETE <date> · tests <n> · tools 13 · stages 10 · flows 10 · gates <n> · tokens <total>`.
 
 - [x] Task 37

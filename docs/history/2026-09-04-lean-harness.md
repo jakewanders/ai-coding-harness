@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript (strict, ESM) on Node 22, `@modelcontextprotocol/sdk`, `zod`, `yaml`, `vitest`, committed `dist/`. Same rules as the 0.1.0 build: hermetic tests, vocabulary lint at zero, `dist/` rebuilt and committed with every source change, never `git push`.
 
-**Spec:** `docs/superpowers/specs/2026-09-04-harness-design.md` (0.1.0 design) plus the delta written in Task 1: `docs/superpowers/specs/2026-09-04-lean-harness.md`. This plan is copied to `docs/superpowers/plans/2026-09-04-lean-harness.md` in Task 1 so it travels with the repo.
+**Spec:** `docs/superpowers/specs/2026-09-04-harness-design.md` (0.1.0 design) plus the delta written in Task 1: `docs/superpowers/specs/2026-09-04-lean-harness.md`. This plan is copied to `docs/history/2026-09-04-lean-harness.md` in Task 1 so it travels with the repo.
 
 ## Context
 
@@ -51,7 +51,7 @@ Routing in the lean pipeline: `scope → build → review`; review verdict `ship
 
 **Files:**
 - Create: `docs/superpowers/specs/2026-09-04-lean-harness.md`
-- Create: `docs/superpowers/plans/2026-09-04-lean-harness.md` (copy of this plan)
+- Create: `docs/history/2026-09-04-lean-harness.md` (copy of this plan)
 
 **Interfaces:**
 - Produces: the lean spec delta every later task cites; the branch `lean`.
@@ -59,7 +59,7 @@ Routing in the lean pipeline: `scope → build → review`; review verdict `ship
 - [ ] **Step 1: Branch from the release tag**
 
 ```bash
-cd /home/jake/repos/ai-coding-harness && git checkout -q -b lean v0.1.0 && git status --short
+cd <repo> && git checkout -q -b lean v0.1.0 && git status --short
 ```
 
 Expected: on branch `lean`, clean tree.
@@ -101,7 +101,7 @@ Everything in `2026-09-04-harness-design.md` holds unless listed here.
 - [ ] **Step 3: Copy this plan into the repo**
 
 ```bash
-mkdir -p docs/superpowers/plans && cp /home/jake/.claude/plans/hashed-floating-brooks.md docs/superpowers/plans/2026-09-04-lean-harness.md
+mkdir -p docs/superpowers/plans && cp <local plan file> docs/history/2026-09-04-lean-harness.md
 ```
 
 - [ ] **Step 4: Commit**
@@ -475,7 +475,7 @@ git add -A && git commit -q -m "lean: consolidate build and review skills; scree
 ### Task 8: Packaging, docs, version 0.2.0, tag
 
 **Files:**
-- Modify: `package.json` (version 0.2.0), `src/index.ts` (VERSION), `.claude-plugin/plugin.json` (version, skills list regenerated from `skills/*/SKILL.md`), `README.md` (tools list 12, stages 6, flows 7, modes 2, remove counterweight from seats), `CHANGELOG.md` (0.2.0 section: what was removed and collapsed, migration note that old stage names normalize on read), `docs/BUILD_LOG.md` (one closing line for the lean pass), `docs/tools.md` (regenerated)
+- Modify: `package.json` (version 0.2.0), `src/index.ts` (VERSION), `.claude-plugin/plugin.json` (version, skills list regenerated from `skills/*/SKILL.md`), `README.md` (tools list 12, stages 6, flows 7, modes 2, remove counterweight from seats), `CHANGELOG.md` (0.2.0 section: what was removed and collapsed, migration note that old stage names normalize on read), `docs/history/BUILD_LOG.md` (one closing line for the lean pass), `docs/tools.md` (regenerated)
 - Test: `test/contracts/plugin.test.ts` (unchanged; it checks version equality and the skills list), `test/smoke.test.ts` (VERSION equality)
 
 - [ ] **Step 1: Bump the version in the three places and regenerate the skills list**
@@ -495,7 +495,7 @@ Expected: all green, status empty after committing.
 
 - [ ] **Step 3: Record and tag locally**
 
-Append to `docs/BUILD_LOG.md`: `LEAN PASS COMPLETE <date> · tests <n> · tools 12 · stages 6 · flows 7 · gates 10`. Commit, then:
+Append to `docs/history/BUILD_LOG.md`: `LEAN PASS COMPLETE <date> · tests <n> · tools 12 · stages 6 · flows 7 · gates 10`. Commit, then:
 
 ```bash
 git add -A && git commit -q -m "lean: 0.2.0 packaging, README, CHANGELOG" && git tag -a v0.2.0 -m "harness 0.2.0 (lean)"
