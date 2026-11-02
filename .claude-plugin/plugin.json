@@ -3,19 +3,19 @@
   "version": "0.2.0",
   "description": "Tracker-driven development lifecycle engine: an MCP server, stage skills, and safety hooks for coding agents.",
   "skills": [
-    "./skills/aftercare/SKILL.md",
-    "./skills/batch/SKILL.md",
-    "./skills/build/SKILL.md",
-    "./skills/conductor/SKILL.md",
-    "./skills/define/SKILL.md",
-    "./skills/inspect/SKILL.md",
-    "./skills/pr/SKILL.md",
-    "./skills/respond/SKILL.md",
-    "./skills/review/SKILL.md",
-    "./skills/screen/SKILL.md",
-    "./skills/setup/SKILL.md",
-    "./skills/walkthrough/SKILL.md",
-    "./skills/wrap_up/SKILL.md"
+    "./skills/aftercare",
+    "./skills/batch",
+    "./skills/build",
+    "./skills/conductor",
+    "./skills/define",
+    "./skills/inspect",
+    "./skills/pr",
+    "./skills/respond",
+    "./skills/review",
+    "./skills/screen",
+    "./skills/setup",
+    "./skills/walkthrough",
+    "./skills/wrap_up"
   ],
   "hooks": "./hooks/hooks.json",
   "mcpServers": {
@@ -25,5 +25,8 @@
         "${CLAUDE_PLUGIN_ROOT}/dist/server.js"
       ]
     }
+  },
+  "author": {
+    "name": "Jake Nelson"
   }
 }

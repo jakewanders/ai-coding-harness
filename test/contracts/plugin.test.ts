@@ -20,9 +20,9 @@ describe('.claude-plugin/plugin.json', () => {
   });
 
   it('declares every skill directory and every declared skill exists', () => {
-    const dirs = listSkills(repoRoot).map((s) => `./skills/${s.name}/SKILL.md`).sort();
+    const dirs = listSkills(repoRoot).map((s) => `./skills/${s.name}`).sort();
     expect([...plugin.skills].sort()).toEqual(dirs);
-    for (const rel of plugin.skills) expect(fs.existsSync(path.join(repoRoot, rel)), rel).toBe(true);
+    for (const rel of plugin.skills) expect(fs.existsSync(path.join(repoRoot, rel, 'SKILL.md')), rel).toBe(true);
   });
 
   it('points at existing hooks and server files', () => {

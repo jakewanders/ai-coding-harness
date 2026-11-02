@@ -1,11 +1,14 @@
 {
   "name": "ai-coding-harness",
-  "owner": { "name": "Jake Nelson" },
+  "owner": {
+    "name": "Jake Nelson"
+  },
   "plugins": [
     {
       "name": "harness",
       "source": "./",
       "description": "Tracker-driven development lifecycle engine with an MCP server, stage skills, safety hooks and kits."
     }
-  ]
+  ],
+  "description": "Tracker-driven development lifecycle engine for coding agents: an MCP server, stage skills and safety hooks."
 }
