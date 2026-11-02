@@ -21,8 +21,8 @@ describe('scaffold', () => {
     expect(config).toBeTruthy();
     expect(vault!.startsWith(REAL_HOME)).toBe(false);
     expect(config!.startsWith(REAL_HOME)).toBe(false);
-    expect(vault!.startsWith(os.tmpdir())).toBe(true);
-    expect(config!.startsWith(os.tmpdir())).toBe(true);
+    expect(vault!.startsWith(fs.realpathSync(os.tmpdir()))).toBe(true);
+    expect(config!.startsWith(fs.realpathSync(os.tmpdir()))).toBe(true);
   });
 
   it('os.homedir() resolves to the HARNESS_HOME temp dir', () => {
@@ -39,7 +39,7 @@ describe('test helpers', () => {
     const a = makeTmpDir('harness-smoke');
     const b = makeTmpDir('harness-smoke');
     expect(a).not.toBe(b);
-    expect(a.startsWith(os.tmpdir())).toBe(true);
+    expect(a.startsWith(fs.realpathSync(os.tmpdir()))).toBe(true);
     expect(fs.statSync(a).isDirectory()).toBe(true);
     fs.rmSync(a, { recursive: true, force: true });
     fs.rmSync(b, { recursive: true, force: true });
