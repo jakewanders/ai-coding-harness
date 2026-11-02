@@ -29,7 +29,7 @@ Unit of work bookkeeping: start, status, list, brief, advance, report and route 
 - `report` — Store a stage report (outcome, summary, questions, verdict, artifacts) for the current cycle.
 - `route` — Decide the next stage from the reports (proceed, retry, blocked, done); applies the move when gates allow it.
 - `answer` — Store the user's answers to blocked questions.
-- `link` — Record convoy siblings symmetrically on every unit in the group.
+- `link` — Record batch siblings symmetrically on every unit in the group.
 
 ## `spec`
 

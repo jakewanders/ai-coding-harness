@@ -269,8 +269,8 @@ export const unitTool = defineTool({
             },
         }),
         link: action({
-            describe: 'Record convoy siblings symmetrically on every unit in the group.',
-            schema: z.object({ id: z.string().describe('Unit id.'), related: z.array(z.string().min(1)).min(1).describe('Sibling unit ids in the same convoy group.') }),
+            describe: 'Record batch siblings symmetrically on every unit in the group.',
+            schema: z.object({ id: z.string().describe('Unit id.'), related: z.array(z.string().min(1)).min(1).describe('Sibling unit ids in the same batch group.') }),
             handler: async (input, ctx) => {
                 const ids = [...new Set([input.id, ...input.related])];
                 const units = ids.map((id) => ({ id, unit: loadUnit(ctx, id) }));
@@ -280,9 +280,9 @@ export const unitTool = defineTool({
                 for (const { id, unit } of units) {
                     const siblings = [...new Set([...(unit.state.siblings ?? []), ...ids.filter((x) => x !== id)])].sort();
                     writeState(unit.dir, { ...unit.state, siblings }, ctx.now);
-                    appendHistory(unit.dir, `convoy siblings: ${siblings.join(', ')}`, ctx.now);
+                    appendHistory(unit.dir, `batch siblings: ${siblings.join(', ')}`, ctx.now);
                 }
-                return result(`Linked ${ids.join(', ')} as convoy siblings.`, envelope(true, `${ids.length} units linked`, { ids }));
+                return result(`Linked ${ids.join(', ')} as batch siblings.`, envelope(true, `${ids.length} units linked`, { ids }));
             },
         }),
     },

@@ -105,7 +105,7 @@ per cycle, so a fix has to be re-checked and re-critiqued. After four cycles wit
 `ship`, `unit route` reports `blocked` and asks a human.
 
 Seven standalone flows sit outside this state machine: `pilot` (the conductor that
-dispatches one fresh subagent per stage), `convoy` (batch several units), `screen`
+dispatches one fresh subagent per stage), `batch` (run several units as a group), `screen`
 (ticket triage), `inspect` (read-only PR review), `respond` (address review comments in
 one batched commit per round), `aftercare` (triage follow-up comments on a shipped unit),
 and `setup` (first-run configuration).
@@ -236,7 +236,7 @@ point where the gates pass; the PR url used there was a placeholder.
 | **column** | One independent review pass recorded as `review_column` evidence. Six column names exist (`criteria_forward`, `criteria_reverse`, `adversarial`, `diffaudit`, `ledger`, `browser`); the first five are required, `browser` is added when `browser_ui` is declared. `evidence synthesize` merges them into one verdict: `ship`, `needs_attention` or `not_ready`. |
 | **ledger** | A per-repo list of standing asks and past landings that outlive a single unit. Review rechecks open entries against each new diff so deferred work is not forgotten. |
 | **kit** | A directory with a `kit.yaml` that adds opinions without code: a config fragment, convention docs selected by repo tags or capabilities, and diff-audit rules. See [Kits](#kits). |
-| **convoy** | A batch flow for several units: define each, group them by predicted file overlap, get the grouping approved, then run the groups one after another. Units in a group are linked as siblings with `unit link`. |
+| **batch** | A flow that runs several units together: define each, group them by predicted file overlap, get the grouping approved, then run the groups one after another. Units in a group are linked as siblings with `unit link`. |
 | **mode** | A named run preset: `thorough` (everything) or `sketch` (define and build only). See [Modes](#modes). |
 | **waiver** | A `waiver` evidence record with a written rationale that satisfies one named gate. The rationale travels into the PR. |
 

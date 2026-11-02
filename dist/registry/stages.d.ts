@@ -1,7 +1,7 @@
 import type { LoadedConfig } from '../config/load.js';
 import type { BriefHeader } from '../contracts/header.js';
 import type { StageName, UnitState } from '../store/state.js';
-export type FlowName = 'pilot' | 'convoy' | 'screen' | 'inspect' | 'respond' | 'aftercare' | 'setup';
+export type FlowName = 'pilot' | 'batch' | 'screen' | 'inspect' | 'respond' | 'aftercare' | 'setup';
 export interface BriefContext {
     state: UnitState | null;
     config: LoadedConfig;

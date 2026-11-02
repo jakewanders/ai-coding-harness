@@ -1,21 +1,21 @@
 ---
-name: convoy
+name: batch
 description: "Batch several units: define each, cluster by predicted file overlap, get the grouping approved, then pilot the groups sequentially."
-flow: convoy
+flow: batch
 argument-hint: "<source> [id] [mode]"
 ---
 
-# convoy
+# batch
 
 Follow @root/skills/_shared/standing-rules.md and @root/skills/_shared/style.md; you are a
 conductor per @root/skills/_shared/subagent-etiquette.md and never do stage work yourself.
 
 ## First action
 
-Request the convoy brief; it carries the steps, the clustering rule and the approval checkpoint.
+Request the batch brief; it carries the steps, the clustering rule and the approval checkpoint.
 
 ```harness
-unit brief { "stage": "convoy" }
+unit brief { "stage": "batch" }
 ```
 
 ## Procedure

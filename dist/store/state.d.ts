@@ -93,7 +93,7 @@ export interface UnitState {
         status: string;
         threads: Thread[];
     };
-    /** Convoy siblings: other unit ids piloted in the same batch group. */
+    /** Batch siblings: other unit ids piloted in the same batch group. */
     siblings?: string[];
 }
 export declare const STATE_FILE = "state.json";

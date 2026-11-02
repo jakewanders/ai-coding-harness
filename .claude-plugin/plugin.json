@@ -4,8 +4,8 @@
   "description": "Tracker-driven development lifecycle engine: an MCP server, stage skills, and safety hooks for coding agents.",
   "skills": [
     "./skills/aftercare/SKILL.md",
+    "./skills/batch/SKILL.md",
     "./skills/build/SKILL.md",
-    "./skills/convoy/SKILL.md",
     "./skills/define/SKILL.md",
     "./skills/inspect/SKILL.md",
     "./skills/pilot/SKILL.md",

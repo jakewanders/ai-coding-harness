@@ -4,5 +4,5 @@ import './screen.js';
 import './inspect.js';
 import './respond.js';
 import './aftercare.js';
-import './convoy.js';
+import './batch.js';
 import './setup.js';

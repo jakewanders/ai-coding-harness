@@ -47,7 +47,7 @@ describe('cluster', () => {
 });
 
 describe('unit link', () => {
-  it('records convoy siblings symmetrically', async () => {
+  it('records batch siblings symmetrically', async () => {
     const ctx = makeCtx({ cwd: makeRepo({ 'README.md': 'x' }) });
     for (const id of ['CV-1', 'CV-2', 'CV-3']) await dispatch(unitTool, { action: 'start', source: 'ticket', ref: id }, ctx);
     const r = await dispatch(unitTool, { action: 'link', id: 'CV-1', related: ['CV-2', 'CV-3'] }, ctx);
@@ -63,13 +63,13 @@ describe('unit link', () => {
   });
 });
 
-describe('convoy brief', () => {
+describe('batch brief', () => {
   it('takes no id and lays out define+plan per id, clustering, the approval checkpoint, sequential pilots and linking', async () => {
-    expect(stageEntry('convoy')).toMatchObject({ standalone: true, takesNoId: true });
+    expect(stageEntry('batch')).toMatchObject({ standalone: true, takesNoId: true });
     const ctx = makeCtx({ cwd: makeRepo({ 'README.md': 'x' }) });
-    const r = await dispatch(unitTool, { action: 'brief', stage: 'convoy', quiet: true }, ctx);
+    const r = await dispatch(unitTool, { action: 'brief', stage: 'batch', quiet: true }, ctx);
     expect(r.envelope.ok).toBe(true);
-    expect(r.text).toContain('# convoy');
+    expect(r.text).toContain('# batch');
     expect(r.text).toMatch(/define only/i);
     expect(r.text).toContain('Files:');
     expect(r.text).toMatch(/cluster/i);

@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Breaking: convoy renamed to batch
+- The batch flow `convoy` is now `batch`: `unit brief { "stage": "batch" }`, `skills/batch`, the
+  flow name in the registry, and the history line `batch siblings: ...`. `unit link` is
+  unchanged. The persisted `siblings` field was never named after the flow, so no state
+  migration is needed.
+
 ### Breaking: seats renamed to roles
 - The capability seats (`tracker`, `codehost`, `docs`, `design`, `chat`, `reviewbot`) are now
   roles. The tool action `system seats` is now `system roles` (its YAML fragment starts with
