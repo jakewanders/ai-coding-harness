@@ -5,9 +5,13 @@ import path from 'node:path';
 /** The real home directory, captured at module load before any test rewrites HOME. */
 export const REAL_HOME = os.homedir();
 
-/** Create a fresh temporary directory under the OS temp root. */
+/**
+ * Create a fresh temporary directory under the OS temp root. The path is
+ * resolved through symlinks (macOS tmpdir is /var -> /private/var) so it matches
+ * what git reports for worktrees and prefix comparisons against HARNESS_HOME hold.
+ */
 export function makeTmpDir(prefix: string): string {
-  return fs.mkdtempSync(path.join(os.tmpdir(), `${prefix}-`));
+  return fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), `${prefix}-`)));
 }
 
 /**
